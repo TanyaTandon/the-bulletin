@@ -5,8 +5,7 @@ import CreateContentForm from "@/components/CreateContentForm";
 import ContentCard from "@/components/ContentCard";
 import FriendsList from "@/components/FriendsList";
 import { useUser, ContentType } from "@/contexts/UserContext";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { FileText, Image, Pencil, Plus, Filter } from "lucide-react";
+import { Filter } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -18,7 +17,6 @@ import { Button } from "@/components/ui/button";
 const Index = () => {
   const { contents, activePersona, activeGroup } = useUser();
   const [contentTypeFilter, setContentTypeFilter] = useState<ContentType | "all">("all");
-  const [showForm, setShowForm] = useState(false);
 
   // Filter contents based on selected criteria
   const filteredContents = contents.filter(content => {
@@ -73,33 +71,21 @@ const Index = () => {
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>
-          
-          <Button 
-            onClick={() => setShowForm(!showForm)}
-            className="flex items-center gap-2"
-          >
-            <Plus className="h-4 w-4" />
-            {showForm ? "Hide Form" : "Create Content"}
-          </Button>
         </div>
       </div>
 
-      {showForm && (
-        <div className="mb-8">
-          <CreateContentForm />
-        </div>
-      )}
+      <div className="mb-8">
+        <CreateContentForm />
+      </div>
 
       {filteredContents.length === 0 ? (
         <div className="text-center py-12">
           <div className="mx-auto w-24 h-24 bg-muted rounded-full flex items-center justify-center mb-4">
-            <Plus className="h-12 w-12 text-muted-foreground" />
+            <p className="text-xl font-medium text-muted-foreground">No content</p>
           </div>
           <h3 className="text-lg font-medium">No content yet</h3>
           <p className="text-muted-foreground mt-1">
-            {showForm 
-              ? "Fill out the form above to create your first piece of content" 
-              : "Click 'Create Content' to add your first picture, note, or writing piece"}
+            Create your first piece of content using the form above
           </p>
         </div>
       ) : (
