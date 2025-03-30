@@ -33,7 +33,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       <header className="border-b bg-white p-4">
         <div className="container mx-auto flex justify-between items-center">
           <Link to="/" className="text-2xl font-bold text-primary">
-            PicNoteScribe
+            The Bulletin
           </Link>
           
           <div className="flex items-center gap-4">
@@ -119,7 +119,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       <footer className="border-t p-4 text-center text-muted-foreground">
         <div className="container mx-auto">
-          &copy; {new Date().getFullYear()} PicNoteScribe App
+          &copy; {new Date().getFullYear()} The Bulletin
         </div>
       </footer>
     </div>

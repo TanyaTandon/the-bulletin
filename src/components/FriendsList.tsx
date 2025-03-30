@@ -35,7 +35,7 @@ const FriendsList = () => {
             onClick={toggleExpanded}
           >
             <Users className="h-5 w-5 text-primary" />
-            <CardTitle className="text-lg">My Personas ({personas.length})</CardTitle>
+            <CardTitle className="text-lg">Bulletin Contributors ({personas.length})</CardTitle>
             {isExpanded ? <ChevronDown className="h-4 w-4" /> : <ChevronRight className="h-4 w-4" />}
           </Button>
         </div>
