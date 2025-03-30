@@ -3,6 +3,7 @@ import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import CreateContentForm from "@/components/CreateContentForm";
 import ContentCard from "@/components/ContentCard";
+import FriendsList from "@/components/FriendsList";
 import { useUser, ContentType } from "@/contexts/UserContext";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { FileText, Image, Pencil, Plus, Filter } from "lucide-react";
@@ -36,6 +37,9 @@ const Index = () => {
 
   return (
     <Layout>
+      {/* Add the FriendsList component at the top */}
+      <FriendsList />
+      
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Your Content</h1>
