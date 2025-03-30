@@ -1,0 +1,177 @@
+
+import React, { useState } from "react";
+import { useUser, ContentType } from "@/contexts/UserContext";
+import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { Textarea } from "@/components/ui/textarea";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import { useToast } from "@/components/ui/use-toast";
+import { FileText, Image, Pencil } from "lucide-react";
+
+const CreateContentForm: React.FC = () => {
+  const { activePersona, activeGroup, addContent } = useUser();
+  const { toast } = useToast();
+  const [title, setTitle] = useState("");
+  const [content, setContent] = useState("");
+  const [contentType, setContentType] = useState<ContentType>("note");
+  const [imagePreview, setImagePreview] = useState<string | null>(null);
+
+  const handleSubmit = (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!activePersona) {
+      toast({
+        title: "No Active Persona",
+        description: "Please select a persona before creating content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!title.trim()) {
+      toast({
+        title: "Title Required",
+        description: "Please add a title for your content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (!content.trim() && contentType !== "picture") {
+      toast({
+        title: "Content Required",
+        description: "Please add some content.",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    addContent({
+      type: contentType,
+      title: title.trim(),
+      content: contentType === "picture" ? imagePreview || "" : content.trim(),
+      createdBy: {
+        personaId: activePersona.id,
+        personaName: activePersona.name,
+      },
+      groupId: activeGroup?.id,
+    });
+
+    toast({
+      title: "Content Created",
+      description: "Your content has been created successfully.",
+    });
+
+    // Reset form
+    setTitle("");
+    setContent("");
+    setImagePreview(null);
+  };
+
+  const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setImagePreview(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  return (
+    <Card className="w-full">
+      <CardHeader>
+        <CardTitle>Create Content</CardTitle>
+        <CardDescription>
+          Share as {activePersona?.name || "No Persona Selected"}
+          {activeGroup && ` in ${activeGroup.name}`}
+        </CardDescription>
+      </CardHeader>
+      <CardContent>
+        <form onSubmit={handleSubmit} className="space-y-4">
+          <div className="space-y-2">
+            <Label htmlFor="title">Title</Label>
+            <Input
+              id="title"
+              value={title}
+              onChange={(e) => setTitle(e.target.value)}
+              placeholder="Enter a title for your content"
+            />
+          </div>
+
+          <Tabs defaultValue="note" onValueChange={(value) => setContentType(value as ContentType)}>
+            <TabsList className="grid w-full grid-cols-3">
+              <TabsTrigger value="note" className="flex items-center gap-2">
+                <FileText className="h-4 w-4" />
+                Note
+              </TabsTrigger>
+              <TabsTrigger value="writing" className="flex items-center gap-2">
+                <Pencil className="h-4 w-4" />
+                Writing
+              </TabsTrigger>
+              <TabsTrigger value="picture" className="flex items-center gap-2">
+                <Image className="h-4 w-4" />
+                Picture
+              </TabsTrigger>
+            </TabsList>
+
+            <TabsContent value="note" className="space-y-2">
+              <Label htmlFor="note-content">Note Content</Label>
+              <Textarea
+                id="note-content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your note here..."
+                rows={5}
+              />
+            </TabsContent>
+
+            <TabsContent value="writing" className="space-y-2">
+              <Label htmlFor="writing-content">Writing Content</Label>
+              <Textarea
+                id="writing-content"
+                value={content}
+                onChange={(e) => setContent(e.target.value)}
+                placeholder="Write your piece here..."
+                rows={10}
+              />
+            </TabsContent>
+
+            <TabsContent value="picture" className="space-y-2">
+              <Label htmlFor="picture-upload">Upload Picture</Label>
+              <Input
+                id="picture-upload"
+                type="file"
+                accept="image/*"
+                onChange={handleImageUpload}
+                className="mb-2"
+              />
+              {imagePreview && (
+                <div className="mt-4">
+                  <p className="text-sm text-muted-foreground mb-2">Preview:</p>
+                  <div className="relative w-full h-48 bg-muted rounded-md overflow-hidden">
+                    <img
+                      src={imagePreview}
+                      alt="Preview"
+                      className="w-full h-full object-contain"
+                    />
+                  </div>
+                </div>
+              )}
+            </TabsContent>
+          </Tabs>
+        </form>
+      </CardContent>
+      <CardFooter>
+        <Button type="button" onClick={handleSubmit} className="w-full">
+          Create {contentType.charAt(0).toUpperCase() + contentType.slice(1)}
+        </Button>
+      </CardFooter>
+    </Card>
+  );
+};
+
+export default CreateContentForm;
