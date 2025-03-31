@@ -59,7 +59,6 @@ const CreateContentForm: React.FC = () => {
         personaName: activePersona.name,
       },
       groupId: activeGroup?.id,
-      shareWith: shareOption,
     });
 
     toast({
@@ -150,7 +149,7 @@ const CreateContentForm: React.FC = () => {
                 id="note-content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your note here..."
+                placeholder="Share your month summary or special messages to your friends"
                 rows={5}
               />
             </TabsContent>
@@ -161,7 +160,7 @@ const CreateContentForm: React.FC = () => {
                 id="writing-content"
                 value={content}
                 onChange={(e) => setContent(e.target.value)}
-                placeholder="Write your piece here..."
+                placeholder="Share your month summary or special messages to your friends"
                 rows={10}
               />
             </TabsContent>

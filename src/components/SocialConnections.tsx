@@ -8,13 +8,13 @@ interface ConnectionProps {
 }
 
 const SocialConnection: React.FC<ConnectionProps> = ({ title }) => {
-  // Mock data for circles and squares
+  // Updated names for connections
   const connections = [
-    { id: 1, name: "Alex" },
-    { id: 2, name: "Jamie" },
-    { id: 3, name: "Sam" },
-    { id: 4, name: "Taylor" },
-    { id: 5, name: "Jordan" },
+    { id: 1, name: "Mahika" },
+    { id: 2, name: "Tanya" },
+    { id: 3, name: "Lila" },
+    { id: 4, name: "Adi" },
+    { id: 5, name: "Nigel" },
   ];
 
   return (
@@ -30,14 +30,15 @@ const SocialConnection: React.FC<ConnectionProps> = ({ title }) => {
           </div>
         ))}
         
-        {/* Two square boxes */}
+        {/* Turby in a square box */}
         <div className="flex flex-col items-center">
-          <div className="h-10 w-10 border border-dashed border-gray-300 rounded flex items-center justify-center">
-            <Plus className="h-4 w-4 text-gray-400" />
+          <div className="h-10 w-10 border border-gray-300 rounded flex items-center justify-center bg-gray-50">
+            <span className="text-xs font-medium">Tu</span>
           </div>
-          <span className="text-xs mt-1">Add</span>
+          <span className="text-xs mt-1">Turby</span>
         </div>
         
+        {/* Add box */}
         <div className="flex flex-col items-center">
           <div className="h-10 w-10 border border-dashed border-gray-300 rounded flex items-center justify-center">
             <Plus className="h-4 w-4 text-gray-400" />

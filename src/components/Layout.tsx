@@ -11,7 +11,7 @@ import {
   DropdownMenuSeparator, 
   DropdownMenuTrigger 
 } from "@/components/ui/dropdown-menu";
-import { ChevronDown, User, Users, PlusCircle } from "lucide-react";
+import { ChevronDown, Users, PlusCircle } from "lucide-react";
 import { Link } from "react-router-dom";
 
 interface LayoutProps {
@@ -20,11 +20,8 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const { 
-    activePersona, 
     activeGroup, 
-    personas, 
     groups, 
-    setActivePersona,
     setActiveGroup
   } = useUser();
 
@@ -37,39 +34,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
           
           <div className="flex items-center gap-4">
-            <DropdownMenu>
-              <DropdownMenuTrigger asChild>
-                <Button variant="outline" className="flex items-center gap-2">
-                  <User className="h-4 w-4" />
-                  {activePersona ? activePersona.name : "Select Persona"}
-                  <ChevronDown className="h-4 w-4" />
-                </Button>
-              </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-56">
-                <DropdownMenuLabel>Your Personas</DropdownMenuLabel>
-                <DropdownMenuSeparator />
-                {personas.map((persona) => (
-                  <DropdownMenuItem 
-                    key={persona.id}
-                    onClick={() => setActivePersona(persona.id)}
-                    className="cursor-pointer"
-                  >
-                    <Avatar className="h-6 w-6 mr-2">
-                      <AvatarFallback>{persona.name.substring(0, 2)}</AvatarFallback>
-                    </Avatar>
-                    {persona.name}
-                  </DropdownMenuItem>
-                ))}
-                <DropdownMenuSeparator />
-                <DropdownMenuItem asChild>
-                  <Link to="/create-persona" className="cursor-pointer flex items-center">
-                    <PlusCircle className="h-4 w-4 mr-2" />
-                    Create New Persona
-                  </Link>
-                </DropdownMenuItem>
-              </DropdownMenuContent>
-            </DropdownMenu>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">

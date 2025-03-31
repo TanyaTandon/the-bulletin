@@ -3,11 +3,10 @@ import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import CreateContentForm from "@/components/CreateContentForm";
 import ContentCard from "@/components/ContentCard";
-import FriendsList from "@/components/FriendsList";
 import TypewriterText from "@/components/TypewriterText";
 import SocialConnections from "@/components/SocialConnections";
 import { useUser, ContentType } from "@/contexts/UserContext";
-import { Filter } from "lucide-react";
+import { Filter, Instagram, Twitter, Facebook, SquareCheck } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -15,6 +14,8 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
+import { Checkbox } from "@/components/ui/checkbox";
+import { Label } from "@/components/ui/label";
 
 const Index = () => {
   const { contents, activePersona, activeGroup } = useUser();
@@ -37,18 +38,15 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Add the TypewriterText component above FriendsList */}
+      {/* Add the TypewriterText component above SocialConnections */}
       <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces and we will curate a newspaper and physically mail it to your friends" />
       
       {/* Add the SocialConnections component */}
       <SocialConnections />
       
-      {/* Add the FriendsList component at the top */}
-      <FriendsList />
-      
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Your Content</h1>
+          <h1 className="text-3xl font-bold tracking-tight">Share your April adventures with your friends</h1>
           <p className="text-muted-foreground">
             {activeGroup 
               ? `Showing ${activeGroup.name} group content`
@@ -103,6 +101,47 @@ const Index = () => {
           ))}
         </div>
       )}
+      
+      {/* Add social media connections section */}
+      <div className="mt-10 border-t pt-6">
+        <h2 className="text-xl font-bold mb-4">Connect to my media</h2>
+        <div className="flex flex-wrap gap-4">
+          <div className="flex items-center space-x-2">
+            <Checkbox id="instagram" />
+            <Label htmlFor="instagram" className="flex items-center">
+              <Instagram className="h-4 w-4 mr-1" /> Instagram
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox id="substack" />
+            <Label htmlFor="substack" className="flex items-center">
+              <SquareCheck className="h-4 w-4 mr-1" /> Substack
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox id="twitter" />
+            <Label htmlFor="twitter" className="flex items-center">
+              <Twitter className="h-4 w-4 mr-1" /> Twitter
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox id="facebook" />
+            <Label htmlFor="facebook" className="flex items-center">
+              <Facebook className="h-4 w-4 mr-1" /> Facebook
+            </Label>
+          </div>
+          
+          <div className="flex items-center space-x-2">
+            <Checkbox id="snapchat" />
+            <Label htmlFor="snapchat" className="flex items-center">
+              <SquareCheck className="h-4 w-4 mr-1" /> Snapchat
+            </Label>
+          </div>
+        </div>
+      </div>
     </Layout>
   );
 };
