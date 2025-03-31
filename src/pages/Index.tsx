@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import CreateContentForm from "@/components/CreateContentForm";
@@ -38,12 +37,12 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Updated TypewriterText with larger font and updated content */}
+      {/* Remove "the bulletin." title */}
       <div className="text-center mb-6">
-        <h1 className="text-4xl font-bold mb-4">the bulletin.</h1>
+        {/* Title has been removed */}
       </div>
       
-      <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces, art, month summaries and we will curate a bulletin and physically mail it to your friends" />
+      <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces, art, month summaries and we will curate a bulletin and physically mail it to your friends." />
       
       {/* Add the SocialConnections component */}
       <SocialConnections />

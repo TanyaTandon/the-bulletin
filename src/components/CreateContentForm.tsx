@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { FileText, Image, Pencil, Users, Calendar } from "lucide-react";
+import { FileText, Image, Pencil, Users, Calendar, Heart } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,7 +17,7 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 
 const CreateContentForm: React.FC = () => {
-  const { activePersona, activeGroup, addContent, personas } = useUser();
+  const { activePersona, activeGroup, addContent, contents, personas } = useUser();
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
@@ -26,8 +26,16 @@ const CreateContentForm: React.FC = () => {
   const [shareOption, setShareOption] = useState("everyone");
   const [imageSize, setImageSize] = useState("medium"); // State for image size
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [calendarNote, setCalendarNote] = useState(""); // New state for calendar notes
+  const [calendarNote, setCalendarNote] = useState(""); // State for calendar notes
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]); // For selected friends
+  
+  // Get existing calendar dates from contents
+  const calendarDates = contents
+    .filter(item => item.type === "calendar")
+    .map(item => {
+      const [dateString] = item.content.split('|');
+      return new Date(dateString);
+    });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +49,8 @@ const CreateContentForm: React.FC = () => {
       return;
     }
 
-    if (!title.trim()) {
+    // Make title optional for calendar type
+    if (!title.trim() && contentType !== "calendar") {
       toast({
         title: "Title Required",
         description: "Please add a title for your content.",
@@ -70,7 +79,7 @@ const CreateContentForm: React.FC = () => {
 
     addContent({
       type: contentType,
-      title: title.trim(),
+      title: title.trim() || (contentType === "calendar" ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}` : ""),
       content: finalContent,
       createdBy: {
         personaId: activePersona.id,
@@ -110,10 +119,19 @@ const CreateContentForm: React.FC = () => {
     );
   };
 
+  // Function to check if a date has a heart
+  const isDateWithHeart = (date: Date) => {
+    return calendarDates.some(calDate => 
+      calDate.getDate() === date.getDate() && 
+      calDate.getMonth() === date.getMonth() && 
+      calDate.getFullYear() === date.getFullYear()
+    );
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-lg">Create Content</CardTitle>
+        <CardTitle className="text-sm">Create Content</CardTitle>
         <CardDescription>
           Share as {activePersona?.name || "No Persona Selected"}
           {activeGroup && ` in ${activeGroup.name}`}
@@ -164,12 +182,14 @@ const CreateContentForm: React.FC = () => {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="title">Title</Label>
+            <Label htmlFor="title">
+              Title {contentType === "calendar" && <span className="text-xs text-muted-foreground">(optional)</span>}
+            </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder="Enter a title for your content"
+              placeholder={contentType === "calendar" ? "Optional event title" : "Enter a title for your content"}
             />
           </div>
 
@@ -276,6 +296,26 @@ const CreateContentForm: React.FC = () => {
                   defaultMonth={new Date(2025, 3)} // April 2025
                   month={new Date(2025, 3)}
                   className="p-3 pointer-events-auto border bg-background rounded-md shadow-sm"
+                  modifiers={{
+                    withHeart: calendarDates
+                  }}
+                  modifiersStyles={{
+                    withHeart: {
+                      color: "#E66767",
+                      fontWeight: "bold"
+                    }
+                  }}
+                  components={{
+                    DayContent: ({ date, displayMonth }) => {
+                      const hasHeart = isDateWithHeart(date);
+                      return (
+                        <div className="flex flex-col items-center justify-center h-full">
+                          <span>{date.getDate()}</span>
+                          {hasHeart && <Heart className="h-3 w-3 text-red-400 mt-0.5" />}
+                        </div>
+                      );
+                    }
+                  }}
                 />
                 {date && (
                   <div className="mt-4 p-3 bg-muted rounded-md w-full">

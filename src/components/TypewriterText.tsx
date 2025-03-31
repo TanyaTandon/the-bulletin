@@ -11,6 +11,12 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 50 }) => 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
+    // Reset when text changes
+    setDisplayedText("");
+    setCurrentIndex(0);
+  }, [text]);
+
+  useEffect(() => {
     if (currentIndex < text.length) {
       const timer = setTimeout(() => {
         setDisplayedText(prev => prev + text[currentIndex]);
