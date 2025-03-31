@@ -1,7 +1,6 @@
-
 import React, { createContext, useContext, useState, ReactNode } from "react";
 
-export type ContentType = "picture" | "note" | "writing";
+export type ContentType = "picture" | "note" | "writing" | "calendar";
 
 export interface Content {
   id: string;
@@ -48,7 +47,6 @@ interface UserContextType {
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
 
-// Initial demo data
 const initialPersonas: Persona[] = [
   {
     id: "p1",

@@ -242,7 +242,6 @@ const CreateContentForm: React.FC = () => {
                   styles={{
                     month: { width: "100%" },
                     caption: { color: "#F472B6" },
-                    day_today: { backgroundColor: "#FEC6A1", fontWeight: "bold" },
                     day_selected: { backgroundColor: "#E5DEFF", color: "#333", fontWeight: "bold" },
                   }}
                 />
