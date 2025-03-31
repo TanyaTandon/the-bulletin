@@ -38,16 +38,20 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Add the TypewriterText component above SocialConnections */}
-      <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces and we will curate a newspaper and physically mail it to your friends" />
+      {/* Updated TypewriterText with larger font and updated content */}
+      <div className="text-center mb-6">
+        <h1 className="text-4xl font-bold mb-4">the bulletin.</h1>
+      </div>
+      
+      <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces, art, month summaries and we will curate a bulletin and physically mail it to your friends" />
       
       {/* Add the SocialConnections component */}
       <SocialConnections />
       
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">Share your April adventures with your friends</h1>
-          <p className="text-sm text-muted-foreground">
+          <h1 className="text-xl font-bold tracking-tight text-muted-foreground">Share your April adventures with your friends</h1>
+          <p className="text-xs text-muted-foreground">
             {activeGroup 
               ? `Showing ${activeGroup.name} group content`
               : "Showing all your content"}
@@ -74,6 +78,9 @@ const Index = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setContentTypeFilter("writing")}>
                 Writing Only
+              </DropdownMenuItem>
+              <DropdownMenuItem onClick={() => setContentTypeFilter("calendar")}>
+                Calendar Only
               </DropdownMenuItem>
             </DropdownMenuContent>
           </DropdownMenu>

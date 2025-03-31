@@ -13,17 +13,21 @@ import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Checkbox } from "@/components/ui/checkbox";
 
 const CreateContentForm: React.FC = () => {
-  const { activePersona, activeGroup, addContent } = useUser();
+  const { activePersona, activeGroup, addContent, personas } = useUser();
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [contentType, setContentType] = useState<ContentType>("note");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [shareOption, setShareOption] = useState("everyone");
-  const [imageSize, setImageSize] = useState("medium"); // New state for image size
+  const [imageSize, setImageSize] = useState("medium"); // State for image size
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [calendarNote, setCalendarNote] = useState(""); // New state for calendar notes
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]); // For selected friends
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -55,14 +59,19 @@ const CreateContentForm: React.FC = () => {
       return;
     }
 
+    let finalContent = "";
+    if (contentType === "picture") {
+      finalContent = imagePreview ? `${imagePreview}|size:${imageSize}` : "";
+    } else if (contentType === "calendar") {
+      finalContent = date ? `${date.toISOString()}|note:${calendarNote}` : new Date().toISOString();
+    } else {
+      finalContent = content.trim();
+    }
+
     addContent({
       type: contentType,
       title: title.trim(),
-      content: contentType === "picture" 
-        ? (imagePreview ? `${imagePreview}|size:${imageSize}` : "") 
-        : contentType === "calendar"
-        ? date ? date.toISOString() : new Date().toISOString()
-        : content.trim(),
+      content: finalContent,
       createdBy: {
         personaId: activePersona.id,
         personaName: activePersona.name,
@@ -79,6 +88,7 @@ const CreateContentForm: React.FC = () => {
     setTitle("");
     setContent("");
     setImagePreview(null);
+    setCalendarNote("");
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -92,10 +102,18 @@ const CreateContentForm: React.FC = () => {
     }
   };
 
+  const handleFriendSelection = (personaId: string) => {
+    setSelectedFriends(current => 
+      current.includes(personaId)
+        ? current.filter(id => id !== personaId)
+        : [...current, personaId]
+    );
+  };
+
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle>Create Content</CardTitle>
+        <CardTitle className="text-lg">Create Content</CardTitle>
         <CardDescription>
           Share as {activePersona?.name || "No Persona Selected"}
           {activeGroup && ` in ${activeGroup.name}`}
@@ -124,6 +142,25 @@ const CreateContentForm: React.FC = () => {
                 <Label htmlFor="selected" className="cursor-pointer">Selected Friends</Label>
               </div>
             </RadioGroup>
+            
+            {/* Friend selection multi-select dropdown */}
+            {shareOption === "selected" && (
+              <div className="mt-2 p-2 border rounded-md">
+                <Label className="mb-2 block">Select friends to share with:</Label>
+                <div className="space-y-2 max-h-40 overflow-y-auto">
+                  {personas.filter(p => p.id !== activePersona?.id).map(persona => (
+                    <div key={persona.id} className="flex items-center space-x-2">
+                      <Checkbox 
+                        id={`friend-${persona.id}`}
+                        checked={selectedFriends.includes(persona.id)}
+                        onCheckedChange={() => handleFriendSelection(persona.id)}
+                      />
+                      <Label htmlFor={`friend-${persona.id}`}>{persona.name}</Label>
+                    </div>
+                  ))}
+                </div>
+              </div>
+            )}
           </div>
 
           <div className="space-y-2">
@@ -239,16 +276,24 @@ const CreateContentForm: React.FC = () => {
                   defaultMonth={new Date(2025, 3)} // April 2025
                   month={new Date(2025, 3)}
                   className="p-3 pointer-events-auto border bg-background rounded-md shadow-sm"
-                  styles={{
-                    month: { width: "100%" },
-                    caption: { color: "#F472B6" },
-                    day_selected: { backgroundColor: "#E5DEFF", color: "#333", fontWeight: "bold" },
-                  }}
                 />
                 {date && (
-                  <div className="mt-4 p-3 bg-muted rounded-md text-center w-full">
+                  <div className="mt-4 p-3 bg-muted rounded-md w-full">
                     <p className="font-medium">Selected Date:</p>
                     <p>{format(date, "MMMM d, yyyy")}</p>
+                    
+                    {/* Calendar note entry */}
+                    <div className="mt-3">
+                      <Label htmlFor="calendar-note" className="block mb-2">Add a note for this date:</Label>
+                      <Textarea
+                        id="calendar-note"
+                        value={calendarNote}
+                        onChange={(e) => setCalendarNote(e.target.value)}
+                        placeholder="What's happening on this day?"
+                        rows={3}
+                        className="w-full"
+                      />
+                    </div>
                   </div>
                 )}
               </div>
