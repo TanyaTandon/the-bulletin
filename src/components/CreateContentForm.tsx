@@ -8,7 +8,8 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { FileText, Image, Pencil } from "lucide-react";
+import { FileText, Image, Pencil, Users } from "lucide-react";
+import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 
 const CreateContentForm: React.FC = () => {
   const { activePersona, activeGroup, addContent } = useUser();
@@ -17,6 +18,7 @@ const CreateContentForm: React.FC = () => {
   const [content, setContent] = useState("");
   const [contentType, setContentType] = useState<ContentType>("note");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [shareOption, setShareOption] = useState("everyone");
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -57,6 +59,7 @@ const CreateContentForm: React.FC = () => {
         personaName: activePersona.name,
       },
       groupId: activeGroup?.id,
+      shareWith: shareOption,
     });
 
     toast({
@@ -92,6 +95,29 @@ const CreateContentForm: React.FC = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
+          {/* Share options */}
+          <div className="space-y-2">
+            <Label className="flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Share with
+            </Label>
+            <RadioGroup
+              defaultValue="everyone"
+              value={shareOption}
+              onValueChange={setShareOption}
+              className="flex space-x-4"
+            >
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="everyone" id="everyone" />
+                <Label htmlFor="everyone" className="cursor-pointer">Everyone</Label>
+              </div>
+              <div className="flex items-center space-x-2">
+                <RadioGroupItem value="selected" id="selected" />
+                <Label htmlFor="selected" className="cursor-pointer">Selected Friends</Label>
+              </div>
+            </RadioGroup>
+          </div>
+
           <div className="space-y-2">
             <Label htmlFor="title">Title</Label>
             <Input

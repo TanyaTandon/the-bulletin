@@ -5,6 +5,7 @@ import CreateContentForm from "@/components/CreateContentForm";
 import ContentCard from "@/components/ContentCard";
 import FriendsList from "@/components/FriendsList";
 import TypewriterText from "@/components/TypewriterText";
+import SocialConnections from "@/components/SocialConnections";
 import { useUser, ContentType } from "@/contexts/UserContext";
 import { Filter } from "lucide-react";
 import { 
@@ -38,6 +39,9 @@ const Index = () => {
     <Layout>
       {/* Add the TypewriterText component above FriendsList */}
       <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces and we will curate a newspaper and physically mail it to your friends" />
+      
+      {/* Add the SocialConnections component */}
+      <SocialConnections />
       
       {/* Add the FriendsList component at the top */}
       <FriendsList />
