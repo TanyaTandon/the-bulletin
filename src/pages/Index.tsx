@@ -47,7 +47,7 @@ const Index = () => {
       <div className="mb-6 flex justify-between items-center">
         <div>
           <h1 className="text-3xl font-bold tracking-tight">Share your April adventures with your friends</h1>
-          <p className="text-muted-foreground">
+          <p className="text-sm text-muted-foreground">
             {activeGroup 
               ? `Showing ${activeGroup.name} group content`
               : "Showing all your content"}

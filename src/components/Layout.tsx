@@ -29,8 +29,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-2xl font-bold text-primary" style={{ fontFamily: 'Courier New, monospace' }}>
-            The Bulletin
+          <Link to="/" className="text-3xl font-bold text-primary lowercase" style={{ fontFamily: 'Courier New, monospace' }}>
+            the bulletin.
           </Link>
           
           <div className="flex items-center gap-4">
@@ -83,7 +83,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       
       <footer className="border-t p-4 text-center text-muted-foreground">
         <div className="container mx-auto">
-          &copy; {new Date().getFullYear()} The Bulletin
+          &copy; {new Date().getFullYear()} the bulletin.
         </div>
       </footer>
     </div>

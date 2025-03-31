@@ -8,8 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { FileText, Image, Pencil, Users } from "lucide-react";
+import { FileText, Image, Pencil, Users, Calendar } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
+import { Calendar as CalendarComponent } from "@/components/ui/calendar";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import { format } from "date-fns";
 
 const CreateContentForm: React.FC = () => {
   const { activePersona, activeGroup, addContent } = useUser();
@@ -19,6 +22,8 @@ const CreateContentForm: React.FC = () => {
   const [contentType, setContentType] = useState<ContentType>("note");
   const [imagePreview, setImagePreview] = useState<string | null>(null);
   const [shareOption, setShareOption] = useState("everyone");
+  const [imageSize, setImageSize] = useState("medium"); // New state for image size
+  const [date, setDate] = useState<Date | undefined>(new Date());
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
@@ -41,7 +46,7 @@ const CreateContentForm: React.FC = () => {
       return;
     }
 
-    if (!content.trim() && contentType !== "picture") {
+    if (!content.trim() && contentType !== "picture" && contentType !== "calendar") {
       toast({
         title: "Content Required",
         description: "Please add some content.",
@@ -53,7 +58,11 @@ const CreateContentForm: React.FC = () => {
     addContent({
       type: contentType,
       title: title.trim(),
-      content: contentType === "picture" ? imagePreview || "" : content.trim(),
+      content: contentType === "picture" 
+        ? (imagePreview ? `${imagePreview}|size:${imageSize}` : "") 
+        : contentType === "calendar"
+        ? date ? date.toISOString() : new Date().toISOString()
+        : content.trim(),
       createdBy: {
         personaId: activePersona.id,
         personaName: activePersona.name,
@@ -128,7 +137,7 @@ const CreateContentForm: React.FC = () => {
           </div>
 
           <Tabs defaultValue="note" onValueChange={(value) => setContentType(value as ContentType)}>
-            <TabsList className="grid w-full grid-cols-3">
+            <TabsList className="grid w-full grid-cols-4">
               <TabsTrigger value="note" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Note
@@ -140,6 +149,10 @@ const CreateContentForm: React.FC = () => {
               <TabsTrigger value="picture" className="flex items-center gap-2">
                 <Image className="h-4 w-4" />
                 Picture
+              </TabsTrigger>
+              <TabsTrigger value="calendar" className="flex items-center gap-2">
+                <Calendar className="h-4 w-4" />
+                Calendar
               </TabsTrigger>
             </TabsList>
 
@@ -174,6 +187,31 @@ const CreateContentForm: React.FC = () => {
                 onChange={handleImageUpload}
                 className="mb-2"
               />
+              
+              {/* Image size selection */}
+              <div className="mt-4">
+                <Label htmlFor="image-size">Image Size</Label>
+                <RadioGroup
+                  defaultValue="medium"
+                  value={imageSize}
+                  onValueChange={setImageSize}
+                  className="flex flex-col space-y-1 mt-2"
+                >
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="small" id="small" />
+                    <Label htmlFor="small" className="cursor-pointer">Small (thumbnail)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="medium" id="medium" />
+                    <Label htmlFor="medium" className="cursor-pointer">Medium (half-page)</Label>
+                  </div>
+                  <div className="flex items-center space-x-2">
+                    <RadioGroupItem value="large" id="large" />
+                    <Label htmlFor="large" className="cursor-pointer">Large (full-page)</Label>
+                  </div>
+                </RadioGroup>
+              </div>
+              
               {imagePreview && (
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground mb-2">Preview:</p>
@@ -186,6 +224,35 @@ const CreateContentForm: React.FC = () => {
                   </div>
                 </div>
               )}
+            </TabsContent>
+            
+            <TabsContent value="calendar" className="space-y-2">
+              <Label>Select a date for your April calendar</Label>
+              <div className="flex flex-col items-center p-4 border rounded-md bg-card">
+                <p className="text-sm text-muted-foreground mb-4">
+                  Mark an important date in April 2025 to share with your friends
+                </p>
+                <CalendarComponent
+                  mode="single"
+                  selected={date}
+                  onSelect={setDate}
+                  defaultMonth={new Date(2025, 3)} // April 2025
+                  month={new Date(2025, 3)}
+                  className="p-3 pointer-events-auto border bg-background rounded-md shadow-sm"
+                  styles={{
+                    month: { width: "100%" },
+                    caption: { color: "#F472B6" },
+                    day_today: { backgroundColor: "#FEC6A1", fontWeight: "bold" },
+                    day_selected: { backgroundColor: "#E5DEFF", color: "#333", fontWeight: "bold" },
+                  }}
+                />
+                {date && (
+                  <div className="mt-4 p-3 bg-muted rounded-md text-center w-full">
+                    <p className="font-medium">Selected Date:</p>
+                    <p>{format(date, "MMMM d, yyyy")}</p>
+                  </div>
+                )}
+              </div>
             </TabsContent>
           </Tabs>
         </form>
