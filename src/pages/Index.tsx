@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import CreateContentForm from "@/components/CreateContentForm";
@@ -38,11 +39,11 @@ const Index = () => {
   return (
     <Layout>
       {/* Remove "the bulletin." title */}
-      <div className="text-center mb-6">
+      <div className="text-center">
         {/* Title has been removed */}
       </div>
       
-      <TypewriterText text="Welcome to the bulletin. Upload notes, pictures, writing pieces, art, month summaries and we will curate a bulletin and physically mail it to your friends." />
+      <TypewriterText text="Hey Jackson. Welcome to the bulletin. Upload notes, pictures, writing pieces, art, month summaries and we will curate a bulletin and physically mail it to your friends." />
       
       {/* Add the SocialConnections component */}
       <SocialConnections />

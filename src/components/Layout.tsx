@@ -38,7 +38,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               <DropdownMenuTrigger asChild>
                 <Button variant="outline" className="flex items-center gap-2">
                   <Users className="h-4 w-4" />
-                  {activeGroup ? activeGroup.name : "Select Group"}
+                  {activeGroup ? activeGroup.name : "Jackson"}
                   <ChevronDown className="h-4 w-4" />
                 </Button>
               </DropdownMenuTrigger>
@@ -49,7 +49,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onClick={() => setActiveGroup(null)}
                   className="cursor-pointer"
                 >
-                  No Group (Individual)
+                  Jackson (Individual)
                 </DropdownMenuItem>
                 <DropdownMenuSeparator />
                 {groups.map((group) => (
