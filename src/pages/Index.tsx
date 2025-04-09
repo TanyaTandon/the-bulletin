@@ -18,7 +18,7 @@ import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
 
 const Index = () => {
-  const { contents, activePersona, activeGroup } = useUser();
+  const { contents, activeGroup } = useUser();
   const [contentTypeFilter, setContentTypeFilter] = useState<ContentType | "all">("all");
 
   // Filter contents based on selected criteria
@@ -50,7 +50,7 @@ const Index = () => {
       
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-xl font-bold tracking-tight text-muted-foreground">Share your April adventures with your friends</h1>
+          <h1 className="text-xs font-bold tracking-tight text-muted-foreground">Share your April adventures with your friends</h1>
           <p className="text-xs text-muted-foreground">
             {activeGroup 
               ? `Showing ${activeGroup.name} group content`
@@ -75,9 +75,6 @@ const Index = () => {
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setContentTypeFilter("note")}>
                 Notes Only
-              </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => setContentTypeFilter("writing")}>
-                Writing Only
               </DropdownMenuItem>
               <DropdownMenuItem onClick={() => setContentTypeFilter("calendar")}>
                 Calendar Only

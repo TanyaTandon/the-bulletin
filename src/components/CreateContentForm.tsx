@@ -8,7 +8,7 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { FileText, Image, Pencil, Users, Calendar, Heart } from "lucide-react";
+import { FileText, Image, Users, Calendar, Heart, ChevronDown, Filter } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
@@ -17,17 +17,18 @@ import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@
 import { Checkbox } from "@/components/ui/checkbox";
 
 const CreateContentForm: React.FC = () => {
-  const { activePersona, activeGroup, addContent, contents, personas } = useUser();
+  const { activeGroup, addContent, contents, personas } = useUser();
   const { toast } = useToast();
   const [title, setTitle] = useState("");
   const [content, setContent] = useState("");
   const [contentType, setContentType] = useState<ContentType>("note");
-  const [imagePreview, setImagePreview] = useState<string | null>(null);
+  const [imagePreview, setImagePreview] = useState<string[]>([]);
   const [shareOption, setShareOption] = useState("everyone");
-  const [imageSize, setImageSize] = useState("medium"); // State for image size
+  const [imageSize, setImageSize] = useState("medium");
   const [date, setDate] = useState<Date | undefined>(new Date());
-  const [calendarNote, setCalendarNote] = useState(""); // State for calendar notes
-  const [selectedFriends, setSelectedFriends] = useState<string[]>([]); // For selected friends
+  const [calendarNote, setCalendarNote] = useState("");
+  const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
+  const [showFriendsList, setShowFriendsList] = useState(false);
   
   // Get existing calendar dates from contents
   const calendarDates = contents
@@ -40,15 +41,6 @@ const CreateContentForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    if (!activePersona) {
-      toast({
-        title: "No Active Persona",
-        description: "Please select a persona before creating content.",
-        variant: "destructive",
-      });
-      return;
-    }
-
     // Make title optional for calendar type
     if (!title.trim() && contentType !== "calendar") {
       toast({
@@ -70,7 +62,24 @@ const CreateContentForm: React.FC = () => {
 
     let finalContent = "";
     if (contentType === "picture") {
-      finalContent = imagePreview ? `${imagePreview}|size:${imageSize}` : "";
+      // Show warning if more than 4 images
+      if (imagePreview.length > 4) {
+        toast({
+          title: "Too many images",
+          description: "Please select a maximum of 4 images. Only the first 4 will be used.",
+        });
+        // Use only the first 4 images
+        finalContent = imagePreview.slice(0, 4).join('|') + `|size:${imageSize}`;
+      } else if (imagePreview.length === 0) {
+        toast({
+          title: "No Images Selected",
+          description: "Please select at least one image.",
+          variant: "destructive",
+        });
+        return;
+      } else {
+        finalContent = imagePreview.join('|') + `|size:${imageSize}`;
+      }
     } else if (contentType === "calendar") {
       finalContent = date ? `${date.toISOString()}|note:${calendarNote}` : new Date().toISOString();
     } else {
@@ -82,8 +91,8 @@ const CreateContentForm: React.FC = () => {
       title: title.trim() || (contentType === "calendar" ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}` : ""),
       content: finalContent,
       createdBy: {
-        personaId: activePersona.id,
-        personaName: activePersona.name,
+        personaId: "p1", // Default persona
+        personaName: "Default Persona",
       },
       groupId: activeGroup?.id,
     });
@@ -96,18 +105,37 @@ const CreateContentForm: React.FC = () => {
     // Reset form
     setTitle("");
     setContent("");
-    setImagePreview(null);
+    setImagePreview([]);
     setCalendarNote("");
   };
 
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (file) {
-      const reader = new FileReader();
-      reader.onloadend = () => {
-        setImagePreview(reader.result as string);
-      };
-      reader.readAsDataURL(file);
+    const files = e.target.files;
+    if (files && files.length > 0) {
+      // Convert FileList to array
+      const fileArray = Array.from(files);
+      
+      // Show warning for more than 4 images
+      if (fileArray.length > 4) {
+        toast({
+          title: "Too many images",
+          description: "Please select a maximum of 4 images. Only the first 4 will be processed.",
+        });
+      }
+      
+      // Process up to 4 images
+      const imagesToProcess = fileArray.slice(0, 4);
+      
+      // Clear existing previews
+      setImagePreview([]);
+      
+      imagesToProcess.forEach(file => {
+        const reader = new FileReader();
+        reader.onloadend = () => {
+          setImagePreview(prev => [...prev, reader.result as string]);
+        };
+        reader.readAsDataURL(file);
+      });
     }
   };
 
@@ -131,10 +159,9 @@ const CreateContentForm: React.FC = () => {
   return (
     <Card className="w-full">
       <CardHeader>
-        <CardTitle className="text-sm">Create Content</CardTitle>
+        <CardTitle className="text-xs">Create Content</CardTitle>
         <CardDescription>
-          Share as {activePersona?.name || "No Persona Selected"}
-          {activeGroup && ` in ${activeGroup.name}`}
+          {activeGroup && `in ${activeGroup.name}`}
         </CardDescription>
       </CardHeader>
       <CardContent>
@@ -161,22 +188,35 @@ const CreateContentForm: React.FC = () => {
               </div>
             </RadioGroup>
             
-            {/* Friend selection multi-select dropdown */}
+            {/* Friend selection dropdown with funnel icon */}
             {shareOption === "selected" && (
-              <div className="mt-2 p-2 border rounded-md">
-                <Label className="mb-2 block">Select friends to share with:</Label>
-                <div className="space-y-2 max-h-40 overflow-y-auto">
-                  {personas.filter(p => p.id !== activePersona?.id).map(persona => (
-                    <div key={persona.id} className="flex items-center space-x-2">
-                      <Checkbox 
-                        id={`friend-${persona.id}`}
-                        checked={selectedFriends.includes(persona.id)}
-                        onCheckedChange={() => handleFriendSelection(persona.id)}
-                      />
-                      <Label htmlFor={`friend-${persona.id}`}>{persona.name}</Label>
+              <div className="mt-2">
+                <Popover open={showFriendsList} onOpenChange={setShowFriendsList}>
+                  <PopoverTrigger asChild>
+                    <Button 
+                      variant="outline" 
+                      className="w-full flex items-center justify-between"
+                      onClick={() => setShowFriendsList(!showFriendsList)}
+                    >
+                      <span>Select friends to share with</span>
+                      <Filter className="h-4 w-4 ml-2" />
+                    </Button>
+                  </PopoverTrigger>
+                  <PopoverContent className="w-full p-2">
+                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                      {personas.filter(p => p.id !== "p1").map(persona => (
+                        <div key={persona.id} className="flex items-center space-x-2">
+                          <Checkbox 
+                            id={`friend-${persona.id}`}
+                            checked={selectedFriends.includes(persona.id)}
+                            onCheckedChange={() => handleFriendSelection(persona.id)}
+                          />
+                          <Label htmlFor={`friend-${persona.id}`}>{persona.name}</Label>
+                        </div>
+                      ))}
                     </div>
-                  ))}
-                </div>
+                  </PopoverContent>
+                </Popover>
               </div>
             )}
           </div>
@@ -194,14 +234,10 @@ const CreateContentForm: React.FC = () => {
           </div>
 
           <Tabs defaultValue="note" onValueChange={(value) => setContentType(value as ContentType)}>
-            <TabsList className="grid w-full grid-cols-4">
+            <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="note" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
                 Note
-              </TabsTrigger>
-              <TabsTrigger value="writing" className="flex items-center gap-2">
-                <Pencil className="h-4 w-4" />
-                Writing
               </TabsTrigger>
               <TabsTrigger value="picture" className="flex items-center gap-2">
                 <Image className="h-4 w-4" />
@@ -224,25 +260,17 @@ const CreateContentForm: React.FC = () => {
               />
             </TabsContent>
 
-            <TabsContent value="writing" className="space-y-2">
-              <Label htmlFor="writing-content">Writing Content</Label>
-              <Textarea
-                id="writing-content"
-                value={content}
-                onChange={(e) => setContent(e.target.value)}
-                placeholder="Share your month summary or special messages to your friends"
-                rows={10}
-              />
-            </TabsContent>
-
             <TabsContent value="picture" className="space-y-2">
-              <Label htmlFor="picture-upload">Upload Picture</Label>
+              <Label htmlFor="picture-upload">
+                Please add 1-4 pictures
+              </Label>
               <Input
                 id="picture-upload"
                 type="file"
                 accept="image/*"
                 onChange={handleImageUpload}
                 className="mb-2"
+                multiple
               />
               
               {/* Image size selection */}
@@ -269,15 +297,19 @@ const CreateContentForm: React.FC = () => {
                 </RadioGroup>
               </div>
               
-              {imagePreview && (
+              {imagePreview.length > 0 && (
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground mb-2">Preview:</p>
-                  <div className="relative w-full h-48 bg-muted rounded-md overflow-hidden">
-                    <img
-                      src={imagePreview}
-                      alt="Preview"
-                      className="w-full h-full object-contain"
-                    />
+                  <div className="grid grid-cols-2 gap-2">
+                    {imagePreview.map((preview, index) => (
+                      <div key={index} className="relative h-48 bg-muted rounded-md overflow-hidden">
+                        <img
+                          src={preview}
+                          alt={`Preview ${index + 1}`}
+                          className="w-full h-full object-contain"
+                        />
+                      </div>
+                    ))}
                   </div>
                 </div>
               )}

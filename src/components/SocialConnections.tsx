@@ -32,13 +32,7 @@ const SocialConnection: React.FC<ConnectionProps> = ({ title }) => {
           </div>
         ))}
         
-        {/* Turby in a square box with pastel color */}
-        <div className="flex flex-col items-center">
-          <div className="h-10 w-10 border border-gray-300 rounded flex items-center justify-center" style={{ backgroundColor: "#FEC6A1" }}>
-            <span className="text-xs font-medium text-gray-700">Tu</span>
-          </div>
-          <span className="text-xs mt-1">Turby</span>
-        </div>
+        {/* Removed Turby block */}
         
         {/* Add box */}
         <div className="flex flex-col items-center">
