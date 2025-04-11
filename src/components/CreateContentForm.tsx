@@ -23,7 +23,6 @@ const CreateContentForm: React.FC = () => {
   const [contentType, setContentType] = useState<ContentType>("note");
   const [imagePreview, setImagePreview] = useState<string[]>([]);
   const [shareOption, setShareOption] = useState("everyone");
-  const [imageSize, setImageSize] = useState("medium");
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [calendarNote, setCalendarNote] = useState("");
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
@@ -40,16 +39,8 @@ const CreateContentForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Make title optional for calendar type
-    if (!title.trim() && contentType !== "calendar") {
-      toast({
-        title: "Title Required",
-        description: "Please add a title for your content.",
-        variant: "destructive",
-      });
-      return;
-    }
-
+    // Title is now optional for all content types
+    // Only content is required (except for picture and calendar types)
     if (!content.trim() && contentType !== "picture" && contentType !== "calendar") {
       toast({
         title: "Content Required",
@@ -68,7 +59,7 @@ const CreateContentForm: React.FC = () => {
           description: "Please select a maximum of 4 images. Only the first 4 will be used.",
         });
         // Use only the first 4 images
-        finalContent = imagePreview.slice(0, 4).join('|') + `|size:${imageSize}`;
+        finalContent = imagePreview.slice(0, 4).join('|');
       } else if (imagePreview.length === 0) {
         toast({
           title: "No Images Selected",
@@ -77,7 +68,7 @@ const CreateContentForm: React.FC = () => {
         });
         return;
       } else {
-        finalContent = imagePreview.join('|') + `|size:${imageSize}`;
+        finalContent = imagePreview.join('|');
       }
     } else if (contentType === "calendar") {
       finalContent = date ? `${date.toISOString()}|note:${calendarNote}` : new Date().toISOString();
@@ -87,7 +78,7 @@ const CreateContentForm: React.FC = () => {
 
     addContent({
       type: contentType,
-      title: title.trim() || (contentType === "calendar" ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}` : ""),
+      title: title.trim() || (contentType === "calendar" ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}` : "Untitled"),
       content: finalContent,
       createdBy: {
         personaId: "p1", // Default persona
@@ -247,13 +238,13 @@ const CreateContentForm: React.FC = () => {
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              Title {contentType === "calendar" && <span className="text-xs text-muted-foreground">(optional)</span>}
+              Title <span className="text-xs text-muted-foreground">(optional)</span>
             </Label>
             <Input
               id="title"
               value={title}
               onChange={(e) => setTitle(e.target.value)}
-              placeholder={contentType === "calendar" ? "Optional event title" : "Enter a title for your content"}
+              placeholder="Enter a title for your content (optional)"
             />
           </div>
 
@@ -296,30 +287,6 @@ const CreateContentForm: React.FC = () => {
                 className="mb-2"
                 multiple
               />
-              
-              {/* Image size selection */}
-              <div className="mt-4">
-                <Label htmlFor="image-size">Image Size</Label>
-                <RadioGroup
-                  defaultValue="medium"
-                  value={imageSize}
-                  onValueChange={setImageSize}
-                  className="flex flex-col space-y-1 mt-2"
-                >
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="small" id="small" />
-                    <Label htmlFor="small" className="cursor-pointer">Small (thumbnail)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="medium" id="medium" />
-                    <Label htmlFor="medium" className="cursor-pointer">Medium (half-page)</Label>
-                  </div>
-                  <div className="flex items-center space-x-2">
-                    <RadioGroupItem value="large" id="large" />
-                    <Label htmlFor="large" className="cursor-pointer">Large (full-page)</Label>
-                  </div>
-                </RadioGroup>
-              </div>
               
               {imagePreview.length > 0 && (
                 <div className="mt-4">
