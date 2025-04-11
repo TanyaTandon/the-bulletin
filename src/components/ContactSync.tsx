@@ -28,7 +28,7 @@ const ContactSync = () => {
   const { importContacts, friends } = useUser();
   const { toast } = useToast();
   const [isOpen, setIsOpen] = useState(false);
-  const [contacts, setContacts] = useState<Array<{name: string, phone: string, selected: boolean}>>([]);
+  const [contacts, setContacts] = useState<Array<{name: string, phone: string, selected: boolean, isExisting?: boolean}>>([]);
   const [isLoading, setIsLoading] = useState(false);
 
   const existingPhones = new Set(friends.map(f => f.phone));
