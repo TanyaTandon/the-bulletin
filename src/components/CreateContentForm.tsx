@@ -8,12 +8,11 @@ import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
-import { FileText, Image, Users, Calendar, Heart, ChevronDown, Filter } from "lucide-react";
+import { FileText, Image, Users, Calendar, Heart, Filter } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { format } from "date-fns";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Checkbox } from "@/components/ui/checkbox";
 
 const CreateContentForm: React.FC = () => {
@@ -188,7 +187,7 @@ const CreateContentForm: React.FC = () => {
               </div>
             </RadioGroup>
             
-            {/* Friend selection dropdown with funnel icon */}
+            {/* Improved Friend selection dropdown with filter icon */}
             {shareOption === "selected" && (
               <div className="mt-2">
                 <Popover open={showFriendsList} onOpenChange={setShowFriendsList}>
@@ -198,23 +197,48 @@ const CreateContentForm: React.FC = () => {
                       className="w-full flex items-center justify-between"
                       onClick={() => setShowFriendsList(!showFriendsList)}
                     >
-                      <span>Select friends to share with</span>
+                      <span>
+                        {selectedFriends.length > 0 
+                          ? `${selectedFriends.length} friend${selectedFriends.length > 1 ? 's' : ''} selected`
+                          : 'Select friends to share with'}
+                      </span>
                       <Filter className="h-4 w-4 ml-2" />
                     </Button>
                   </PopoverTrigger>
-                  <PopoverContent className="w-full p-2">
-                    <div className="space-y-2 max-h-40 overflow-y-auto">
+                  <PopoverContent className="w-full p-4">
+                    <div className="mb-2 pb-2 border-b">
+                      <h4 className="font-medium">Select Friends</h4>
+                      <p className="text-xs text-muted-foreground">Choose who you want to share with</p>
+                    </div>
+                    <div className="space-y-2 max-h-48 overflow-y-auto">
                       {personas.filter(p => p.id !== "p1").map(persona => (
-                        <div key={persona.id} className="flex items-center space-x-2">
+                        <div key={persona.id} className="flex items-center space-x-2 p-1 hover:bg-muted rounded">
                           <Checkbox 
                             id={`friend-${persona.id}`}
                             checked={selectedFriends.includes(persona.id)}
                             onCheckedChange={() => handleFriendSelection(persona.id)}
                           />
-                          <Label htmlFor={`friend-${persona.id}`}>{persona.name}</Label>
+                          <Label 
+                            htmlFor={`friend-${persona.id}`}
+                            className="flex-1 cursor-pointer"
+                          >
+                            {persona.name}
+                          </Label>
                         </div>
                       ))}
                     </div>
+                    {selectedFriends.length > 0 && (
+                      <div className="mt-3 pt-2 border-t flex justify-between items-center">
+                        <span className="text-sm">{selectedFriends.length} selected</span>
+                        <Button 
+                          variant="ghost" 
+                          size="sm"
+                          onClick={() => setSelectedFriends([])}
+                        >
+                          Clear
+                        </Button>
+                      </div>
+                    )}
                   </PopoverContent>
                 </Popover>
               </div>

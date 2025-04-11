@@ -8,6 +8,7 @@ import { UserProvider } from "@/contexts/UserContext";
 import Index from "./pages/Index";
 import CreatePersona from "./pages/CreatePersona";
 import CreateGroup from "./pages/CreateGroup";
+import SignUp from "./pages/Signup";
 import NotFound from "./pages/NotFound";
 
 const queryClient = new QueryClient();
@@ -21,6 +22,7 @@ const App = () => (
         <BrowserRouter>
           <Routes>
             <Route path="/" element={<Index />} />
+            <Route path="/signup" element={<SignUp />} />
             <Route path="/create-persona" element={<CreatePersona />} />
             <Route path="/create-group" element={<CreateGroup />} />
             <Route path="*" element={<NotFound />} />

@@ -32,11 +32,9 @@ const SocialConnection: React.FC<ConnectionProps> = ({ title }) => {
           </div>
         ))}
         
-        {/* Removed Turby block */}
-        
         {/* Add box */}
         <div className="flex flex-col items-center">
-          <div className="h-10 w-10 border border-dashed border-gray-300 rounded flex items-center justify-center bg-gray-50">
+          <div className="h-10 w-10 border border-dashed border-gray-300 rounded-full flex items-center justify-center bg-gray-50">
             <Plus className="h-4 w-4 text-gray-400" />
           </div>
           <span className="text-xs mt-1">Add</span>

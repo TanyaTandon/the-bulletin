@@ -6,7 +6,7 @@ import ContentCard from "@/components/ContentCard";
 import TypewriterText from "@/components/TypewriterText";
 import SocialConnections from "@/components/SocialConnections";
 import { useUser, ContentType } from "@/contexts/UserContext";
-import { Filter, Instagram, Twitter, Facebook, SquareCheck } from "lucide-react";
+import { Filter } from "lucide-react";
 import { 
   DropdownMenu, 
   DropdownMenuContent, 
@@ -14,8 +14,6 @@ import {
   DropdownMenuTrigger
 } from "@/components/ui/dropdown-menu";
 import { Button } from "@/components/ui/button";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 
 const Index = () => {
   const { contents, activeGroup } = useUser();
@@ -38,11 +36,6 @@ const Index = () => {
 
   return (
     <Layout>
-      {/* Remove "the bulletin." title */}
-      <div className="text-center">
-        {/* Title has been removed */}
-      </div>
-      
       <TypewriterText text="Hey Jackson. Welcome to the bulletin. Upload notes, pictures, writing pieces, art, month summaries and we will curate a bulletin and physically mail it to your friends." />
       
       {/* Add the SocialConnections component */}
@@ -50,7 +43,7 @@ const Index = () => {
       
       <div className="mb-6 flex justify-between items-center">
         <div>
-          <h1 className="text-xs font-bold tracking-tight text-muted-foreground">Share your April adventures with your friends</h1>
+          <h1 className="text-xs font-bold tracking-tight text-primary">Share your April adventures with your friends</h1>
           <p className="text-xs text-muted-foreground">
             {activeGroup 
               ? `Showing ${activeGroup.name} group content`
@@ -105,47 +98,6 @@ const Index = () => {
           ))}
         </div>
       )}
-      
-      {/* Add social media connections section */}
-      <div className="mt-10 border-t pt-6">
-        <h2 className="text-xl font-bold mb-4">Connect to my media</h2>
-        <div className="flex flex-wrap gap-4">
-          <div className="flex items-center space-x-2">
-            <Checkbox id="instagram" />
-            <Label htmlFor="instagram" className="flex items-center">
-              <Instagram className="h-4 w-4 mr-1" /> Instagram
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox id="substack" />
-            <Label htmlFor="substack" className="flex items-center">
-              <SquareCheck className="h-4 w-4 mr-1" /> Substack
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox id="twitter" />
-            <Label htmlFor="twitter" className="flex items-center">
-              <Twitter className="h-4 w-4 mr-1" /> Twitter
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox id="facebook" />
-            <Label htmlFor="facebook" className="flex items-center">
-              <Facebook className="h-4 w-4 mr-1" /> Facebook
-            </Label>
-          </div>
-          
-          <div className="flex items-center space-x-2">
-            <Checkbox id="snapchat" />
-            <Label htmlFor="snapchat" className="flex items-center">
-              <SquareCheck className="h-4 w-4 mr-1" /> Snapchat
-            </Label>
-          </div>
-        </div>
-      </div>
     </Layout>
   );
 };
