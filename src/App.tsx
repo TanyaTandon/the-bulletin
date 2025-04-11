@@ -10,12 +10,11 @@ import CreatePersona from "./pages/CreatePersona";
 import CreateGroup from "./pages/CreateGroup";
 import SignUp from "./pages/Signup";
 import NotFound from "./pages/NotFound";
-import { useState } from "react";
+
+// Create the query client outside of the component
+const queryClient = new QueryClient();
 
 const App = () => {
-  // Create the client inside the component
-  const [queryClient] = useState(() => new QueryClient());
-
   return (
     <QueryClientProvider client={queryClient}>
       <TooltipProvider>
