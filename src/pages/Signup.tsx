@@ -5,7 +5,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Phone, Lock, User, ArrowRight } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
@@ -144,11 +143,11 @@ const SignUp = () => {
                   <InputOTP
                     maxLength={6}
                     value={verificationCode}
-                    onChange={setVerificationCode}
+                    onChange={(value) => setVerificationCode(value)}
                     render={({ slots }) => (
                       <InputOTPGroup>
                         {slots.map((slot, index) => (
-                          <InputOTPSlot key={index} index={index} {...slot} />
+                          <InputOTPSlot key={index} {...slot} />
                         ))}
                       </InputOTPGroup>
                     )}
