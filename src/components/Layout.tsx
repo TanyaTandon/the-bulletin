@@ -2,6 +2,7 @@
 import React from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Link } from "react-router-dom";
+import FriendRequests from "./FriendRequests";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -15,6 +16,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           <Link to="/" className="text-3xl font-bold text-primary lowercase" style={{ fontFamily: 'Courier New, monospace' }}>
             the bulletin.
           </Link>
+          
+          <div className="flex items-center space-x-2">
+            <FriendRequests />
+          </div>
         </div>
       </header>
       
