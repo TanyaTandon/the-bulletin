@@ -1,32 +1,14 @@
 
 import React from "react";
-import { Link, useNavigate } from "react-router-dom";
+import { useUser } from "@/contexts/UserContext";
+import { Link } from "react-router-dom";
 import FriendRequests from "./FriendRequests";
-import { Button } from "@/components/ui/button";
-import { useAuth } from "@/contexts/AuthContext";
-import { LogOut, User } from "lucide-react";
-import { 
-  DropdownMenu, 
-  DropdownMenuContent, 
-  DropdownMenuItem, 
-  DropdownMenuLabel, 
-  DropdownMenuSeparator, 
-  DropdownMenuTrigger 
-} from "@/components/ui/dropdown-menu";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
-  const { user, signOut } = useAuth();
-  const navigate = useNavigate();
-
-  const handleSignOut = async () => {
-    await signOut();
-    navigate("/signin");
-  };
-
   return (
     <div className="min-h-screen flex flex-col">
       <header className="border-b bg-white p-4">
@@ -36,28 +18,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
           
           <div className="flex items-center space-x-2">
-            {user ? (
-              <>
-                <FriendRequests />
-                <DropdownMenu>
-                  <DropdownMenuTrigger asChild>
-                    <Button variant="ghost" size="icon">
-                      <User className="h-5 w-5" />
-                    </Button>
-                  </DropdownMenuTrigger>
-                  <DropdownMenuContent align="end">
-                    <DropdownMenuLabel>My Account</DropdownMenuLabel>
-                    <DropdownMenuSeparator />
-                    <DropdownMenuItem onClick={handleSignOut}>
-                      <LogOut className="h-4 w-4 mr-2" />
-                      Sign out
-                    </DropdownMenuItem>
-                  </DropdownMenuContent>
-                </DropdownMenu>
-              </>
-            ) : (
-              <Button onClick={() => navigate("/signin")}>Sign In</Button>
-            )}
+            <FriendRequests />
           </div>
         </div>
       </header>

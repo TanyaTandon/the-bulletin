@@ -5,25 +5,24 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
-import { useToast } from "@/hooks/use-toast";
-import { ArrowLeft, Phone, Lock, User, Mail, ArrowRight } from "lucide-react";
-import { useAuth } from "@/contexts/AuthContext";
+import { useToast } from "@/components/ui/use-toast";
+import { ArrowLeft, Phone, Lock, User, ArrowRight } from "lucide-react";
+import { useUser } from "@/contexts/UserContext";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { signUp, loading } = useAuth();
+  const { addFriend } = useUser();
   const [step, setStep] = useState(1);
-  const [email, setEmail] = useState("");
   const [phone, setPhone] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
   const handleNextStep = () => {
-    if (step === 1 && !email) {
+    if (step === 1 && !phone) {
       toast({
-        title: "Email required",
-        description: "Please enter your email to continue",
+        title: "Phone number required",
+        description: "Please enter your phone number to continue",
         variant: "destructive",
       });
       return;
@@ -47,16 +46,21 @@ const SignUp = () => {
       return;
     }
     
-    if (step < 3) {
+    if (step < 4) {
       setStep(step + 1);
     } else {
-      handleSignUp();
+      // Complete sign up - store user data locally as a friend
+      addFriend({
+        name,
+        phone
+      });
+      
+      toast({
+        title: "Account created!",
+        description: "Welcome to the bulletin.",
+      });
+      navigate("/");
     }
-  };
-  
-  const handleSignUp = async () => {
-    await signUp(email, password, name, phone);
-    navigate("/");
   };
   
   const handlePrevStep = () => {
@@ -79,15 +83,16 @@ const SignUp = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex mb-6">
-            {[1, 2, 3].map((i) => (
+            {[1, 2, 3, 4].map((i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${step >= i ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
                   {i}
                 </div>
                 <div className={`text-xs ${step === i ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
-                  {i === 1 && "Account"}
+                  {i === 1 && "Phone"}
                   {i === 2 && "Password"}
                   {i === 3 && "Profile"}
+                  {i === 4 && "Connect"}
                 </div>
               </div>
             ))}
@@ -96,21 +101,7 @@ const SignUp = () => {
           {step === 1 && (
             <div className="space-y-4">
               <div className="space-y-2">
-                <Label htmlFor="email">Email</Label>
-                <div className="relative">
-                  <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                  <Input
-                    id="email"
-                    type="email"
-                    placeholder="your@email.com"
-                    className="pl-9"
-                    value={email}
-                    onChange={(e) => setEmail(e.target.value)}
-                  />
-                </div>
-              </div>
-              <div className="space-y-2">
-                <Label htmlFor="phone">Phone Number (optional)</Label>
+                <Label htmlFor="phone">Phone Number</Label>
                 <div className="relative">
                   <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                   <Input
@@ -123,6 +114,9 @@ const SignUp = () => {
                   />
                 </div>
               </div>
+              <p className="text-sm text-muted-foreground">
+                Enter your phone number to get started.
+              </p>
             </div>
           )}
 
@@ -168,6 +162,30 @@ const SignUp = () => {
               </p>
             </div>
           )}
+
+          {step === 4 && (
+            <div className="space-y-4">
+              <div className="text-center">
+                <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
+                  <User className="h-8 w-8 text-primary" />
+                </div>
+                <h3 className="text-lg font-medium mb-1">Almost there, {name}!</h3>
+                <p className="text-sm text-muted-foreground mb-6">
+                  Connect with your friends to share your bulletin
+                </p>
+              </div>
+              
+              <div className="space-y-3">
+                <Button variant="outline" className="w-full justify-start">
+                  <Phone className="mr-2 h-4 w-4" />
+                  Import contacts
+                </Button>
+                <p className="text-xs text-muted-foreground text-center">
+                  We'll help you find friends who are already using the bulletin
+                </p>
+              </div>
+            </div>
+          )}
         </CardContent>
         <CardFooter className="flex justify-between">
           <Button
@@ -179,14 +197,14 @@ const SignUp = () => {
             <ArrowLeft className="mr-2 h-4 w-4" />
             Back
           </Button>
-          <Button onClick={handleNextStep} disabled={loading}>
-            {step < 3 ? (
+          <Button onClick={handleNextStep}>
+            {step < 4 ? (
               <>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
               </>
             ) : (
-              loading ? "Creating account..." : "Complete Setup"
+              "Complete Setup"
             )}
           </Button>
         </CardFooter>
@@ -196,7 +214,7 @@ const SignUp = () => {
         <div className="mt-4 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
-            <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/signin")}>
+            <Button variant="link" className="p-0 h-auto" onClick={() => navigate("/")}>
               Sign in
             </Button>
           </p>
