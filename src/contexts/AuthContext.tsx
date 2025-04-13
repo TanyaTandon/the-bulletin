@@ -1,8 +1,7 @@
 
-import React, { createContext, useContext, useEffect, useState } from 'react';
-import { Session, User } from '@supabase/supabase-js';
-import { supabase } from '@/lib/supabase';
+import React, { createContext, useContext, useState } from 'react';
 import { useToast } from '@/hooks/use-toast';
+import { User, Session } from '@supabase/supabase-js';
 
 interface AuthContextType {
   session: Session | null;
@@ -16,69 +15,44 @@ interface AuthContextType {
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [session, setSession] = useState<Session | null>(null);
+  // Create a mock user that will be used when signing in
+  const mockUser = {
+    id: 'mock-user-id',
+    email: '',
+    user_metadata: {
+      name: '',
+      phone: ''
+    }
+  } as User;
+
   const [user, setUser] = useState<User | null>(null);
-  const [loading, setLoading] = useState(true);
+  const [session, setSession] = useState<Session | null>(null);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
-
-  useEffect(() => {
-    // Check for active session on load
-    supabase.auth.getSession().then(({ data: { session } }) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    // Listen for auth changes
-    const { data: { subscription } } = supabase.auth.onAuthStateChange((_event, session) => {
-      setSession(session);
-      setUser(session?.user ?? null);
-      setLoading(false);
-    });
-
-    return () => subscription.unsubscribe();
-  }, []);
 
   const signUp = async (email: string, password: string, name: string, phone: string) => {
     try {
       setLoading(true);
       
-      // Sign up the user
-      const { data, error } = await supabase.auth.signUp({ 
-        email, 
-        password,
-        options: {
-          data: {
-            name,
-            phone
-          }
+      // Mock user creation
+      const mockCreatedUser = {
+        ...mockUser,
+        email,
+        user_metadata: {
+          name,
+          phone
         }
-      });
+      } as User;
       
-      if (error) throw error;
-
-      // Insert user profile into profiles table
-      if (data.user) {
-        const { error: profileError } = await supabase
-          .from('profiles')
-          .insert({
-            id: data.user.id,
-            name,
-            phone,
-            created_at: new Date().toISOString()
-          });
-        
-        if (profileError) {
-          console.error('Error creating profile:', profileError);
-          toast({
-            title: 'Error creating profile',
-            description: profileError.message,
-            variant: 'destructive'
-          });
-          return;
-        }
-      }
-
+      setUser(mockCreatedUser);
+      
+      const mockSession = {
+        user: mockCreatedUser,
+        access_token: 'mock-token',
+      } as Session;
+      
+      setSession(mockSession);
+      
       toast({
         title: 'Account created!',
         description: 'Welcome to the bulletin.',
@@ -89,7 +63,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message,
         variant: 'destructive'
       });
-      console.error('Error signing up:', error);
     } finally {
       setLoading(false);
     }
@@ -98,9 +71,25 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signIn = async (email: string, password: string) => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signInWithPassword({ email, password });
       
-      if (error) throw error;
+      // Mock user sign-in
+      const mockSignedInUser = {
+        ...mockUser,
+        email,
+        user_metadata: {
+          name: 'Demo User',
+          phone: '123-456-7890'
+        }
+      } as User;
+      
+      setUser(mockSignedInUser);
+      
+      const mockSession = {
+        user: mockSignedInUser,
+        access_token: 'mock-token',
+      } as Session;
+      
+      setSession(mockSession);
       
       toast({
         title: 'Signed in successfully',
@@ -112,7 +101,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message,
         variant: 'destructive'
       });
-      console.error('Error signing in:', error);
     } finally {
       setLoading(false);
     }
@@ -121,9 +109,8 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const signOut = async () => {
     try {
       setLoading(true);
-      const { error } = await supabase.auth.signOut();
-      
-      if (error) throw error;
+      setUser(null);
+      setSession(null);
       
       toast({
         title: 'Signed out successfully',
@@ -134,7 +121,6 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         description: error.message,
         variant: 'destructive'
       });
-      console.error('Error signing out:', error);
     } finally {
       setLoading(false);
     }

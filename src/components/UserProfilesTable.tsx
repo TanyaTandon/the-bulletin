@@ -1,6 +1,5 @@
 
-import React, { useEffect, useState } from 'react';
-import { supabase } from '@/lib/supabase';
+import React, { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -22,25 +21,42 @@ interface Profile {
   created_at: string;
 }
 
+// Mock data for profiles
+const mockProfiles: Profile[] = [
+  {
+    id: '1',
+    name: 'John Doe',
+    phone: '123-456-7890',
+    created_at: new Date().toISOString()
+  },
+  {
+    id: '2',
+    name: 'Jane Smith',
+    phone: '555-123-4567',
+    created_at: new Date(Date.now() - 86400000).toISOString() // 1 day ago
+  },
+  {
+    id: '3',
+    name: 'Bob Johnson',
+    phone: '789-012-3456',
+    created_at: new Date(Date.now() - 172800000).toISOString() // 2 days ago
+  }
+];
+
 const UserProfilesTable = () => {
-  const [profiles, setProfiles] = useState<Profile[]>([]);
-  const [loading, setLoading] = useState(true);
+  const [profiles, setProfiles] = useState<Profile[]>(mockProfiles);
+  const [loading, setLoading] = useState(false);
   const { toast } = useToast();
 
   const fetchProfiles = async () => {
     try {
       setLoading(true);
       
-      const { data, error } = await supabase
-        .from('profiles')
-        .select('*')
-        .order('created_at', { ascending: false });
+      // Simulate API delay
+      await new Promise(resolve => setTimeout(resolve, 800));
       
-      if (error) {
-        throw error;
-      }
-      
-      setProfiles(data || []);
+      // Return mock data
+      setProfiles(mockProfiles);
     } catch (error: any) {
       console.error('Error fetching profiles:', error);
       toast({
@@ -52,10 +68,6 @@ const UserProfilesTable = () => {
       setLoading(false);
     }
   };
-
-  useEffect(() => {
-    fetchProfiles();
-  }, []);
 
   return (
     <div className="space-y-4">
@@ -69,7 +81,7 @@ const UserProfilesTable = () => {
       
       <div className="border rounded-md">
         <Table>
-          <TableCaption>List of all user profiles saved in the database</TableCaption>
+          <TableCaption>Mock data - Supabase integration disabled</TableCaption>
           <TableHeader>
             <TableRow>
               <TableHead>Name</TableHead>

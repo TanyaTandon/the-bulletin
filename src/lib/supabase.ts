@@ -1,13 +1,29 @@
 
 import { createClient } from '@supabase/supabase-js';
 
-// Get environment variables with fallbacks for development
-const supabaseUrl = import.meta.env.VITE_SUPABASE_URL || '';
-const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY || '';
+// Create a mock Supabase client that doesn't do anything
+// This prevents errors when Supabase isn't properly configured
+const mockSupabase = {
+  auth: {
+    getSession: async () => ({ data: { session: null } }),
+    onAuthStateChange: () => ({ data: { subscription: { unsubscribe: () => {} } } }),
+    signUp: async () => ({ data: {}, error: null }),
+    signInWithPassword: async () => ({ data: {}, error: null }),
+    signOut: async () => ({ error: null })
+  },
+  from: () => ({
+    select: () => ({ 
+      order: () => ({
+        data: [],
+        error: null
+      })
+    }),
+    insert: () => ({ error: null })
+  })
+};
 
-// Check if required environment variables are available
-if (!supabaseUrl || !supabaseAnonKey) {
-  console.error('Supabase environment variables are missing. Please set VITE_SUPABASE_URL and VITE_SUPABASE_ANON_KEY in your environment.');
-}
+// Use the mock client instead of trying to connect to Supabase
+export const supabase = mockSupabase as unknown as ReturnType<typeof createClient>;
 
-export const supabase = createClient(supabaseUrl, supabaseAnonKey);
+// Export a flag indicating Supabase isn't properly configured
+export const isSupabaseConfigured = false;
