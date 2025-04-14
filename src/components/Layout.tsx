@@ -1,9 +1,9 @@
 
 import React from "react";
 import { useUser } from "@/contexts/UserContext";
-import { Link, useNavigate } from "react-router-dom";
+import { Link, useNavigate, useLocation } from "react-router-dom";
 import FriendRequests from "./FriendRequests";
-import { Settings, Archive } from "lucide-react";
+import { History, Settings } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface LayoutProps {
@@ -12,6 +12,15 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const navigate = useNavigate();
+  const location = useLocation();
+
+  const handleSettingsClick = () => {
+    if (location.pathname === '/settings') {
+      navigate('/');
+    } else {
+      navigate('/settings');
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col">
@@ -22,17 +31,17 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           </Link>
           
           <div className="flex items-center space-x-2">
+            <FriendRequests />
             <Button 
               variant="ghost" 
               size="icon"
-              onClick={() => navigate("/settings")}
+              onClick={handleSettingsClick}
             >
               <Settings className="h-5 w-5" />
             </Button>
             <Button variant="ghost" size="icon">
-              <Archive className="h-5 w-5" />
+              <History className="h-5 w-5" />
             </Button>
-            <FriendRequests />
           </div>
         </div>
       </header>
