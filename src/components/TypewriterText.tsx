@@ -11,7 +11,6 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 50 }) => 
   const [currentIndex, setCurrentIndex] = useState(0);
 
   useEffect(() => {
-    // Reset when text changes
     setDisplayedText("");
     setCurrentIndex(0);
   }, [text]);
@@ -28,7 +27,10 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 50 }) => 
   }, [currentIndex, text, speed]);
 
   return (
-    <div className="text-lg text-muted-foreground italic border-b mb-4" style={{ fontFamily: 'Courier New, monospace' }}>
+    <div 
+      className="text-lg italic mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent" 
+      style={{ fontFamily: 'Courier New, monospace' }}
+    >
       {displayedText}
       {currentIndex < text.length && <span className="animate-pulse">|</span>}
     </div>

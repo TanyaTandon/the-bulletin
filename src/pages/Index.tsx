@@ -6,30 +6,25 @@ import BlurbInput from "@/components/BlurbInput";
 import MonthlyTimer from "@/components/MonthlyTimer";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/UserContext";
+import TypewriterText from "@/components/TypewriterText";
 
 const Index = () => {
   const { friends } = useUser();
-  
   const friendsList = friends.map(friend => friend.name).join(", ");
   
   return (
     <Layout>
-      <div className="max-w-4xl mx-auto">
-        <div className="mb-8">
-          <h1 className="text-2xl font-semibold mb-2">
-            Welcome Jackson
-          </h1>
-          <p className="text-muted-foreground">
-            Your friends {friendsList} are excited to see your latest bulletin
-          </p>
-        </div>
+      <div className="max-w-3xl mx-auto space-y-6 py-8">
+        <TypewriterText 
+          text={`Welcome Jackson to the bulletin, we are so excited you are here. Your friends ${friendsList} are excited to hear from you`}
+        />
 
         <ImageUploadGrid />
         
         <BlurbInput />
         
-        <div className="flex justify-center mb-8">
-          <Button size="lg">
+        <div className="flex justify-center mb-6">
+          <Button size="lg" className="bg-gradient-to-r from-accent to-primary hover:opacity-90">
             Submit Bulletin
           </Button>
         </div>
