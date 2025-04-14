@@ -7,14 +7,14 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Phone, Lock, User, ArrowRight } from "lucide-react";
-import { useUser } from "@/contexts/UserContext";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
-  const { addFriend } = useUser();
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
+  const [verificationCode, setVerificationCode] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
@@ -28,7 +28,16 @@ const SignUp = () => {
       return;
     }
     
-    if (step === 2 && !password) {
+    if (step === 2 && !verificationCode) {
+      toast({
+        title: "Verification code required",
+        description: "Please enter the verification code sent to your phone",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    if (step === 3 && !password) {
       toast({
         title: "Password required",
         description: "Please create a password to continue",
@@ -37,7 +46,7 @@ const SignUp = () => {
       return;
     }
     
-    if (step === 3 && !name) {
+    if (step === 4 && !name) {
       toast({
         title: "Name required",
         description: "Please enter your name to continue",
@@ -46,15 +55,17 @@ const SignUp = () => {
       return;
     }
     
-    if (step < 4) {
+    if (step < 5) {
+      // If step 1 (phone number), simulate sending verification code
+      if (step === 1) {
+        toast({
+          title: "Verification code sent",
+          description: `We've sent a code to ${phone}`,
+        });
+      }
       setStep(step + 1);
     } else {
-      // Complete sign up - store user data locally as a friend
-      addFriend({
-        name,
-        phone
-      });
-      
+      // Complete sign up
       toast({
         title: "Account created!",
         description: "Welcome to the bulletin.",
@@ -83,16 +94,17 @@ const SignUp = () => {
         </CardHeader>
         <CardContent className="space-y-4">
           <div className="flex mb-6">
-            {[1, 2, 3, 4].map((i) => (
+            {[1, 2, 3, 4, 5].map((i) => (
               <div key={i} className="flex-1 flex flex-col items-center">
                 <div className={`w-8 h-8 rounded-full flex items-center justify-center mb-1 ${step >= i ? 'bg-primary text-white' : 'bg-gray-200 text-gray-500'}`}>
                   {i}
                 </div>
                 <div className={`text-xs ${step === i ? 'text-primary font-medium' : 'text-muted-foreground'}`}>
                   {i === 1 && "Phone"}
-                  {i === 2 && "Password"}
-                  {i === 3 && "Profile"}
-                  {i === 4 && "Connect"}
+                  {i === 2 && "Verify"}
+                  {i === 3 && "Password"}
+                  {i === 4 && "Profile"}
+                  {i === 5 && "Connect"}
                 </div>
               </div>
             ))}
@@ -115,12 +127,45 @@ const SignUp = () => {
                 </div>
               </div>
               <p className="text-sm text-muted-foreground">
-                Enter your phone number to get started.
+                We'll send you a verification code to confirm your phone number.
               </p>
             </div>
           )}
 
           {step === 2 && (
+            <div className="space-y-4">
+              <div className="space-y-2">
+                <Label htmlFor="verification-code">Verification Code</Label>
+                <p className="text-sm text-muted-foreground mb-4">
+                  Enter the code we sent to {phone}
+                </p>
+                <div className="flex justify-center">
+                  <InputOTP
+                    maxLength={6}
+                    value={verificationCode}
+                    onChange={(value) => setVerificationCode(value)}
+                    render={({ slots }) => (
+                      <InputOTPGroup>
+                        {slots.map((slot, index) => (
+                          <InputOTPSlot key={index} {...slot} />
+                        ))}
+                      </InputOTPGroup>
+                    )}
+                  />
+                </div>
+              </div>
+              <div className="flex justify-center mt-4">
+                <Button variant="link" className="text-sm" onClick={() => toast({
+                  title: "Code resent",
+                  description: `We've sent a new code to ${phone}`,
+                })}>
+                  Resend code
+                </Button>
+              </div>
+            </div>
+          )}
+
+          {step === 3 && (
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="password">Create a password</Label>
@@ -142,7 +187,7 @@ const SignUp = () => {
             </div>
           )}
 
-          {step === 3 && (
+          {step === 4 && (
             <div className="space-y-4">
               <div className="space-y-2">
                 <Label htmlFor="name">Your name</Label>
@@ -163,7 +208,7 @@ const SignUp = () => {
             </div>
           )}
 
-          {step === 4 && (
+          {step === 5 && (
             <div className="space-y-4">
               <div className="text-center">
                 <div className="w-16 h-16 rounded-full bg-primary/10 flex items-center justify-center mx-auto mb-4">
@@ -198,7 +243,7 @@ const SignUp = () => {
             Back
           </Button>
           <Button onClick={handleNextStep}>
-            {step < 4 ? (
+            {step < 5 ? (
               <>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />
@@ -210,7 +255,7 @@ const SignUp = () => {
         </CardFooter>
       </Card>
       
-      {step <= 3 && (
+      {step <= 4 && (
         <div className="mt-4 text-center">
           <p className="text-sm text-muted-foreground">
             Already have an account?{" "}
