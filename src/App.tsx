@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -10,6 +9,7 @@ import CreatePersona from "./pages/CreatePersona";
 import CreateGroup from "./pages/CreateGroup";
 import SignUp from "./pages/Signup";
 import NotFound from "./pages/NotFound";
+import Settings from "./pages/Settings";
 
 // Create the query client outside of the component
 const queryClient = new QueryClient();
@@ -27,6 +27,7 @@ const App = () => {
               <Route path="/signup" element={<SignUp />} />
               <Route path="/create-persona" element={<CreatePersona />} />
               <Route path="/create-group" element={<CreateGroup />} />
+              <Route path="/settings" element={<Settings />} />
               <Route path="*" element={<NotFound />} />
             </Routes>
           </BrowserRouter>

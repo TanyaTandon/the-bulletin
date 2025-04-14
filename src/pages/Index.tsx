@@ -14,16 +14,16 @@ const Index = () => {
   
   return (
     <Layout>
-      <div className="max-w-3xl mx-auto space-y-6 py-8">
-        <TypewriterText 
-          text={`Welcome Jackson to the bulletin, we are so excited you are here. Your friends ${friendsList} are excited to hear from you`}
-        />
+      <div className="max-w-3xl mx-auto space-y-4 py-6">
+        <div className="space-y-2">
+          <TypewriterText text="Welcome Jackson to the bulletin, we are so excited you are here." />
+          <TypewriterText text={`Your friends ${friendsList} are excited to hear from you`} />
+        </div>
 
         <ImageUploadGrid />
-        
         <BlurbInput />
         
-        <div className="flex justify-center mb-6">
+        <div className="flex justify-center">
           <Button size="lg" className="bg-gradient-to-r from-accent to-primary hover:opacity-90">
             Submit Bulletin
           </Button>
