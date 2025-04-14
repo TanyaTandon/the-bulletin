@@ -16,8 +16,8 @@ const Index = () => {
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4 py-6">
         <div className="space-y-1">
-          <TypewriterText text="Welcome Jackson to the bulletin, we are so excited you are here." />
-          <TypewriterText text={`Your friends ${friendsList} are excited to hear from you`} />
+          <TypewriterText text="welcome Jackson to the bulletin, we are so happy you are here. upload pictures and month summary and we will curate a bulletin and physically mail it to your friends." />
+          <TypewriterText text={`your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.`} />
         </div>
 
         <ImageUploadGrid />
