@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -7,14 +6,12 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
 import { useToast } from "@/components/ui/use-toast";
 import { ArrowLeft, Phone, Lock, User, ArrowRight } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [step, setStep] = useState(1);
   const [phone, setPhone] = useState("");
-  const [verificationCode, setVerificationCode] = useState("");
   const [password, setPassword] = useState("");
   const [name, setName] = useState("");
   
@@ -28,16 +25,7 @@ const SignUp = () => {
       return;
     }
     
-    if (step === 2 && !verificationCode) {
-      toast({
-        title: "Verification code required",
-        description: "Please enter the verification code sent to your phone",
-        variant: "destructive",
-      });
-      return;
-    }
-    
-    if (step === 3 && !password) {
+    if (step === 2 && !password) {
       toast({
         title: "Password required",
         description: "Please create a password to continue",
@@ -46,7 +34,7 @@ const SignUp = () => {
       return;
     }
     
-    if (step === 4 && !name) {
+    if (step === 3 && !name) {
       toast({
         title: "Name required",
         description: "Please enter your name to continue",
@@ -55,14 +43,7 @@ const SignUp = () => {
       return;
     }
     
-    if (step < 5) {
-      // If step 1 (phone number), simulate sending verification code
-      if (step === 1) {
-        toast({
-          title: "Verification code sent",
-          description: `We've sent a code to ${phone}`,
-        });
-      }
+    if (step < 4) {
       setStep(step + 1);
     } else {
       // Complete sign up
@@ -243,7 +224,7 @@ const SignUp = () => {
             Back
           </Button>
           <Button onClick={handleNextStep}>
-            {step < 5 ? (
+            {step < 4 ? (
               <>
                 Next
                 <ArrowRight className="ml-2 h-4 w-4" />

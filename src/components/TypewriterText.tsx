@@ -6,7 +6,7 @@ interface TypewriterTextProps {
   speed?: number;
 }
 
-const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 50 }) => {
+const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -28,7 +28,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 50 }) => 
 
   return (
     <div 
-      className="text-lg italic mb-6 bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent" 
+      className="text-lg italic mb-2 text-white/90" 
       style={{ fontFamily: 'Courier New, monospace' }}
     >
       {displayedText}

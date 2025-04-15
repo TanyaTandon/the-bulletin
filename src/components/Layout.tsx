@@ -23,10 +23,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col">
-      <header className="border-b bg-white p-4">
+    <div className="min-h-screen flex flex-col bg-slate-900">
+      <header className="border-b border-white/10 bg-slate-900/95 backdrop-blur-sm p-4">
         <div className="container mx-auto flex justify-between items-center">
-          <Link to="/" className="text-3xl font-bold text-primary lowercase" style={{ fontFamily: 'Courier New, monospace' }}>
+          <Link to="/" className="text-3xl font-bold text-white lowercase" style={{ fontFamily: 'Courier New, monospace' }}>
             the bulletin.
           </Link>
           
@@ -36,21 +36,22 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               variant="ghost" 
               size="icon"
               onClick={handleSettingsClick}
+              className="text-white/70 hover:text-white"
             >
               <Settings className="h-5 w-5" />
             </Button>
-            <Button variant="ghost" size="icon">
+            <Button variant="ghost" size="icon" className="text-white/70 hover:text-white">
               <History className="h-5 w-5" />
             </Button>
           </div>
         </div>
       </header>
       
-      <main className="flex-1 p-6 container mx-auto">
+      <main className="flex-1 p-4 container mx-auto">
         {children}
       </main>
       
-      <footer className="border-t p-4 text-center text-muted-foreground">
+      <footer className="border-t border-white/10 p-4 text-center text-white/50">
         <div className="container mx-auto">
           &copy; {new Date().getFullYear()} the bulletin.
         </div>
