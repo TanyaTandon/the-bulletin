@@ -16,27 +16,46 @@ const ImageUploadGrid = () => {
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
-    if (files.length + images.length > 9) {
-      alert('You can only upload up to 9 images');
-      return;
-    }
     
-    const newImages = files.map(file => ({
-      url: URL.createObjectURL(file),
-      file
-    }));
-    
-    if (editingIndex !== null && files.length > 0) {
-      // Replace single image
-      const newImageArray = [...images];
-      newImageArray[editingIndex] = {
-        url: URL.createObjectURL(files[0]),
-        file: files[0]
-      };
-      setImages(newImageArray);
-      setEditingIndex(null);
+    if (editingIndex !== null) {
+      // Single image edit mode
+      if (files.length === 1) {
+        // Replace single image
+        const newImageArray = [...images];
+        newImageArray[editingIndex] = {
+          url: URL.createObjectURL(files[0]),
+          file: files[0]
+        };
+        setImages(newImageArray);
+        setEditingIndex(null);
+      } else {
+        // Multiple images selected while editing - add all to appropriate grid
+        const totalNewImages = files.length;
+        const newImages = files.map(file => ({
+          url: URL.createObjectURL(file),
+          file
+        }));
+        
+        if (totalNewImages > 9) {
+          alert('You can only upload up to 9 images');
+          return;
+        }
+        
+        setImages(newImages);
+        setEditingIndex(null);
+      }
     } else {
-      // Add new images
+      // Adding new images
+      if (files.length + images.length > 9) {
+        alert('You can only upload up to 9 images');
+        return;
+      }
+      
+      const newImages = files.map(file => ({
+        url: URL.createObjectURL(file),
+        file
+      }));
+      
       setImages([...images, ...newImages]);
     }
   };
@@ -50,14 +69,24 @@ const ImageUploadGrid = () => {
   };
 
   const getGridConfig = () => {
-    const totalSlots = images.length <= 1 ? 1 : 
-                      images.length <= 4 ? 4 : 9;
+    const totalImages = images.length;
     
-    return {
-      cols: images.length <= 1 ? 1 : 
-            images.length <= 4 ? 2 : 3,
-      slots: totalSlots
-    };
+    if (totalImages <= 1) {
+      return {
+        cols: 1,
+        slots: 1
+      };
+    } else if (totalImages <= 4) {
+      return {
+        cols: 2,
+        slots: 4
+      };
+    } else {
+      return {
+        cols: 3,
+        slots: 9
+      };
+    }
   };
 
   const { cols, slots } = getGridConfig();
