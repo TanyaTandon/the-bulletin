@@ -130,7 +130,7 @@ const ImageUploadGrid = () => {
                       className="absolute bottom-2 right-2 bg-white/20 hover:bg-white/30 rounded-full"
                       onClick={(e) => handleReplaceImage(index, e)}
                     >
-                      <Edit className="h-5 w-5 text-white" />
+                      <Edit className="h-5 w-5 text-[#8B5CF6]" />
                     </Button>
                   </div>
                 ) : (
