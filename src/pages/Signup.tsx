@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -112,6 +111,13 @@ const SignUp = () => {
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
+              <div className="text-center mt-4 text-sm" style={{ color: '#D6BCFA' }}>
+                No ads. No scroll. 
+                <br />
+                Just love. Just updates from your friends, 
+                <br />
+                printed for you, and delivered to your door, monthly
+              </div>
             </TabsContent>
             
             <TabsContent value="signup">
