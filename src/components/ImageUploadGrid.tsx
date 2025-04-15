@@ -12,6 +12,7 @@ interface UploadedImage {
 const ImageUploadGrid = () => {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const [editingIndex, setEditingIndex] = useState<number | null>(null);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -25,24 +26,26 @@ const ImageUploadGrid = () => {
       file
     }));
     
-    setImages([...images, ...newImages]);
+    if (editingIndex !== null && files.length > 0) {
+      // Replace single image
+      const newImageArray = [...images];
+      newImageArray[editingIndex] = {
+        url: URL.createObjectURL(files[0]),
+        file: files[0]
+      };
+      setImages(newImageArray);
+      setEditingIndex(null);
+    } else {
+      // Add new images
+      setImages([...images, ...newImages]);
+    }
   };
 
-  const handleReplaceImage = (indexToReplace: number) => {
+  const handleReplaceImage = (index: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    setEditingIndex(index);
     if (fileInputRef.current) {
       fileInputRef.current.click();
-      // We'll use a separate state or ref to track which image is being replaced
-      fileInputRef.current.onchange = (event: any) => {
-        const files = Array.from(event.target.files || []);
-        if (files.length > 0) {
-          const newImages = [...images];
-          newImages[indexToReplace] = {
-            url: URL.createObjectURL(files[0]),
-            file: files[0]
-          };
-          setImages(newImages);
-        }
-      };
     }
   };
 
@@ -96,16 +99,13 @@ const ImageUploadGrid = () => {
                       variant="ghost" 
                       size="icon" 
                       className="absolute bottom-2 right-2 bg-white/20 hover:bg-white/30 rounded-full"
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleReplaceImage(index);
-                      }}
+                      onClick={(e) => handleReplaceImage(index, e)}
                     >
                       <Edit className="h-5 w-5 text-white" />
                     </Button>
                   </div>
                 ) : (
-                  <Plus className="w-6 h-6 text-accent" />
+                  <Plus className="w-6 h-6 text-violet-500" />
                 )}
               </Card>
             );
@@ -115,7 +115,7 @@ const ImageUploadGrid = () => {
           ref={fileInputRef}
           type="file"
           accept="image/*"
-          multiple
+          multiple={editingIndex === null}
           className="hidden"
           onChange={handleFileSelect}
         />
