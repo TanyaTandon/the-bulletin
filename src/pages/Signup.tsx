@@ -7,7 +7,7 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
-import { Mail, Lock, User } from "lucide-react";
+import { Mail, Lock, User, Heart } from "lucide-react";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -60,6 +60,15 @@ const SignUp = () => {
 
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
+      <div className="mb-8 text-center">
+        <h1 className="text-4xl font-bold text-violet-600 lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+          the bulletin.
+        </h1>
+        <div className="flex items-center justify-center mt-2 text-violet-600">
+          <Mail className="h-5 w-5" />
+          <Heart className="h-4 w-4 ml-1 fill-current" />
+        </div>
+      </div>
       <Card className="w-[380px]">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">Welcome</CardTitle>
