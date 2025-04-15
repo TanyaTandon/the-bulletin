@@ -28,8 +28,8 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => 
 
   return (
     <div 
-      className="text-lg italic mb-2 text-white/90" 
-      style={{ fontFamily: 'Courier New, monospace' }}
+      className="text-lg text-violet-600 mb-2" 
+      style={{ fontFamily: 'Sometype Mono, monospace' }}
     >
       {displayedText}
       {currentIndex < text.length && <span className="animate-pulse">|</span>}
