@@ -7,10 +7,11 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Check, X } from "lucide-react";
+import { UserPlus, Check, X, UserPlus2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
+import ContactSync from "./ContactSync";
 
 const FriendRequests = () => {
   const { friendRequests, updateFriendRequestStatus, friends } = useUser();
@@ -108,6 +109,13 @@ const FriendRequests = () => {
               </div>
             )}
           </div>
+
+          <div className="border-t pt-4">
+            <h3 className="font-medium text-sm mb-2">Add Friends</h3>
+            <div className="flex justify-center">
+              <ContactSync />
+            </div>
+          </div>
         </div>
       </PopoverContent>
     </Popover>
@@ -115,3 +123,4 @@ const FriendRequests = () => {
 };
 
 export default FriendRequests;
+
