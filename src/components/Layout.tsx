@@ -36,12 +36,12 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               variant="ghost" 
               size="icon"
               onClick={handleSettingsClick}
-              className="text-white/70 hover:text-white"
+              className="text-white hover:text-white/80"
             >
-              <Settings className="h-5 w-5" />
+              <Settings className="h-5 w-5 text-white" />
             </Button>
-            <Button variant="ghost" size="icon" className="text-white/70 hover:text-white">
-              <History className="h-5 w-5" />
+            <Button variant="ghost" size="icon" className="text-white hover:text-white/80">
+              <History className="h-5 w-5 text-white" />
             </Button>
           </div>
         </div>
