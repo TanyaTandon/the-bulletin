@@ -1,6 +1,6 @@
 
 import React, { useState, useRef } from 'react';
-import { Plus } from 'lucide-react';
+import { Plus, Edit } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 
@@ -26,6 +26,24 @@ const ImageUploadGrid = () => {
     }));
     
     setImages([...images, ...newImages]);
+  };
+
+  const handleReplaceImage = (indexToReplace: number) => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+      // We'll use a separate state or ref to track which image is being replaced
+      fileInputRef.current.onchange = (event: any) => {
+        const files = Array.from(event.target.files || []);
+        if (files.length > 0) {
+          const newImages = [...images];
+          newImages[indexToReplace] = {
+            url: URL.createObjectURL(files[0]),
+            file: files[0]
+          };
+          setImages(newImages);
+        }
+      };
+    }
   };
 
   const getGridConfig = () => {
@@ -68,13 +86,26 @@ const ImageUploadGrid = () => {
                 onClick={() => !image && fileInputRef.current?.click()}
               >
                 {image ? (
-                  <img 
-                    src={image.url} 
-                    alt={`Upload ${index + 1}`}
-                    className="w-full h-full object-cover"
-                  />
+                  <div className="w-full h-full relative">
+                    <img 
+                      src={image.url} 
+                      alt={`Upload ${index + 1}`}
+                      className="w-full h-full object-cover"
+                    />
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="absolute bottom-2 right-2 bg-white/20 hover:bg-white/30 rounded-full"
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleReplaceImage(index);
+                      }}
+                    >
+                      <Edit className="h-5 w-5 text-white" />
+                    </Button>
+                  </div>
                 ) : (
-                  <Plus className="w-6 h-6 text-white/70" />
+                  <Plus className="w-6 h-6 text-accent" />
                 )}
               </Card>
             );
