@@ -8,12 +8,23 @@ import { useUser } from "@/contexts/UserContext";
 import TypewriterText from "@/components/TypewriterText";
 import { format, addMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Button } from "@/components/ui/button";
+import { Send, Calendar, Image, FileText } from "lucide-react";
+import { toast } from "sonner";
 
 const Index = () => {
   const { friends } = useUser();
   const nextMonth = format(addMonths(new Date(), 1), "MMMM");
   const currentMonth = format(new Date(), "MMMM");
   const isMobile = useIsMobile();
+  
+  const handleSubmitAll = () => {
+    // This is a placeholder for the actual submission logic
+    // You would typically gather data from all three components here
+    toast.success("Submitting your bulletin content", {
+      description: "Your images, text, and calendar updates will be included in the next bulletin."
+    });
+  };
   
   return (
     <Layout>
@@ -31,8 +42,28 @@ your updates for april will print on May 1st at 12:01 am, and your submissions a
 
         <ImageUploadGrid />
         <BlurbInput />
-        
         <MonthlyTimer />
+        
+        {/* Unified submit button */}
+        <div className="flex justify-center pt-4 pb-8">
+          <Button 
+            onClick={handleSubmitAll}
+            className="px-6 py-6 bg-violet-500 hover:bg-violet-600 transition-colors"
+            size="lg"
+          >
+            <div className="flex flex-col items-center gap-1">
+              <div className="flex items-center gap-2">
+                <Send className="h-5 w-5" />
+                <span className="text-lg">Submit All Content</span>
+              </div>
+              <div className="text-xs text-gray-200 flex gap-2 items-center">
+                <Image className="h-3 w-3" /> 
+                <FileText className="h-3 w-3" /> 
+                <Calendar className="h-3 w-3" />
+              </div>
+            </div>
+          </Button>
+        </div>
       </div>
     </Layout>
   );

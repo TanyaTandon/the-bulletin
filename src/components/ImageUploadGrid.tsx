@@ -109,19 +109,6 @@ const ImageUploadGrid = () => {
 
   const slotsToShow = images.length === 0 ? 1 : Math.min(Math.max(slots, images.length + 1), 9);
 
-  const handleSubmit = () => {
-    if (images.length === 0) {
-      toast.error('Please upload at least one image', {
-        description: 'You need to add images before submitting.'
-      });
-      return;
-    }
-
-    toast.success(`Submitting ${images.length} image(s)`, {
-      description: 'Your images are being processed.'
-    });
-  };
-
   return (
     <div className="mb-4 flex justify-center flex-col items-center">
       <div className="w-full max-w-md">
@@ -195,16 +182,6 @@ const ImageUploadGrid = () => {
           onChange={handleFileSelect}
         />
       </div>
-      
-      {images.length > 0 && (
-        <Button 
-          className="mt-4 flex items-center gap-2"
-          onClick={handleSubmit}
-        >
-          <Upload className="h-4 w-4" />
-          Submit {images.length} Image{images.length !== 1 ? 's' : ''}
-        </Button>
-      )}
     </div>
   );
 };
