@@ -20,7 +20,7 @@ const MonthlyTimer = () => {
 
   return (
     <div className="text-center bg-gradient-to-r from-accent/10 to-primary/10 p-4 rounded-lg">
-      <p className="text-muted-foreground mb-2">Time remaining until the April submission for the bulletin:</p>
+      <p className="text-muted-foreground mb-2">Time to print:</p>
       <p className="text-xl font-semibold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent">
         {days} days, {hours} hours, {minutes} minutes
       </p>
@@ -29,3 +29,4 @@ const MonthlyTimer = () => {
 };
 
 export default MonthlyTimer;
+
