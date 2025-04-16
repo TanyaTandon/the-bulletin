@@ -52,7 +52,7 @@ const BlurbInput = () => {
       />
       <div className="flex flex-col items-center space-y-2">
         <h3 className="text-lg font-semibold text-black" style={{ fontFamily: 'Sometype Mono, monospace' }}>
-          Selected date: {date ? format(date, 'PPP') : 'Pick a date'}
+          Add your key April highlights and what you got going on in May
         </h3>
         <p className="text-xs text-gray-500 mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
           This is the date your monthly summary is associated with
