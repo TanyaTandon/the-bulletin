@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from 'react';
 import { Plus, Edit } from 'lucide-react';
 import { Card } from './ui/card';
@@ -17,8 +18,8 @@ const ImageUploadGrid = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
-    if (files.length + images.length > 4) {
-      toast.error('You can only upload up to 4 images', {
+    if (files.length + images.length > 9) {
+      toast.error('You can only upload up to 9 images', {
         description: 'Please select fewer images.'
       });
       return;
@@ -90,7 +91,7 @@ const ImageUploadGrid = () => {
   return (
     <div className="mb-4 flex justify-center">
       <div>
-        <h3 className="text-sm text-black mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>Upload your 1-4 pictures</h3>
+        <h3 className="text-sm text-black mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>Upload your 1-9 pictures</h3>
         <div 
           className={`grid gap-1 w-fit`}
           style={{
