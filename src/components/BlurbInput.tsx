@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Calendar } from './ui/calendar';
@@ -28,7 +27,6 @@ const BlurbInput = () => {
     withNote: savedNotes.map(note => note.date)
   };
 
-  // Use the Record<string, CSSProperties> type for modifiersStyles
   const modifiersStyles: Record<string, CSSProperties> = {
     withNote: {
       backgroundColor: 'rgba(255, 192, 203, 0.2)',
@@ -54,9 +52,6 @@ const BlurbInput = () => {
         <h3 className="text-lg font-semibold text-black" style={{ fontFamily: 'Sometype Mono, monospace' }}>
           Add your key April highlights and things you're excited for in May
         </h3>
-        <p className="text-xs text-gray-500 mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
-          This is the date your monthly summary is associated with
-        </p>
         <Calendar
           mode="single"
           selected={date}
