@@ -3,7 +3,7 @@ import React from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import FriendRequests from "./FriendRequests";
-import { History, Settings } from "lucide-react";
+import { Settings } from "lucide-react";
 import { Button } from "./ui/button";
 
 interface LayoutProps {
@@ -43,13 +43,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               className="text-black hover:text-black/70 hover:bg-gray-50"
             >
               <Settings className="h-5 w-5" />
-            </Button>
-            <Button 
-              variant="ghost" 
-              size="icon" 
-              className="text-black hover:text-black/70 hover:bg-gray-50"
-            >
-              <History className="h-5 w-5" />
             </Button>
           </div>
         </div>
