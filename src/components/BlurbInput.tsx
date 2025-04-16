@@ -1,3 +1,4 @@
+
 import React, { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Calendar } from './ui/calendar';
@@ -26,14 +27,16 @@ const BlurbInput = () => {
     withNote: savedNotes.map(note => note.date)
   };
 
-  const modifierStyles = {
+  // Renamed from modifierStyles to modifiersStyles to match the component's expected props
+  const modifiersStyles = {
     withNote: {
       backgroundColor: 'rgba(255, 192, 203, 0.2)',
       position: 'relative',
     }
   };
 
-  const modifierClassNames = {
+  // Plural form for consistency
+  const modifiersClassNames = {
     withNote: 'relative group'
   };
 
@@ -60,8 +63,8 @@ const BlurbInput = () => {
           onSelect={setDate}
           className="rounded-md border shadow bg-white"
           modifiers={modifiers}
-          modifierStyles={modifierStyles}
-          modifierClassNames={modifierClassNames}
+          modifiersStyles={modifiersStyles}
+          modifiersClassNames={modifiersClassNames}
           formatters={{
             formatDay: (date) => {
               const hasNote = savedNotes.some(note => 
