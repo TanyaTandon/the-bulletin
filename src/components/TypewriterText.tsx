@@ -32,10 +32,8 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => 
     <div 
       className={`text-black mb-2 ${isMobile ? 'text-sm' : 'text-lg'}`}
       style={{ fontFamily: 'Sometype Mono, monospace' }}
-    >
-      {displayedText}
-      {currentIndex < text.length && <span className="animate-pulse text-black">|</span>}
-    </div>
+      dangerouslySetInnerHTML={{ __html: displayedText }}
+    />
   );
 };
 
