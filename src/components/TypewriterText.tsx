@@ -28,11 +28,11 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => 
 
   return (
     <div 
-      className="text-lg text-violet-600 mb-2" 
+      className="text-lg text-black mb-2" // Changed from text-violet-600 to text-black
       style={{ fontFamily: 'Sometype Mono, monospace' }}
     >
       {displayedText}
-      {currentIndex < text.length && <span className="animate-pulse">|</span>}
+      {currentIndex < text.length && <span className="animate-pulse text-black">|</span>}
     </div>
   );
 };
