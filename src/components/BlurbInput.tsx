@@ -21,6 +21,9 @@ const BlurbInput = () => {
         <h3 className="text-sm text-black" style={{ fontFamily: 'Sometype Mono, monospace' }}>
           Selected date: {date ? format(date, 'PPP') : 'Pick a date'}
         </h3>
+        <p className="text-xs text-gray-500 mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+          This is the date your monthly summary is associated with
+        </p>
         <Calendar
           mode="single"
           selected={date}
