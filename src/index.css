@@ -6,7 +6,7 @@
 @layer base {
   :root {
     --background: 240 10% 99%;
-    --foreground: 0 0% 3.9%; // Changed to make text black
+    --foreground: 0 0% 3.9%; /* Changed to make text black */
 
     --card: 0 0% 100%;
     --card-foreground: 0 0% 3.9%;
