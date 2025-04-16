@@ -96,7 +96,9 @@ const ImageUploadGrid = () => {
   return (
     <div className="mb-4 flex justify-center">
       <div>
-        <h3 className="text-sm text-black mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>Upload your 1-9 pictures</h3>
+        <h3 className="text-lg font-semibold text-black mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+          Upload your 1-9 pictures
+        </h3>
         <div 
           className={`grid gap-1 w-fit`}
           style={{
