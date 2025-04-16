@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { Plus, Edit } from 'lucide-react';
+import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -63,6 +62,14 @@ const ImageUploadGrid = () => {
     }
   };
 
+  const handleDeleteImage = (index: number, event: React.MouseEvent) => {
+    event.stopPropagation();
+    const newImages = [...images];
+    newImages.splice(index, 1);
+    setImages(newImages);
+    toast.success('Image deleted successfully');
+  };
+
   const getGridConfig = () => {
     const totalImages = images.length;
     
@@ -120,6 +127,14 @@ const ImageUploadGrid = () => {
                       onClick={(e) => handleReplaceImage(index, e)}
                     >
                       <Edit className="h-5 w-5 text-[#8B5CF6]" />
+                    </Button>
+                    <Button 
+                      variant="ghost" 
+                      size="icon" 
+                      className="bg-white/20 hover:bg-white/30 rounded-full"
+                      onClick={(e) => handleDeleteImage(index, e)}
+                    >
+                      <Trash2 className="h-5 w-5 text-[#8B5CF6]" />
                     </Button>
                   </div>
                 </div>
