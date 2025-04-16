@@ -7,17 +7,25 @@ import MonthlyTimer from "@/components/MonthlyTimer";
 import { Button } from "@/components/ui/button";
 import { useUser } from "@/contexts/UserContext";
 import TypewriterText from "@/components/TypewriterText";
+import { format, addMonths } from "date-fns";
 
 const Index = () => {
   const { friends } = useUser();
-  const friendsList = friends.map(friend => friend.name).join(", ");
+  const nextMonth = format(addMonths(new Date(), 1), "MMMM");
+  const deadlineDay = "25th";
+  const currentMonth = format(new Date(), "MMMM");
   
   return (
     <Layout>
       <div className="max-w-3xl mx-auto space-y-4">
         <div className="space-y-1">
-          <TypewriterText text="welcome Jackson to the bulletin, we are so happy you are here. upload pictures and month summary and we will curate a bulletin and physically mail it to your friends." />
-          <TypewriterText text="your friends mahika, tanya, lila, adi, and nigel are excited to hear from you." />
+          <TypewriterText text={`hello, XXXXX. welcome to the bulletin!
+
+we're happy you're here.
+
+upload pictures & text for your friends below. The ${nextMonth} deadline is ${currentMonth} ${deadlineDay}, so get them in soon!
+
+your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.`} />
         </div>
 
         <ImageUploadGrid />
@@ -36,3 +44,4 @@ const Index = () => {
 };
 
 export default Index;
+
