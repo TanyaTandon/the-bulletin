@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Calendar } from './ui/calendar';
@@ -23,6 +22,21 @@ const BlurbInput = () => {
     }
   };
 
+  const modifiers = {
+    withNote: savedNotes.map(note => note.date)
+  };
+
+  const modifierStyles = {
+    withNote: {
+      backgroundColor: 'rgba(255, 192, 203, 0.2)',
+      position: 'relative',
+    }
+  };
+
+  const modifierClassNames = {
+    withNote: 'relative group'
+  };
+
   return (
     <div className="flex flex-col items-center w-full space-y-6">
       <h3 className="text-sm text-black mb-2 text-center w-full" style={{ fontFamily: 'Sometype Mono, monospace' }}>
@@ -45,9 +59,29 @@ const BlurbInput = () => {
           selected={date}
           onSelect={setDate}
           className="rounded-md border shadow bg-white"
+          modifiers={modifiers}
+          modifierStyles={modifierStyles}
+          modifierClassNames={modifierClassNames}
+          formatters={{
+            formatDay: (date) => {
+              const hasNote = savedNotes.some(note => 
+                note.date.toDateString() === date.toDateString()
+              );
+              return (
+                <div className="relative">
+                  {date.getDate()}
+                  {hasNote && (
+                    <Heart 
+                      className="absolute top-0 right-0 h-3 w-3 text-pink-500" 
+                      style={{ transform: 'translate(50%, -50%)' }} 
+                    />
+                  )}
+                </div>
+              );
+            }
+          }}
         />
 
-        {/* Display saved notes with hearts */}
         <div className="w-full max-w-md space-y-2 mt-4">
           {savedNotes.map((savedNote, index) => (
             <div key={index} className="flex items-start space-x-2 text-sm" style={{ fontFamily: 'Sometype Mono, monospace' }}>
