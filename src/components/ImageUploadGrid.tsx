@@ -1,6 +1,5 @@
-
 import React, { useState, useRef } from 'react';
-import { Plus, Edit, Trash2 } from 'lucide-react';
+import { Plus, Edit, Trash2, Upload } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
@@ -56,7 +55,6 @@ const ImageUploadGrid = () => {
       setImages([...images, ...newImages]);
     }
     
-    // Clear the input value so the same file can be selected again
     if (event.target.value) {
       event.target.value = '';
     }
@@ -101,7 +99,6 @@ const ImageUploadGrid = () => {
 
   const { cols, slots } = getGridConfig();
   
-  // Determine optimal image card size for mobile
   const getCardSize = () => {
     if (isMobile) {
       return cols === 1 ? 'w-full' : cols === 2 ? 'w-36' : 'w-24';
@@ -110,11 +107,23 @@ const ImageUploadGrid = () => {
     }
   };
 
-  // Calculate the number of slots to display based on current image count
   const slotsToShow = images.length === 0 ? 1 : Math.min(Math.max(slots, images.length + 1), 9);
 
+  const handleSubmit = () => {
+    if (images.length === 0) {
+      toast.error('Please upload at least one image', {
+        description: 'You need to add images before submitting.'
+      });
+      return;
+    }
+
+    toast.success(`Submitting ${images.length} image(s)`, {
+      description: 'Your images are being processed.'
+    });
+  };
+
   return (
-    <div className="mb-4 flex justify-center">
+    <div className="mb-4 flex justify-center flex-col items-center">
       <div className="w-full max-w-md">
         <h3 className={`font-semibold text-black mb-2 ${isMobile ? 'text-base' : 'text-lg'}`} style={{ fontFamily: 'Sometype Mono, monospace' }}>
           Upload your 1-9 pictures
@@ -131,7 +140,6 @@ const ImageUploadGrid = () => {
           {[...Array(slotsToShow)].map((_, index) => {
             const image = images[index];
             
-            // Don't show more than 9 slots total
             if (index >= 9) {
               return null;
             }
@@ -187,6 +195,16 @@ const ImageUploadGrid = () => {
           onChange={handleFileSelect}
         />
       </div>
+      
+      {images.length > 0 && (
+        <Button 
+          className="mt-4 flex items-center gap-2"
+          onClick={handleSubmit}
+        >
+          <Upload className="h-4 w-4" />
+          Submit {images.length} Image{images.length !== 1 ? 's' : ''}
+        </Button>
+      )}
     </div>
   );
 };
