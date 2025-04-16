@@ -55,6 +55,11 @@ const ImageUploadGrid = () => {
       }));
       setImages([...images, ...newImages]);
     }
+    
+    // Clear the input value so the same file can be selected again
+    if (event.target.value) {
+      event.target.value = '';
+    }
   };
 
   const handleReplaceImage = (index: number, event: React.MouseEvent) => {
@@ -105,6 +110,9 @@ const ImageUploadGrid = () => {
     }
   };
 
+  // Calculate the number of slots to display based on current image count
+  const slotsToShow = images.length === 0 ? 1 : Math.min(Math.max(slots, images.length + 1), 9);
+
   return (
     <div className="mb-4 flex justify-center">
       <div className="w-full max-w-md">
@@ -120,10 +128,11 @@ const ImageUploadGrid = () => {
               (cols === 1 ? '300px' : cols === 2 ? '400px' : '600px')
           }}
         >
-          {[...Array(slots)].map((_, index) => {
+          {[...Array(slotsToShow)].map((_, index) => {
             const image = images[index];
             
-            if (index >= images.length && images.length >= 9) {
+            // Don't show more than 9 slots total
+            if (index >= 9) {
               return null;
             }
 
@@ -162,6 +171,9 @@ const ImageUploadGrid = () => {
                 onClick={() => fileInputRef.current?.click()}
               >
                 <Plus className="w-5 h-5 text-violet-500" />
+                {images.length === 0 && index === 0 && (
+                  <span className="text-xs text-muted-foreground absolute bottom-1">Add image</span>
+                )}
               </Card>
             );
           })}
