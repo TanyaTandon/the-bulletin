@@ -60,10 +60,10 @@ const SignUp = () => {
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-violet-600 lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+        <h1 className="text-4xl font-bold text-black lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
           the bulletin.
         </h1>
-        <div className="flex items-center justify-center mt-2 text-violet-600">
+        <div className="flex items-center justify-center mt-2 text-black">
           <Mail className="h-5 w-5" />
           <Heart className="h-4 w-4 ml-1 fill-current" />
         </div>

@@ -28,7 +28,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         <div className="container mx-auto flex justify-between items-center">
           <Link 
             to="/" 
-            className="text-3xl font-bold text-violet-600 lowercase" 
+            className="text-3xl font-bold text-black lowercase" 
             style={{ fontFamily: 'Sometype Mono, monospace' }}
           >
             the bulletin.
