@@ -44,4 +44,3 @@ your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.`}
 };
 
 export default Index;
-
