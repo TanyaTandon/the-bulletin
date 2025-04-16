@@ -2,11 +2,26 @@
 import React, { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Calendar } from './ui/calendar';
+import { Button } from './ui/button';
+import { Heart } from 'lucide-react';
 import { format } from 'date-fns';
+
+interface CalendarNote {
+  date: Date;
+  note: string;
+}
 
 const BlurbInput = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [calendarNote, setCalendarNote] = useState('');
+  const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
+
+  const handleSaveNote = () => {
+    if (date && calendarNote.trim()) {
+      setSavedNotes([...savedNotes, { date, note: calendarNote.trim() }]);
+      setCalendarNote('');
+    }
+  };
 
   return (
     <div className="flex flex-col items-center w-full space-y-6">
@@ -31,18 +46,40 @@ const BlurbInput = () => {
           onSelect={setDate}
           className="rounded-md border shadow bg-white"
         />
+
+        {/* Display saved notes with hearts */}
+        <div className="w-full max-w-md space-y-2 mt-4">
+          {savedNotes.map((savedNote, index) => (
+            <div key={index} className="flex items-start space-x-2 text-sm" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+              <Heart className="h-4 w-4 text-pink-500 mt-1" />
+              <span>
+                {format(savedNote.date, 'M/d')} {savedNote.note}
+              </span>
+            </div>
+          ))}
+        </div>
+
         {date && (
           <div className="mt-4 w-full max-w-md p-4 border rounded-lg bg-white shadow-sm">
             <p className="text-sm mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
               Add a note for {format(date, 'MMMM d, yyyy')}:
             </p>
-            <Textarea
-              value={calendarNote}
-              onChange={(e) => setCalendarNote(e.target.value)}
-              placeholder="What's happening on this day?"
-              className="min-h-[80px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
-              style={{ fontFamily: 'Sometype Mono, monospace' }}
-            />
+            <div className="space-y-2">
+              <Textarea
+                value={calendarNote}
+                onChange={(e) => setCalendarNote(e.target.value)}
+                placeholder="What's happening on this day?"
+                className="min-h-[80px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
+                style={{ fontFamily: 'Sometype Mono, monospace' }}
+              />
+              <Button 
+                onClick={handleSaveNote}
+                className="w-full"
+                disabled={!calendarNote.trim()}
+              >
+                Add Note
+              </Button>
+            </div>
           </div>
         )}
       </div>
