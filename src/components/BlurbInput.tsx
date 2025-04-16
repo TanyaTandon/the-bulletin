@@ -6,6 +6,7 @@ import { format } from 'date-fns';
 
 const BlurbInput = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
+  const [calendarNote, setCalendarNote] = useState('');
 
   return (
     <div className="flex flex-col items-center w-full space-y-6">
@@ -30,6 +31,20 @@ const BlurbInput = () => {
           onSelect={setDate}
           className="rounded-md border shadow bg-white"
         />
+        {date && (
+          <div className="mt-4 w-full max-w-md p-4 border rounded-lg bg-white shadow-sm">
+            <p className="text-sm mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+              Add a note for {format(date, 'MMMM d, yyyy')}:
+            </p>
+            <Textarea
+              value={calendarNote}
+              onChange={(e) => setCalendarNote(e.target.value)}
+              placeholder="What's happening on this day?"
+              className="min-h-[80px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
+              style={{ fontFamily: 'Sometype Mono, monospace' }}
+            />
+          </div>
+        )}
       </div>
     </div>
   );
