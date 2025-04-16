@@ -1,9 +1,11 @@
+
 import React, { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Calendar } from './ui/calendar';
 import { Button } from './ui/button';
 import { Heart } from 'lucide-react';
 import { format } from 'date-fns';
+import { CSSProperties } from 'react';
 
 interface CalendarNote {
   date: Date;
@@ -26,10 +28,11 @@ const BlurbInput = () => {
     withNote: savedNotes.map(note => note.date)
   };
 
-  const modifiersStyles = {
+  // Use the Record<string, CSSProperties> type for modifiersStyles
+  const modifiersStyles: Record<string, CSSProperties> = {
     withNote: {
       backgroundColor: 'rgba(255, 192, 203, 0.2)',
-      position: 'relative',
+      position: 'relative' as const,
     }
   };
 
