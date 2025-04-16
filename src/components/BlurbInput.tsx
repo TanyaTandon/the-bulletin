@@ -1,4 +1,3 @@
-
 import React, { useState } from 'react';
 import { Textarea } from './ui/textarea';
 import { Calendar } from './ui/calendar';
@@ -27,7 +26,6 @@ const BlurbInput = () => {
     withNote: savedNotes.map(note => note.date)
   };
 
-  // Renamed from modifierStyles to modifiersStyles to match the component's expected props
   const modifiersStyles = {
     withNote: {
       backgroundColor: 'rgba(255, 192, 203, 0.2)',
@@ -35,7 +33,6 @@ const BlurbInput = () => {
     }
   };
 
-  // Plural form for consistency
   const modifiersClassNames = {
     withNote: 'relative group'
   };
@@ -52,7 +49,7 @@ const BlurbInput = () => {
       />
       <div className="flex flex-col items-center space-y-2">
         <h3 className="text-lg font-semibold text-black" style={{ fontFamily: 'Sometype Mono, monospace' }}>
-          Add your key April highlights and what you got going on in May
+          Add your key April highlights and things you're excited for in May
         </h3>
         <p className="text-xs text-gray-500 mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
           This is the date your monthly summary is associated with
