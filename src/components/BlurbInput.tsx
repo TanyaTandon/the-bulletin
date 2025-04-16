@@ -6,6 +6,7 @@ import { Button } from './ui/button';
 import { Heart } from 'lucide-react';
 import { format } from 'date-fns';
 import { CSSProperties } from 'react';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface CalendarNote {
   date: Date;
@@ -16,6 +17,7 @@ const BlurbInput = () => {
   const [date, setDate] = useState<Date | undefined>(new Date());
   const [calendarNote, setCalendarNote] = useState('');
   const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
+  const isMobile = useIsMobile();
 
   const handleSaveNote = () => {
     if (date && calendarNote.trim()) {
@@ -40,24 +42,24 @@ const BlurbInput = () => {
   };
 
   return (
-    <div className="flex flex-col items-center w-full space-y-6">
-      <h3 className="text-lg font-semibold text-black mb-2 text-center w-full" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+    <div className="flex flex-col items-center w-full space-y-4">
+      <h3 className={`font-semibold text-black mb-1 text-center w-full ${isMobile ? 'text-base' : 'text-lg'}`} style={{ fontFamily: 'Sometype Mono, monospace' }}>
         Add your monthly summary
       </h3>
       <Textarea 
         placeholder="April was so fucking LIT. I nommed nommed and crushed on my crush and biked on my bike"
-        className="min-h-[100px] resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400"
+        className="min-h-[80px] resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm"
         style={{ fontFamily: 'Sometype Mono, monospace' }}
       />
       <div className="flex flex-col items-center space-y-2">
-        <h3 className="text-lg font-semibold text-black" style={{ fontFamily: 'Sometype Mono, monospace' }}>
-          Add your key April highlights and things you're excited for in May
+        <h3 className={`font-semibold text-black ${isMobile ? 'text-base' : 'text-lg'}`} style={{ fontFamily: 'Sometype Mono, monospace' }}>
+          Add your key April highlights
         </h3>
         <Calendar
           mode="single"
           selected={date}
           onSelect={setDate}
-          className="rounded-md border shadow bg-white"
+          className="rounded-md border shadow bg-white scale-90 origin-top"
           modifiers={modifiers}
           modifiersStyles={modifiersStyles}
           modifiersClassNames={modifiersClassNames}
@@ -71,7 +73,7 @@ const BlurbInput = () => {
                   {date.getDate()}
                   {hasNote && (
                     <Heart 
-                      className="absolute top-0 right-0 h-3 w-3 text-pink-500" 
+                      className="absolute top-0 right-0 h-2 w-2 text-pink-500" 
                       style={{ transform: 'translate(50%, -50%)' }} 
                     />
                   )}
@@ -81,11 +83,11 @@ const BlurbInput = () => {
           }}
         />
 
-        <div className="w-full max-w-md space-y-2 mt-4">
+        <div className="w-full max-w-md space-y-1 mt-2">
           {savedNotes.map((savedNote, index) => (
-            <div key={index} className="flex items-start space-x-2 text-sm" style={{ fontFamily: 'Sometype Mono, monospace' }}>
-              <Heart className="h-4 w-4 text-pink-500 mt-1" />
-              <span>
+            <div key={index} className="flex items-start space-x-1 text-xs" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+              <Heart className="h-3 w-3 text-pink-500 mt-1 flex-shrink-0" />
+              <span className="break-words">
                 {format(savedNote.date, 'M/d')} {savedNote.note}
               </span>
             </div>
@@ -93,8 +95,8 @@ const BlurbInput = () => {
         </div>
 
         {date && (
-          <div className="mt-4 w-full max-w-md p-4 border rounded-lg bg-white shadow-sm">
-            <p className="text-sm mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+          <div className="mt-2 w-full max-w-md p-3 border rounded-lg bg-white shadow-sm">
+            <p className="text-xs mb-1" style={{ fontFamily: 'Sometype Mono, monospace' }}>
               Add a note for {format(date, 'MMMM d, yyyy')}:
             </p>
             <div className="space-y-2">
@@ -102,12 +104,12 @@ const BlurbInput = () => {
                 value={calendarNote}
                 onChange={(e) => setCalendarNote(e.target.value)}
                 placeholder="What's happening on this day?"
-                className="min-h-[80px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
+                className="min-h-[60px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-xs"
                 style={{ fontFamily: 'Sometype Mono, monospace' }}
               />
               <Button 
                 onClick={handleSaveNote}
-                className="w-full"
+                className="w-full text-xs py-1 h-auto"
                 disabled={!calendarNote.trim()}
               >
                 Add Note

@@ -1,8 +1,10 @@
+
 import React, { useState, useRef } from 'react';
 import { Plus, Edit, Trash2 } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
 import { toast } from 'sonner';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 interface UploadedImage {
   id: string;
@@ -14,6 +16,7 @@ const ImageUploadGrid = () => {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const fileInputRef = useRef<HTMLInputElement>(null);
   const [editingIndex, setEditingIndex] = useState<number | null>(null);
+  const isMobile = useIsMobile();
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -92,18 +95,29 @@ const ImageUploadGrid = () => {
   };
 
   const { cols, slots } = getGridConfig();
+  
+  // Determine optimal image card size for mobile
+  const getCardSize = () => {
+    if (isMobile) {
+      return cols === 1 ? 'w-full' : cols === 2 ? 'w-36' : 'w-24';
+    } else {
+      return cols === 1 ? 'w-full' : cols === 2 ? 'w-48' : 'w-48';
+    }
+  };
 
   return (
     <div className="mb-4 flex justify-center">
-      <div>
-        <h3 className="text-lg font-semibold text-black mb-2" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+      <div className="w-full max-w-md">
+        <h3 className={`font-semibold text-black mb-2 ${isMobile ? 'text-base' : 'text-lg'}`} style={{ fontFamily: 'Sometype Mono, monospace' }}>
           Upload your 1-9 pictures
         </h3>
         <div 
-          className={`grid gap-1 w-fit`}
+          className="grid gap-1 mx-auto"
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
-            width: cols === 1 ? '300px' : cols === 2 ? '400px' : '600px'
+            width: isMobile ? 
+              (cols === 1 ? '100%' : cols === 2 ? '90%' : '100%') : 
+              (cols === 1 ? '300px' : cols === 2 ? '400px' : '600px')
           }}
         >
           {[...Array(slots)].map((_, index) => {
@@ -121,22 +135,22 @@ const ImageUploadGrid = () => {
                     alt={`Upload ${index + 1}`}
                     className="w-full h-full object-cover"
                   />
-                  <div className="absolute top-2 right-2 flex gap-2">
+                  <div className="absolute top-1 right-1 flex gap-1">
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="bg-white/20 hover:bg-white/30 rounded-full"
+                      className="bg-white/20 hover:bg-white/30 rounded-full h-6 w-6"
                       onClick={(e) => handleReplaceImage(index, e)}
                     >
-                      <Edit className="h-5 w-5 text-[#8B5CF6]" />
+                      <Edit className="h-3 w-3 text-[#8B5CF6]" />
                     </Button>
                     <Button 
                       variant="ghost" 
                       size="icon" 
-                      className="bg-white/20 hover:bg-white/30 rounded-full"
+                      className="bg-white/20 hover:bg-white/30 rounded-full h-6 w-6"
                       onClick={(e) => handleDeleteImage(index, e)}
                     >
-                      <Trash2 className="h-5 w-5 text-[#8B5CF6]" />
+                      <Trash2 className="h-3 w-3 text-[#8B5CF6]" />
                     </Button>
                   </div>
                 </div>
@@ -144,12 +158,10 @@ const ImageUploadGrid = () => {
             ) : (
               <Card 
                 key={index}
-                className={`aspect-square relative flex items-center justify-center cursor-pointer hover:bg-accent/10 transition-colors ${
-                  cols === 1 ? 'w-full' : cols === 2 ? 'w-48' : 'w-48'
-                } bg-white/5`}
+                className={`aspect-square relative flex items-center justify-center cursor-pointer hover:bg-accent/10 transition-colors ${getCardSize()} bg-white/5`}
                 onClick={() => fileInputRef.current?.click()}
               >
-                <Plus className="w-6 h-6 text-violet-500" />
+                <Plus className="w-5 h-5 text-violet-500" />
               </Card>
             );
           })}
