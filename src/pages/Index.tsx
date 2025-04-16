@@ -23,7 +23,7 @@ const Index = () => {
 
 we're happy you're here. ❤️
 
-upload pictures & text for your friends below. your updates for ${currentMonth} will print on ${nextMonth} 1st at 12:01, and your submissions are auto-saved. 
+upload pictures & text for your friends below. your updates for ${currentMonth} will print on ${nextMonth} 1st at 12:01 am, and your submissions are auto-saved. 
 
 your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.`} />
         </div>
