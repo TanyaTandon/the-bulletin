@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useUser, ContentType } from "@/contexts/UserContext";
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
@@ -28,7 +27,6 @@ const CreateContentForm: React.FC = () => {
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [showFriendsList, setShowFriendsList] = useState(false);
   
-  // Get existing calendar dates from contents
   const calendarDates = contents
     .filter(item => item.type === "calendar")
     .map(item => {
@@ -39,8 +37,6 @@ const CreateContentForm: React.FC = () => {
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     
-    // Title is now optional for all content types
-    // Only content is required (except for picture and calendar types)
     if (!content.trim() && contentType !== "picture" && contentType !== "calendar") {
       toast({
         title: "Content Required",
@@ -52,13 +48,11 @@ const CreateContentForm: React.FC = () => {
 
     let finalContent = "";
     if (contentType === "picture") {
-      // Show warning if more than 4 images
       if (imagePreview.length > 4) {
         toast({
           title: "Too many images",
           description: "Please select a maximum of 4 images. Only the first 4 will be used.",
         });
-        // Use only the first 4 images
         finalContent = imagePreview.slice(0, 4).join('|');
       } else if (imagePreview.length === 0) {
         toast({
@@ -81,7 +75,7 @@ const CreateContentForm: React.FC = () => {
       title: title.trim() || (contentType === "calendar" ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}` : "Untitled"),
       content: finalContent,
       createdBy: {
-        personaId: "p1", // Default persona
+        personaId: "p1",
         personaName: "Default Persona",
       },
       groupId: activeGroup?.id,
@@ -92,7 +86,6 @@ const CreateContentForm: React.FC = () => {
       description: "Your content has been created successfully.",
     });
 
-    // Reset form
     setTitle("");
     setContent("");
     setImagePreview([]);
@@ -102,10 +95,8 @@ const CreateContentForm: React.FC = () => {
   const handleImageUpload = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = e.target.files;
     if (files && files.length > 0) {
-      // Convert FileList to array
       const fileArray = Array.from(files);
       
-      // Show warning for more than 4 images
       if (fileArray.length > 4) {
         toast({
           title: "Too many images",
@@ -113,10 +104,8 @@ const CreateContentForm: React.FC = () => {
         });
       }
       
-      // Process up to 4 images
       const imagesToProcess = fileArray.slice(0, 4);
       
-      // Clear existing previews
       setImagePreview([]);
       
       imagesToProcess.forEach(file => {
@@ -137,7 +126,6 @@ const CreateContentForm: React.FC = () => {
     );
   };
 
-  // Function to check if a date has a heart
   const isDateWithHeart = (date: Date) => {
     return calendarDates.some(calDate => 
       calDate.getDate() === date.getDate() && 
@@ -156,7 +144,6 @@ const CreateContentForm: React.FC = () => {
       </CardHeader>
       <CardContent>
         <form onSubmit={handleSubmit} className="space-y-4">
-          {/* Share options */}
           <div className="space-y-2">
             <Label className="flex items-center gap-2">
               <Users className="h-4 w-4" />
@@ -178,7 +165,6 @@ const CreateContentForm: React.FC = () => {
               </div>
             </RadioGroup>
             
-            {/* Improved Friend selection dropdown with filter icon */}
             {shareOption === "selected" && (
               <div className="mt-2">
                 <Popover open={showFriendsList} onOpenChange={setShowFriendsList}>
@@ -345,7 +331,6 @@ const CreateContentForm: React.FC = () => {
                     <p className="font-medium">Selected Date:</p>
                     <p>{format(date, "MMMM d, yyyy")}</p>
                     
-                    {/* Calendar note entry */}
                     <div className="mt-3">
                       <Label htmlFor="calendar-note" className="block mb-2">Add a note for this date:</Label>
                       <Textarea

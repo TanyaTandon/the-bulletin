@@ -29,4 +29,3 @@ const MonthlyTimer = () => {
 };
 
 export default MonthlyTimer;
-
