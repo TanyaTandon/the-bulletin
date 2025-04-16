@@ -20,11 +20,11 @@ const Index = () => {
       <div className={`mx-auto space-y-3 ${isMobile ? 'max-w-[95%] px-1' : 'max-w-3xl'}`}>
         <div className="space-y-1">
           <TypewriterText 
-            text={`<p>hello, jackson. welcome to the bulletin!
-<p>we're happy you're here. ❤️
-<p>upload pictures & text for your friends below.<br>
+            text={`hello, jackson. welcome to the bulletin!
+we're happy you're here. ❤️
+upload pictures & text for your friends below.
 your updates for ${currentMonth} will print on ${nextMonth} 1st at 12:01 am, and your submissions are auto-saved.
-<p>your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.`} 
+your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.`} 
             speed={isMobile ? 20 : 25}
           />
         </div>
