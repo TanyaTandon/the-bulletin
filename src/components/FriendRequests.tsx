@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useUser, FriendRequest } from "@/contexts/UserContext";
 import { 
@@ -7,7 +6,7 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Check, X, UserPlus2 } from "lucide-react";
+import { UserPlus, Check, X } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
@@ -41,7 +40,7 @@ const FriendRequests = () => {
         <Button 
           variant="ghost" 
           size="icon" 
-          className="relative text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+          className="relative text-black hover:text-black/70 hover:bg-gray-50"
         >
           <UserPlus className="h-5 w-5" />
           {pendingRequests.length > 0 && (
@@ -123,4 +122,3 @@ const FriendRequests = () => {
 };
 
 export default FriendRequests;
-
