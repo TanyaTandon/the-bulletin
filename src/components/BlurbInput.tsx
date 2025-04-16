@@ -5,7 +5,7 @@ import { Textarea } from './ui/textarea';
 const BlurbInput = () => {
   return (
     <div className="flex flex-col items-center w-full">
-      <h3 className="text-sm text-violet-600 mb-2 text-center w-full" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+      <h3 className="text-sm text-black mb-2 text-center w-full" style={{ fontFamily: 'Sometype Mono, monospace' }}>
         Add your monthly summary
       </h3>
       <Textarea 

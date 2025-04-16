@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Plus, Edit } from 'lucide-react';
 import { Card } from './ui/card';
@@ -94,7 +93,7 @@ const ImageUploadGrid = () => {
   return (
     <div className="mb-4 flex justify-center">
       <div>
-        <h3 className="text-sm text-white/70 mb-2">Upload your 1-9 pictures</h3>
+        <h3 className="text-sm text-black mb-2">Upload your 1-9 pictures</h3>
         <div 
           className={`grid gap-1 w-fit`}
           style={{
