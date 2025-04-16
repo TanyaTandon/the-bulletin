@@ -2,6 +2,7 @@ import React, { useState, useRef } from 'react';
 import { Plus, Edit } from 'lucide-react';
 import { Card } from './ui/card';
 import { Button } from './ui/button';
+import { toast } from 'sonner';
 
 interface UploadedImage {
   url: string;
@@ -16,6 +17,13 @@ const ImageUploadGrid = () => {
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
     
+    if (files.length + images.length > 4) {
+      toast.error('You can only upload up to 4 images', {
+        description: 'Please select fewer images.'
+      });
+      return;
+    }
+    
     if (editingIndex !== null) {
       // Single image edit mode
       if (files.length === 1) {
@@ -29,27 +37,16 @@ const ImageUploadGrid = () => {
         setEditingIndex(null);
       } else {
         // Multiple images selected while editing - add all to appropriate grid
-        const totalNewImages = files.length;
         const newImages = files.map(file => ({
           url: URL.createObjectURL(file),
           file
         }));
-        
-        if (totalNewImages > 9) {
-          alert('You can only upload up to 9 images');
-          return;
-        }
         
         setImages(newImages);
         setEditingIndex(null);
       }
     } else {
       // Adding new images
-      if (files.length + images.length > 9) {
-        alert('You can only upload up to 9 images');
-        return;
-      }
-      
       const newImages = files.map(file => ({
         url: URL.createObjectURL(file),
         file
