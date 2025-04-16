@@ -42,7 +42,6 @@ your updates for april will print on May 1st at 12:01 am, and your submissions a
 
         <ImageUploadGrid />
         <BlurbInput />
-        <MonthlyTimer />
         
         {/* Unified submit button */}
         <div className="flex justify-center pt-4 pb-8">
@@ -64,9 +63,12 @@ your updates for april will print on May 1st at 12:01 am, and your submissions a
             </div>
           </Button>
         </div>
+
+        <MonthlyTimer />
       </div>
     </Layout>
   );
 };
 
 export default Index;
+
