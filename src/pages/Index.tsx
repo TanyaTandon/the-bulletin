@@ -33,8 +33,8 @@ const Index = () => {
           <TypewriterText 
             text={`<p>hello, jackson. welcome to the bulletin!</p>
 <p>we're happy you're here. ❤️</p>
-<p>upload pictures & text for your friends below.<br>
-your updates for april will print on May 1st at 12:01 am, and your submissions are auto-saved.</p>
+<p>upload pictures, text, highlights for april & may with your friends below.<br>
+your submissions are auto-saved.</p>
 <p>your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.</p>`} 
             speed={isMobile ? 20 : 25}
           />
