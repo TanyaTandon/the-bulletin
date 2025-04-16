@@ -30,7 +30,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => 
 
   return (
     <div 
-      className={`text-black mb-2 ${isMobile ? 'text-sm' : 'text-lg'} whitespace-pre-line`}
+      className={`text-black mb-2 ${isMobile ? 'text-sm' : 'text-lg'}`}
       style={{ fontFamily: 'Sometype Mono, monospace' }}
       dangerouslySetInnerHTML={{ __html: displayedText }}
     />
