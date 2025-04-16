@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from 'react';
 import { Plus, Edit, Trash2, Move } from 'lucide-react';
 import { Card } from './ui/card';
@@ -6,7 +5,7 @@ import { Button } from './ui/button';
 import { toast } from 'sonner';
 import { useIsMobile } from '@/hooks/use-mobile';
 import { DndContext, DragEndEvent, PointerSensor, useSensor, useSensors } from '@dnd-kit/core';
-import { arrayMove } from '@dnd-kit/utilities';
+import { arrayMove } from '@dnd-kit/sortable';
 
 interface UploadedImage {
   id: string;
@@ -125,7 +124,6 @@ const ImageUploadGrid = () => {
       }
     }
     
-    // Clear the input value to allow selecting the same file again
     if (event.target) {
       event.target.value = '';
     }
@@ -191,7 +189,6 @@ const ImageUploadGrid = () => {
 
   const { cols, slots } = getGridConfig();
   
-  // Determine optimal image card size for mobile
   const getCardSize = () => {
     if (isMobile) {
       return cols === 1 ? 'w-full' : cols === 2 ? 'w-36' : 'w-24';
@@ -240,7 +237,6 @@ const ImageUploadGrid = () => {
               </Card>
             )}
             
-            {/* Add empty slots to maintain grid */}
             {[...Array(Math.max(0, slots - images.length - (images.length < 9 ? 1 : 0)))].map((_, index) => (
               <Card 
                 key={`empty-${index}`}
