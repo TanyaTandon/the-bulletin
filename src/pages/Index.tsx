@@ -21,7 +21,7 @@ const Index = () => {
         <div className="space-y-1">
           <TypewriterText text={`hello, jackson. welcome to the bulletin! 
 
-we're happy you're here.  ❤️
+we're happy you're here. ❤️
 
 upload pictures & text for your friends below. The ${nextMonth} deadline is ${currentMonth} ${deadlineDay}, so get them in soon!
 
