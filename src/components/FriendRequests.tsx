@@ -1,4 +1,5 @@
-import React, { useState } from "react";
+
+import React, { useState, useCallback } from "react";
 import { useUser, FriendRequest } from "@/contexts/UserContext";
 import { 
   Popover, 
@@ -6,17 +7,22 @@ import {
   PopoverTrigger 
 } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
-import { UserPlus, Check, X } from "lucide-react";
+import { UserPlus, Check, X, Share2 } from "lucide-react";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { useToast } from "@/hooks/use-toast";
 import { Badge } from "@/components/ui/badge";
 import ContactSync from "./ContactSync";
+import { Input } from "@/components/ui/input";
 
 const FriendRequests = () => {
   const { friendRequests, updateFriendRequestStatus, friends } = useUser();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
+  const [showShareLink, setShowShareLink] = useState(false);
   
+  // Generate a unique link - in a real app, this would be more sophisticated
+  const uniqueLink = `${window.location.origin}?ref=${Math.random().toString(36).substring(2, 10)}`;
+
   const pendingRequests = friendRequests.filter(request => request.status === "pending");
 
   const handleAccept = (request: FriendRequest) => {
@@ -33,6 +39,14 @@ const FriendRequests = () => {
       description: `Friend request from ${request.name} rejected`,
     });
   };
+
+  const handleCopyLink = useCallback(() => {
+    navigator.clipboard.writeText(uniqueLink);
+    toast({
+      title: "Link copied!",
+      description: "Share this with your friends to invite them to the bulletin",
+    });
+  }, [uniqueLink, toast]);
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -52,20 +66,49 @@ const FriendRequests = () => {
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
         <div className="flex flex-col space-y-4">
-          <div>
-            <h3 className="font-medium text-sm mb-2">Your Friends</h3>
-            <div className="flex flex-col space-y-2 mb-4">
-              {friends.slice(0, 3).map((friend) => (
-                <div key={friend.id} className="flex items-center space-x-2 p-2 bg-violet-50 rounded-md">
-                  <Avatar className="h-8 w-8">
-                    <AvatarFallback>{friend.name.substring(0, 2)}</AvatarFallback>
-                  </Avatar>
-                  <span className="text-sm">{friend.name}</span>
-                </div>
-              ))}
-            </div>
+          <div className="text-center mb-2">
+            <h3 className="font-medium text-base">Your friends joining the bulletin shortly</h3>
           </div>
           
+          <div className={`${showShareLink ? 'block' : 'hidden'}`}>
+            <div className="flex flex-col space-y-2">
+              <p className="text-sm text-muted-foreground">Share this link with your friends to invite them to the bulletin:</p>
+              <div className="flex space-x-2">
+                <Input 
+                  value={uniqueLink} 
+                  readOnly 
+                  className="text-xs"
+                />
+                <Button size="sm" onClick={handleCopyLink}>
+                  <Share2 className="h-4 w-4 mr-1" />
+                  Copy
+                </Button>
+              </div>
+            </div>
+          </div>
+
+          <div>
+            <Button 
+              className="w-full bg-violet-500 hover:bg-violet-600"
+              onClick={() => setShowShareLink(!showShareLink)}
+            >
+              <Share2 className="h-4 w-4 mr-2" />
+              {showShareLink ? "Hide" : "Generate"} Invite Link
+            </Button>
+          </div>
+          
+          <div className="flex flex-col space-y-2 mb-4">
+            <h3 className="font-medium text-sm mb-2">Your Friends</h3>
+            {friends.slice(0, 3).map((friend) => (
+              <div key={friend.id} className="flex items-center space-x-2 p-2 bg-violet-50 rounded-md">
+                <Avatar className="h-8 w-8">
+                  <AvatarFallback>{friend.name.substring(0, 2)}</AvatarFallback>
+                </Avatar>
+                <span className="text-sm">{friend.name}</span>
+              </div>
+            ))}
+          </div>
+
           <div>
             <h3 className="font-medium text-sm mb-2">Friend Requests</h3>
             {pendingRequests.length === 0 ? (
