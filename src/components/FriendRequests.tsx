@@ -9,12 +9,10 @@ import {
 import { Button } from "@/components/ui/button";
 import { UserPlus, Share2 } from "lucide-react";
 import { useToast } from "@/hooks/use-toast";
-import { Badge } from "@/components/ui/badge";
-import ContactSync from "./ContactSync";
 import { Input } from "@/components/ui/input";
+import ContactSync from "./ContactSync";
 
 const FriendRequests = () => {
-  const { friendRequests } = useUser();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
   
@@ -38,11 +36,6 @@ const FriendRequests = () => {
           className="relative text-black hover:text-black/70 hover:bg-gray-50"
         >
           <UserPlus className="h-5 w-5" />
-          {friendRequests.length > 0 && (
-            <Badge className="absolute -top-1 -right-1 h-5 w-5 p-0 flex items-center justify-center" variant="destructive">
-              {friendRequests.length}
-            </Badge>
-          )}
         </Button>
       </PopoverTrigger>
       <PopoverContent className="w-80" align="end">
