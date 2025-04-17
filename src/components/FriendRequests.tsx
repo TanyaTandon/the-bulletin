@@ -17,7 +17,6 @@ const FriendRequests = () => {
   const { friendRequests } = useUser();
   const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const [showShareLink, setShowShareLink] = useState(false);
   
   // Generate a unique link - in a real app, this would be more sophisticated
   const uniqueLink = `${window.location.origin}?ref=${Math.random().toString(36).substring(2, 10)}`;
@@ -52,31 +51,19 @@ const FriendRequests = () => {
             <h3 className="font-medium text-base">Invite your friends to join</h3>
           </div>
           
-          <div className={`${showShareLink ? 'block' : 'hidden'}`}>
-            <div className="flex flex-col space-y-2">
-              <p className="text-sm text-muted-foreground">Share this link with your friends to invite them to the bulletin:</p>
-              <div className="flex space-x-2">
-                <Input 
-                  value={uniqueLink} 
-                  readOnly 
-                  className="text-xs"
-                />
-                <Button size="sm" onClick={handleCopyLink}>
-                  <Share2 className="h-4 w-4 mr-1" />
-                  Copy
-                </Button>
-              </div>
+          <div className="flex flex-col space-y-2">
+            <p className="text-sm text-muted-foreground">Share this link with your friends to invite them to the bulletin:</p>
+            <div className="flex space-x-2">
+              <Input 
+                value={uniqueLink} 
+                readOnly 
+                className="text-xs"
+              />
+              <Button size="sm" onClick={handleCopyLink}>
+                <Share2 className="h-4 w-4 mr-1" />
+                Copy
+              </Button>
             </div>
-          </div>
-
-          <div>
-            <Button 
-              className="w-full bg-violet-500 hover:bg-violet-600"
-              onClick={() => setShowShareLink(!showShareLink)}
-            >
-              <Share2 className="h-4 w-4 mr-2" />
-              {showShareLink ? "Hide" : "Generate"} Invite Link
-            </Button>
           </div>
 
           <div className="border-t pt-4">
