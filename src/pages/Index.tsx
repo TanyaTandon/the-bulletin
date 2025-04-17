@@ -1,4 +1,3 @@
-
 import React from "react";
 import Layout from "@/components/Layout";
 import ImageUploadGrid from "@/components/ImageUploadGrid";
@@ -34,8 +33,7 @@ const Index = () => {
             text={`<p>welcome to the bulletin!</p>
 <p>we're happy you're here. ❤️</p>
 <p>upload pictures, text, highlights for april & may with your friends below.</p>
-<p>submit your submission soon, we will ship your bulletin on may 1st.</p>
-<p>your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.</p>`} 
+<p>submit your submission soon, we will ship your bulletin on may 1st.</p>`} 
             speed={isMobile ? 20 : 25}
           />
         </div>
