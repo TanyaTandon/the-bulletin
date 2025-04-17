@@ -1,4 +1,3 @@
-
 import React from "react";
 import Layout from "@/components/Layout";
 import ImageUploadGrid from "@/components/ImageUploadGrid";
@@ -31,11 +30,10 @@ const Index = () => {
       <div className={`mx-auto space-y-3 ${isMobile ? 'max-w-[95%] px-1' : 'max-w-3xl'}`}>
         <div className="space-y-1">
           <TypewriterText 
-            text={`<p>welcome to the bulletin!</p>
-<p>we're happy you're here. ❤️</p>
-<p>upload pictures, text, highlights for april & may with your friends below.</p>
-<p>submit your submission soon, we will ship your bulletin on may 1st.</p>
-<p>your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.</p>`} 
+            text={`<p>welcome to the bulletin!  </p>
+<p>we're happy you're here. ❤️ </p>
+<p>upload pictures, text, highlights for april & may with your friends below. </p>
+<p>submit your submission soon, we will ship your bulletin on may 1st. </p>`} 
             speed={isMobile ? 20 : 25}
           />
         </div>
