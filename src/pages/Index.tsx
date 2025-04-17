@@ -12,6 +12,7 @@ import { Send, Calendar, Image, FileText } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth, useSignUp } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
+// import { Dialog } from "@radix-ui/react-dialog";
 import { Dialog } from "@mui/material";
 import createNewUser from "@/lib/api";
 
@@ -22,6 +23,8 @@ const Index = () => {
   const isMobile = useIsMobile();
 
   const handleSubmitAll = () => {
+    // This is a placeholder for the actual submission logic
+    // You would typically gather data from all three components here
     toast.success("Submitting your bulletin content", {
       description:
         "Your images, text, and calendar updates will be included in the next bulletin.",
@@ -57,7 +60,8 @@ const Index = () => {
             text={`<p>hello, jackson. welcome to the bulletin!</p>
 <p>we're happy you're here. ❤️</p>
 <p>upload pictures, text, highlights for april & may with your friends below.<br>
-your updates for april will print on May 1st at 12:01 am. submit your submission soon.</p>`}
+your updates for april will print on May 1st at 12:01 am. submit your submission soon.</p>
+<p>your friends mahika, tanya, lila, adi, and nigel are excited to hear from you.</p>`}
             speed={isMobile ? 20 : 25}
           />
         </div>
