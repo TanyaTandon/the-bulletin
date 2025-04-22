@@ -124,6 +124,7 @@ const Index = () => {
               }}
               open
             >
+              
               <p
                 onClick={() => setReceviedCode(false)}
                 style={{
