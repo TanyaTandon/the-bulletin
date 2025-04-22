@@ -91,7 +91,6 @@ const Index = () => {
             />
           </>
         )}
-
         <div className="flex justify-center">
           <Button
             onClick={async () => {
@@ -124,7 +123,7 @@ const Index = () => {
               }}
               open
             >
-              
+
               <p
                 onClick={() => setReceviedCode(false)}
                 style={{
