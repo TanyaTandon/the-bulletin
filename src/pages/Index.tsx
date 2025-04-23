@@ -168,7 +168,7 @@ const Index = () => {
                           phoneNumber: phoneNumber,
                           savedNotes: savedNotes,
                         };
-                        createNewUser(userData).then(() => {
+                        createNewUser(userData as any).then(() => {
                           toast.success("User created successfully");
                           setReceviedCode(false);
                         });
