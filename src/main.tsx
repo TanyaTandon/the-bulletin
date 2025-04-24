@@ -5,6 +5,8 @@ import "./index.css";
 import { toast } from "react-toastify";
 import { ToastContext } from "./contexts/toastcontextTP.ts";
 import { ClerkProvider } from "@clerk/clerk-react";
+import { Provider } from "react-redux";
+import { store } from "./redux/index.ts";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY =
@@ -23,8 +25,10 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
     <ClerkProvider publishableKey={key} afterSignOutUrl="/">
       <ToastContext.Provider value={{ showToast }}>
-        <App />
-        <div id="clerk-captcha" />
+        <Provider store={store}>
+          <App />
+          <div id="clerk-captcha" />
+        </Provider>
       </ToastContext.Provider>
     </ClerkProvider>
   </React.StrictMode>

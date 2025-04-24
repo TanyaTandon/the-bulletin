@@ -1,117 +1,64 @@
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
-import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
-import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
-import MonthlyTimer from "@/components/MonthlyTimer";
-import { useUser } from "@/contexts/UserContext";
-import TypewriterText from "@/components/TypewriterText";
-import { format, addMonths } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Send, Calendar, Image, FileText } from "lucide-react";
-import { toast } from "sonner";
-import { useAuth, useSignUp } from "@clerk/clerk-react";
-import { Input } from "@/components/ui/input";
-// import { Dialog } from "@radix-ui/react-dialog";
+import { useAuth, useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
-import createNewUser from "@/lib/api";
+import { Input } from "@/components/ui/input";
+import { useAppDispatch } from "@/redux";
+import { fetchUser } from "@/redux/user";
+import { createNewUser } from "@/lib/api";
 
 const Index = () => {
-  const { friends } = useUser();
-  const nextMonth = format(addMonths(new Date(), 1), "MMMM");
-  const currentMonth = format(new Date(), "MMMM");
-  const isMobile = useIsMobile();
-
-  const handleSubmitAll = () => {
-    // This is a placeholder for the actual submission logic
-    // You would typically gather data from all three components here
-    toast.success("Submitting your bulletin content", {
-      description:
-        "Your images, text, and calendar updates will be included in the next bulletin.",
-    });
-  };
-
-  const [images, setImages] = useState<UploadedImage[]>([]);
-
-  const friendsList = friends.map((friend) => friend.name).join(", ");
-
+  const dispatch = useAppDispatch();
   const { isSignedIn } = useAuth();
-
+  const navigate = useNavigate();
   const { isLoaded, signUp } = useSignUp();
+  const { signIn } = useSignIn();
 
-  const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
-  const [vCode, setVCode] = useState<string | null>(null);
-  const [receviedCode, setReceviedCode] = useState<boolean>(false);
-  const [blurb, setBlurb] = useState<string>("");
+  const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
+
+  const [signInState, setSignInState] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
+  const [phoneNumber, setPhoneNumber] = useState<string>("");
+  const [code, setCode] = useState<string>("");
+  const [receviedCode, setReceviedCode] = useState<boolean>(false);
+  const [address, setAddress] = useState<string | null>(null);
 
-  const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
+  const [signInStep, setSignInStep] = useState<number>(0);
 
-  console.log(savedNotes);
   return (
     <Layout>
-      <div
-        className={`mx-auto space-y-3 ${
-          isMobile ? "max-w-[95%] px-1" : "max-w-3xl"
-        }`}
-      >
-        <div className="space-y-1">
-          <TypewriterText 
-            text={`<p>welcome to the bulletin!  </p>
-<p>we're happy you're here. ❤️ </p>
-<p>upload pictures, text, highlights for april & may with your friends below. </p>
-<p>submit your submission soon, we will ship your bulletin on may 1st. </p>`} 
-            speed={isMobile ? 20 : 25}
-          />
+      <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
+        <div className="text-center space-y-4">
+          <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
+          <h1 className="text-4xl font-bold">Welcome to Bulletin</h1>
+          <p className="text-md text-muted-foreground">
+            hi,
+            <br />
+            <br />
+            we love our friends, we want to keep up with them, and have
+            something to show for it! but — we’re tired of our phones, ads, &
+            scrolling.
+            <br />
+            <br />
+            so we’d love to present to you — the bulletin! you and your friends
+            upload pictures and text to our webapp. we make a monthly magazine,
+            personalized for you, with all your friends’ content. you’re limited
+            to 6 close friends - quality over quantity! you get this magazine on
+            high quality paper in a beautiful layout to keep and cherish! Expect
+            your first bulletin by May 1st!
+            <br />
+            <br />
+            love, tanya, adi, jackson the
+            <br />
+            <br />
+            bulletin team
+          </p>
         </div>
 
-        <ImageUploadGrid images={images} setImages={setImages} />
-        <BlurbInput
-          savedNotes={savedNotes}
-          setSavedNotes={setSavedNotes}
-          blurb={blurb}
-          setBlurb={setBlurb}
-        />
-
-        {!isSignedIn && (
-          <>
-            <Input
-              placeholder="Enter your Name"
-              onChange={(e) => {
-                setName(e.target.value);
-              }}
-            />
-            <Input
-              placeholder="Enter your Phone Number"
-              type="tel"
-              onChange={(e) => {
-                setPhoneNumber(e.target.value);
-              }}
-              pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
-            />
-          </>
-        )}
-        <div className="flex justify-center">
-          <Button
-            onClick={async () => {
-              await signUp.create({
-                phoneNumber: "2535149837",
-              });
-              await signUp
-                .preparePhoneNumberVerification({
-                  strategy: "phone_code",
-                })
-                .then((res) => {
-                  setReceviedCode(true);
-                });
-            }}
-            size="lg"
-            className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
-          >
-            Submit Bulletin
-          </Button>
-
-          {receviedCode && (
+        <div className="flex gap-4 ">
+          {openAuthModal && (
             <Dialog
               PaperProps={{
                 style: {
@@ -119,13 +66,14 @@ const Index = () => {
                   display: "flex",
                   alignItems: "center",
                   width: "52vw",
+                  flexDirection: "column",
+                  gap: "1em",
                 },
               }}
               open
             >
-
               <p
-                onClick={() => setReceviedCode(false)}
+                onClick={() => setOpenAuthModal(false)}
                 style={{
                   position: "absolute",
                   right: "1em",
@@ -135,55 +83,181 @@ const Index = () => {
               >
                 x
               </p>
-              <section
-                style={{
-                  display: "flex",
-                  flexDirection: "column",
-                  alignItems: "center",
-                  justifyContent: "center",
-                  gap: "1em",
-                }}
-              >
-                <p>Enter your Verification Code</p>
-                <Input
-                  onChange={(e) => {
-                    setVCode(e.target.value);
-                  }}
-                />
-                <Button
-                  onClick={async () => {
-                    console.log(vCode);
-                    setReceviedCode(true);
-                    await signUp
-                      .attemptPhoneNumberVerification({
-                        code: vCode,
-                      })
-                      .then((res) => {
-                        const userData = {
-                          name: name,
-                          id: phoneNumber,
-                          // created_user_id: res.createdUserId,
-                          blurb: blurb,
-                          images: images,
-                          phoneNumber: phoneNumber,
-                          savedNotes: savedNotes,
-                        };
-                        createNewUser(userData as any).then(() => {
-                          toast.success("User created successfully");
-                          setReceviedCode(false);
-                        });
-                      });
-                  }}
-                >
-                  submit
-                </Button>
-                <button onClick={() => toast.success("test")}>test</button>
-              </section>
+              {signInState ? (
+                <>
+                  {signInStep === 0 ? (
+                    <>
+                      <h1>Enter your phone number</h1>
+                      <Input
+                        value={phoneNumber}
+                        placeholder="Enter your Phone Number"
+                        type="tel"
+                        onChange={(e) => {
+                          setPhoneNumber(e.target.value);
+                        }}
+                        pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h1>Enter your code</h1>
+                      <Input
+                        value={code}
+                        placeholder="Enter your Code"
+                        onChange={(e) => {
+                          setCode(e.target.value);
+                        }}
+                      />
+                    </>
+                  )}
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={async () => {
+                        if (signInStep === 0) {
+                          await signIn.create({
+                            strategy: "phone_code",
+                            identifier: phoneNumber,
+                          });
+                          setSignInStep(1);
+                        } else {
+                          await signIn
+                            .attemptFirstFactor({
+                              strategy: "phone_code",
+                              code: code,
+                            })
+                            .then(async (res) => {
+                              console.log("res", res.identifier.split("+1")[1]);
+                              dispatch(
+                                fetchUser(res.identifier.split("+1")[1])
+                              ).then(() => {
+                                navigate("/bulletin");
+                              });
+                            });
+                        }
+                      }}
+                      size="lg"
+                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                    >
+                      Submit Bulletin
+                    </Button>
+                  </div>
+                </>
+              ) : (
+                <>
+                  {signInStep === 0 ? (
+                    <>
+                      <h1>Enter your Name and Phone Number</h1>
+                      <Input
+                        placeholder="Enter your Name"
+                        onChange={(e) => {
+                          setName(e.target.value);
+                        }}
+                      />
+                      <Input
+                        placeholder="Enter your Phone Number"
+                        type="tel"
+                        onChange={(e) => {
+                          setPhoneNumber(e.target.value);
+                        }}
+                        pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
+                      />
+                      <Input
+                        placeholder="Enter your Address"
+                        onChange={(e) => {
+                          setAddress(e.target.value);
+                        }}
+                      />
+                    </>
+                  ) : (
+                    <>
+                      <h1>Enter your code</h1>
+                      <Input
+                        value={code}
+                        placeholder="Enter your Code"
+                        onChange={(e) => {
+                          setCode(e.target.value);
+                        }}
+                      />
+                    </>
+                  )}
+
+                  <div className="flex justify-center">
+                    <Button
+                      onClick={async () => {
+                        if (signInStep === 0) {
+                          await signUp.create({
+                            phoneNumber: phoneNumber,
+                          });
+                          await signUp
+                            .preparePhoneNumberVerification({
+                              strategy: "phone_code",
+                            })
+                            .then((res) => {
+                              setReceviedCode(true);
+                              setSignInStep(1);
+                            });
+                        } else {
+                          await signUp
+                            .attemptPhoneNumberVerification({
+                              code: code,
+                            })
+                            .then((res) => {
+                              console.log(res);
+                              createNewUser({
+                                name: name,
+                                created_user_id: res.createdUserId,
+                                id: phoneNumber,
+                                phoneNumber: phoneNumber,
+                                address: address,
+                              }).then(() => {
+                                navigate("/bulletin");
+                              });
+                            });
+                        }
+                      }}
+                      size="lg"
+                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                    >
+                      {signInStep === 0 ? "Submit" : "Verify Phone Number"}
+                    </Button>
+                  </div>
+                </>
+              )}
             </Dialog>
           )}
+          {!isSignedIn ? (
+            <>
+              <Button
+                size="lg"
+                onClick={() => {
+                  setOpenAuthModal(true);
+                  setSignInState(true);
+                }}
+                className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+              >
+                Sign In
+              </Button>
+              <Button
+                size="lg"
+                onClick={() => {
+                  setOpenAuthModal(true);
+                  setSignInState(false);
+                }}
+                variant="outline"
+              >
+                Sign Up
+              </Button>
+            </>
+          ) : (
+            <Button
+              size="lg"
+              onClick={() => navigate("/bulletin")}
+              className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+            >
+              Go to Bulletin
+            </Button>
+          )}
         </div>
-
-        <MonthlyTimer />
       </div>
     </Layout>
   );
