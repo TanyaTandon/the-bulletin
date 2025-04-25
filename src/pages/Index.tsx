@@ -142,7 +142,7 @@ const Index = () => {
                       size="lg"
                       className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      {signInStep === 0 ? "Send me a 1 time code" : "Verify Code"}
+                      {signInStep === 0 ? "Send me a one time verification code" : "Verify Code"}
                     </Button>
                   </div>
                 </>
@@ -222,7 +222,7 @@ const Index = () => {
                       size="lg"
                       className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      {signInStep === 0 ? "Send me a 1 time code" : "Verify Code"}
+                      {signInStep === 0 ? "Send me a one time verification code" : "Verify Code"}
                     </Button>
                   </div>
                 </>
