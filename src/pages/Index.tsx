@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -30,24 +31,33 @@ const Index = () => {
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
-        <div className="text-left space-y-4 max-w-2xl w-full">
-          <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-0 mr-auto" />
+        <div className="text-left space-y-4">
+          <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
           <h1 className="text-4xl font-bold text-left">Welcome to Bulletin</h1>
           <p className="text-md text-muted-foreground text-left">
             hi!
-
+            <br />
+            <br />
             the bulletin team here. we love our friends, we want to keep up with them, and have something to show for it! but we're tired of our phones, ads, & scrolling.
-
+            <br />
+            <br />
             so we'd love to present to you — the bulletin! 
-
+            <br />
+            <br />
             1. you and your friends upload pictures and text to our webapp. 
+            <br />
             2. we make a monthly magazine, personalized for you, with all your friends' content. 
+            <br />
             3. you're limited to 6 close friends - quality over quantity! 
+            <br />
             4. you get this magazine on high quality paper in a beautiful layout to keep and cherish! 
-
+            <br />
+            <br />
             Expect your first bulletin by May 1st!
-
+            <br />
+            <br />
             love, 
+            <br />
             tanya, adi, jackson - the bulletin team
           </p>
         </div>
