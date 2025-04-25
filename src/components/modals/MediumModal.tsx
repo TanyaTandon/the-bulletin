@@ -1,4 +1,3 @@
-
 import React, { ReactNode } from "react";
 import { Dialog, IconButton, Stack } from "@mui/material";
 import { useTheme } from "next-themes";
@@ -7,7 +6,6 @@ import Button from "../buttonTP";
 import { lightTheme } from "../theme/theme";
 import useThemeSync from "../../hooks/useThemeSync";
 import ImageComponent from "../ImageComponent";
-import "./modals.css";
 
 const MediumModal: React.FC<DefaultModalProps> = ({
   children,
@@ -49,7 +47,17 @@ const MediumModal: React.FC<DefaultModalProps> = ({
             <ImageComponent src="close.svg" />
           </IconButton>
         )}
-        <section className="medium-modal-inner-section">
+        <section
+          // style={{
+          //   maxHeight: "90%",
+          //   width: "100%",
+          //   overflow: "scroll",
+          //   justifyItems: "center",
+          //   display: "grid",
+          //   minHeight: "90%",
+          // }}
+          className="medium-modal-inner-section"
+        >
           {children}
         </section>
         {!buttons ? (
