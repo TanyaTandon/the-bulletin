@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -77,17 +76,6 @@ const Index = () => {
               }}
               open
             >
-              <p
-                onClick={() => setOpenAuthModal(false)}
-                style={{
-                  position: "absolute",
-                  right: "1em",
-                  top: "0px",
-                  cursor: "pointer",
-                }}
-              >
-                x
-              </p>
               {signInState ? (
                 <>
                   {signInStep === 0 ? (
@@ -143,7 +131,7 @@ const Index = () => {
                       size="lg"
                       className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      Submit Bulletin
+                      Submit
                     </Button>
                   </div>
                 </>
