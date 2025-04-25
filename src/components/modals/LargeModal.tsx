@@ -1,3 +1,4 @@
+
 import React, { ReactNode } from "react";
 import { Dialog, Stack } from "@mui/material";
 import { useTheme } from "@mui/material/styles";
@@ -37,7 +38,7 @@ const LargeModal: React.FC<DefaultModalProps> = ({
       >
         {!hideCloseButton && (
           <div
-            sx={{ position: "absolute", right: 8, top: 8 }}
+            style={{ position: "absolute", right: 8, top: 8 }}
             onClick={closeDialog}
           >
             <ImageComponent src="close.svg" />
