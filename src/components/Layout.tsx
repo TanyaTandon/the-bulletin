@@ -63,24 +63,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Settings className="h-5 w-5" />
                 <SignOutButton />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-              ></Button>
             </div>
-          ) : (
-            <Button
-              onClick={() => {
-                setOpen(true);
-              }}
-              variant="ghost"
-              size="icon"
-              className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-            >
-              Sign In
-            </Button>
-          )}
+          ) : null}
         </div>
       </header>
       {open && (
