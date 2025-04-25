@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -77,17 +76,6 @@ const Index = () => {
               }}
               open
             >
-              <p
-                onClick={() => setOpenAuthModal(false)}
-                style={{
-                  position: "absolute",
-                  right: "1em",
-                  top: "0px",
-                  cursor: "pointer",
-                }}
-              >
-                x
-              </p>
               {signInState ? (
                 <>
                   {signInStep === 0 ? (
@@ -102,6 +90,21 @@ const Index = () => {
                         }}
                         pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                       />
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={async () => {
+                            await signIn.create({
+                              strategy: "phone_code",
+                              identifier: phoneNumber,
+                            });
+                            setSignInStep(1);
+                          }}
+                          size="lg"
+                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          Verification code
+                        </Button>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -113,39 +116,31 @@ const Index = () => {
                           setCode(e.target.value);
                         }}
                       />
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={async () => {
+                            await signIn
+                              .attemptFirstFactor({
+                                strategy: "phone_code",
+                                code: code,
+                              })
+                              .then(async (res) => {
+                                console.log("res", res.identifier.split("+1")[1]);
+                                dispatch(
+                                  fetchUser(res.identifier.split("+1")[1])
+                                ).then(() => {
+                                  navigate("/bulletin");
+                                });
+                              });
+                          }}
+                          size="lg"
+                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          Submit Bulletin
+                        </Button>
+                      </div>
                     </>
                   )}
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={async () => {
-                        if (signInStep === 0) {
-                          await signIn.create({
-                            strategy: "phone_code",
-                            identifier: phoneNumber,
-                          });
-                          setSignInStep(1);
-                        } else {
-                          await signIn
-                            .attemptFirstFactor({
-                              strategy: "phone_code",
-                              code: code,
-                            })
-                            .then(async (res) => {
-                              console.log("res", res.identifier.split("+1")[1]);
-                              dispatch(
-                                fetchUser(res.identifier.split("+1")[1])
-                              ).then(() => {
-                                navigate("/bulletin");
-                              });
-                            });
-                        }
-                      }}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
-                    >
-                      Submit Bulletin
-                    </Button>
-                  </div>
                 </>
               ) : (
                 <>
@@ -172,6 +167,27 @@ const Index = () => {
                           setAddress(e.target.value);
                         }}
                       />
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={async () => {
+                            await signUp.create({
+                              phoneNumber: phoneNumber,
+                            });
+                            await signUp
+                              .preparePhoneNumberVerification({
+                                strategy: "phone_code",
+                              })
+                              .then((res) => {
+                                setReceviedCode(true);
+                                setSignInStep(1);
+                              });
+                          }}
+                          size="lg"
+                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          Submit
+                        </Button>
+                      </div>
                     </>
                   ) : (
                     <>
@@ -183,49 +199,34 @@ const Index = () => {
                           setCode(e.target.value);
                         }}
                       />
+                      <div className="flex justify-center">
+                        <Button
+                          onClick={async () => {
+                            await signUp
+                              .attemptPhoneNumberVerification({
+                                code: code,
+                              })
+                              .then((res) => {
+                                console.log(res);
+                                createNewUser({
+                                  name: name,
+                                  created_user_id: res.createdUserId,
+                                  id: phoneNumber,
+                                  phoneNumber: phoneNumber,
+                                  address: address,
+                                }).then(() => {
+                                  navigate("/bulletin");
+                                });
+                              });
+                          }}
+                          size="lg"
+                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          Verify Phone Number
+                        </Button>
+                      </div>
                     </>
                   )}
-
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={async () => {
-                        if (signInStep === 0) {
-                          await signUp.create({
-                            phoneNumber: phoneNumber,
-                          });
-                          await signUp
-                            .preparePhoneNumberVerification({
-                              strategy: "phone_code",
-                            })
-                            .then((res) => {
-                              setReceviedCode(true);
-                              setSignInStep(1);
-                            });
-                        } else {
-                          await signUp
-                            .attemptPhoneNumberVerification({
-                              code: code,
-                            })
-                            .then((res) => {
-                              console.log(res);
-                              createNewUser({
-                                name: name,
-                                created_user_id: res.createdUserId,
-                                id: phoneNumber,
-                                phoneNumber: phoneNumber,
-                                address: address,
-                              }).then(() => {
-                                navigate("/bulletin");
-                              });
-                            });
-                        }
-                      }}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
-                    >
-                      {signInStep === 0 ? "Submit" : "Verify Phone Number"}
-                    </Button>
-                  </div>
                 </>
               )}
             </Dialog>
