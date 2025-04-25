@@ -38,7 +38,7 @@ const LargeModal: React.FC<DefaultModalProps> = ({
       >
         {!hideCloseButton && (
           <div
-            style={{ position: "absolute", right: 8, top: 8, cursor: "pointer" }}
+            style={{ position: "absolute", right: 8, top: 8 }}
             onClick={closeDialog}
           >
             <ImageComponent src="close.svg" />

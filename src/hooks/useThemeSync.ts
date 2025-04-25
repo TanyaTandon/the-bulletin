@@ -4,14 +4,14 @@ import { useEffect, useState } from "react";
 
 const useThemeSync = (cssVariable: string): string => {
   const { theme } = useTheme();
-  const [color, setColor] = useState<string>("#000000");
-
+  const [color, setColor] = useState("#000000");
+  
   useEffect(() => {
-    // Get the CSS variable value
-    const value = getComputedStyle(document.documentElement)
-      .getPropertyValue(cssVariable)
-      .trim();
-    setColor(value || "#000000");
+    if (typeof window !== 'undefined') {
+      const computedStyle = getComputedStyle(document.documentElement);
+      const value = computedStyle.getPropertyValue(cssVariable);
+      setColor(value || (theme === 'dark' ? '#ffffff' : '#000000'));
+    }
   }, [cssVariable, theme]);
 
   return color;

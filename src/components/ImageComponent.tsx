@@ -1,29 +1,30 @@
 
-import React from "react";
+import React from 'react';
 
 interface ImageComponentProps {
   src: string;
   alt?: string;
   className?: string;
-  width?: number | string;
-  height?: number | string;
+  width?: string | number;
+  height?: string | number;
+  onClick?: () => void;
 }
 
 const ImageComponent: React.FC<ImageComponentProps> = ({
   src,
-  alt = "",
-  className = "",
+  alt = "image",
+  className,
   width,
   height,
+  onClick
 }) => {
   return (
-    <img
-      src={src}
-      alt={alt}
+    <img 
+      src={src} 
+      alt={alt} 
       className={className}
-      width={width}
-      height={height}
-      style={{ cursor: "pointer" }}
+      style={{ width, height }}
+      onClick={onClick}
     />
   );
 };

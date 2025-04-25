@@ -7,6 +7,7 @@ import Button from "../buttonTP";
 import { lightTheme } from "../theme/theme";
 import useThemeSync from "../../hooks/useThemeSync";
 import ImageComponent from "../ImageComponent";
+import "./modals.css";
 
 const MediumModal: React.FC<DefaultModalProps> = ({
   children,
@@ -42,7 +43,7 @@ const MediumModal: React.FC<DefaultModalProps> = ({
       >
         {!hideCloseButton && (
           <IconButton
-            style={{ position: "absolute", right: 8, top: 8 }}
+            sx={{ position: "absolute", right: 8, top: 8 }}
             onClick={closeDialog}
           >
             <ImageComponent src="close.svg" />

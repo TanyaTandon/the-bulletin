@@ -31,40 +31,31 @@ const Index = () => {
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
-        <div className="flex items-center justify-center w-full space-x-8"> {/* Added flex container */}
-          <div className="w-1/4"> {/* Left side container for envelope image */}
-            <img 
-              src="/BulletinLogoICON.svg" 
-              alt="envelope icon" 
-              className="w-full h-auto" 
-            />
-          </div>
-          <div className="text-left space-y-4 w-1/2"> {/* Adjusted width and kept text-left */}
-            <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
-            <h1 className="text-4xl font-bold text-left">Welcome to Bulletin</h1>
-            <p className="text-md text-muted-foreground text-left">
-              hi,
-              <br />
-              <br />
-              we love our friends, we want to keep up with them, and have
-              something to show for it! but — we're tired of our phones, ads, &
-              scrolling.
-              <br />
-              <br />
-              so we'd love to present to you — the bulletin! you and your friends
-              upload pictures and text to our webapp. we make a monthly magazine,
-              personalized for you, with all your friends' content. you're limited
-              to 6 close friends - quality over quantity! you get this magazine on
-              high quality paper in a beautiful layout to keep and cherish! Expect
-              your first bulletin by May 1st!
-              <br />
-              <br />
-              love, tanya, adi, jackson the
-              <br />
-              <br />
-              bulletin team
-            </p>
-          </div>
+        <div className="text-left space-y-4"> {/* Changed from text-center to text-left */}
+          <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
+          <h1 className="text-4xl font-bold text-left">Welcome to Bulletin</h1> {/* Added text-left */}
+          <p className="text-md text-muted-foreground text-left"> {/* Added text-left */}
+            hi,
+            <br />
+            <br />
+            we love our friends, we want to keep up with them, and have
+            something to show for it! but — we're tired of our phones, ads, &
+            scrolling.
+            <br />
+            <br />
+            so we'd love to present to you — the bulletin! you and your friends
+            upload pictures and text to our webapp. we make a monthly magazine,
+            personalized for you, with all your friends' content. you're limited
+            to 6 close friends - quality over quantity! you get this magazine on
+            high quality paper in a beautiful layout to keep and cherish! Expect
+            your first bulletin by May 1st!
+            <br />
+            <br />
+            love, tanya, adi, jackson the
+            <br />
+            <br />
+            bulletin team
+          </p>
         </div>
 
         <div className="flex gap-4 ">
@@ -274,4 +265,3 @@ const Index = () => {
 };
 
 export default Index;
-

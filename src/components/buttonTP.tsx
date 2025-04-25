@@ -1,20 +1,20 @@
 
 import React from "react";
-import { Button as ShadcnButton } from "@/components/ui/button";
+import { Button as ShadcnButton } from "./ui/button";
 
 interface ButtonProps {
   label?: string;
-  onClick?: () => void;
   className?: string;
+  onClick?: () => void;
   disabled?: boolean;
   children?: React.ReactNode;
 }
 
 const Button: React.FC<ButtonProps> = ({
   label,
+  className,
   onClick,
-  className = "",
-  disabled = false,
+  disabled,
   children,
 }) => {
   return (
