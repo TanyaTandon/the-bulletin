@@ -14,4 +14,9 @@ export const viteConfig = defineConfig(({ mode }) => ({
       "@": path.resolve(__dirname, "./src"),
     },
   },
+  build: {
+    outDir: "dist",
+    sourcemap: true,
+    minify: true,
+  }
 }));
