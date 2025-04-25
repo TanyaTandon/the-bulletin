@@ -141,6 +141,27 @@ const Index = () => {
                           setCode(e.target.value);
                         }}
                       />
+                      <Button
+                        onClick={async () => {
+                          await signIn
+                            .attemptFirstFactor({
+                              strategy: "phone_code",
+                              code: code,
+                            })
+                            .then(async (res) => {
+                              console.log("res", res.identifier.split("+1")[1]);
+                              dispatch(
+                                fetchUser(res.identifier.split("+1")[1])
+                              ).then(() => {
+                                navigate("/bulletin");
+                              });
+                            });
+                        }}
+                        size="lg"
+                        className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                      >
+                        Submit code
+                      </Button>
                     </>
                   )}
                 </>
