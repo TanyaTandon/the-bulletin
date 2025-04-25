@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -9,7 +8,6 @@ import { Input } from "@/components/ui/input";
 import { useAppDispatch } from "@/redux";
 import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
-import { toast } from "react-toastify";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -19,92 +17,15 @@ const Index = () => {
   const { signIn } = useSignIn();
 
   const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
-  const [isSubmitting, setIsSubmitting] = useState<boolean>(false);
+
   const [signInState, setSignInState] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [receviedCode, setReceviedCode] = useState<boolean>(false);
   const [address, setAddress] = useState<string | null>(null);
+
   const [signInStep, setSignInStep] = useState<number>(0);
-
-  const handleSignIn = async () => {
-    if (isSubmitting) return;
-    
-    try {
-      setIsSubmitting(true);
-      if (signInStep === 0) {
-        await signIn.create({
-          strategy: "phone_code",
-          identifier: phoneNumber,
-        });
-        setSignInStep(1);
-      } else {
-        await signIn
-          .attemptFirstFactor({
-            strategy: "phone_code",
-            code: code,
-          })
-          .then(async (res) => {
-            const cleanPhone = res.identifier.split("+1")[1];
-            await dispatch(fetchUser(cleanPhone));
-            navigate("/bulletin");
-          });
-      }
-    } catch (error) {
-      toast.error("Error signing in. Please try again.");
-      console.error("Sign in error:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const handleSignUp = async () => {
-    if (isSubmitting) return;
-    
-    try {
-      setIsSubmitting(true);
-      if (signInStep === 0) {
-        await signUp.create({
-          phoneNumber: phoneNumber,
-        });
-        await signUp.preparePhoneNumberVerification({
-          strategy: "phone_code",
-        });
-        setReceviedCode(true);
-        setSignInStep(1);
-      } else {
-        await signUp
-          .attemptPhoneNumberVerification({
-            code: code,
-          })
-          .then((res) => {
-            createNewUser({
-              name: name,
-              created_user_id: res.createdUserId,
-              id: phoneNumber,
-              phoneNumber: phoneNumber,
-              address: address,
-            }).then(() => {
-              navigate("/bulletin");
-            });
-          });
-      }
-    } catch (error) {
-      toast.error("Error signing up. Please try again.");
-      console.error("Sign up error:", error);
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
-  const closeModal = () => {
-    setOpenAuthModal(false);
-    setSignInStep(0);
-    setCode("");
-    setPhoneNumber("");
-    setIsSubmitting(false);
-  };
 
   return (
     <Layout>
@@ -154,105 +75,143 @@ const Index = () => {
                 },
               }}
               open
-              onClose={closeModal}
             >
               {signInState ? (
                 <>
-                  <div className="flex justify-between w-full">
-                    <h1 className="text-xl font-bold">{signInStep === 0 ? "Sign In" : "Enter Verification Code"}</h1>
-                    <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                      ✕
-                    </button>
-                  </div>
                   {signInStep === 0 ? (
                     <>
+                      <h1>Enter your phone number</h1>
                       <Input
                         value={phoneNumber}
-                        placeholder="Enter your phone number"
+                        placeholder="Enter your Phone Number"
                         type="tel"
                         onChange={(e) => {
                           setPhoneNumber(e.target.value);
                         }}
-                        className="w-full"
+                        pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                       />
                     </>
                   ) : (
                     <>
+                      <h1>Enter your code</h1>
                       <Input
                         value={code}
-                        placeholder="Enter verification code"
+                        placeholder="Enter your Code"
                         onChange={(e) => {
                           setCode(e.target.value);
                         }}
-                        className="w-full"
                       />
                     </>
                   )}
-                  <div className="flex justify-center w-full">
+                  <div className="flex justify-center">
                     <Button
-                      onClick={handleSignIn}
-                      disabled={isSubmitting}
+                      onClick={async () => {
+                        if (signInStep === 0) {
+                          await signIn.create({
+                            strategy: "phone_code",
+                            identifier: phoneNumber,
+                          });
+                          setSignInStep(1);
+                        } else {
+                          await signIn
+                            .attemptFirstFactor({
+                              strategy: "phone_code",
+                              code: code,
+                            })
+                            .then(async (res) => {
+                              console.log("res", res.identifier.split("+1")[1]);
+                              dispatch(
+                                fetchUser(res.identifier.split("+1")[1])
+                              ).then(() => {
+                                navigate("/bulletin");
+                              });
+                            });
+                        }
+                      }}
                       size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
+                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      {isSubmitting ? "Processing..." : "Submit"}
+                      Submit
                     </Button>
                   </div>
                 </>
               ) : (
                 <>
-                  <div className="flex justify-between w-full">
-                    <h1 className="text-xl font-bold">{signInStep === 0 ? "Sign Up" : "Enter Verification Code"}</h1>
-                    <button onClick={closeModal} className="text-gray-500 hover:text-gray-700">
-                      ✕
-                    </button>
-                  </div>
                   {signInStep === 0 ? (
                     <>
+                      <h1>Enter your Name and Phone Number</h1>
                       <Input
-                        placeholder="Enter your name"
+                        placeholder="Enter your Name"
                         onChange={(e) => {
                           setName(e.target.value);
                         }}
-                        className="w-full"
                       />
                       <Input
-                        placeholder="Enter your phone number"
+                        placeholder="Enter your Phone Number"
                         type="tel"
                         onChange={(e) => {
                           setPhoneNumber(e.target.value);
                         }}
-                        className="w-full"
+                        pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                       />
                       <Input
-                        placeholder="Enter your address"
+                        placeholder="Enter your Address"
                         onChange={(e) => {
                           setAddress(e.target.value);
                         }}
-                        className="w-full"
                       />
                     </>
                   ) : (
                     <>
+                      <h1>Enter your code</h1>
                       <Input
                         value={code}
-                        placeholder="Enter verification code"
+                        placeholder="Enter your Code"
                         onChange={(e) => {
                           setCode(e.target.value);
                         }}
-                        className="w-full"
                       />
                     </>
                   )}
 
-                  <div className="flex justify-center w-full">
+                  <div className="flex justify-center">
                     <Button
-                      onClick={handleSignUp}
-                      disabled={isSubmitting}
+                      onClick={async () => {
+                        if (signInStep === 0) {
+                          await signUp.create({
+                            phoneNumber: phoneNumber,
+                          });
+                          await signUp
+                            .preparePhoneNumberVerification({
+                              strategy: "phone_code",
+                            })
+                            .then((res) => {
+                              setReceviedCode(true);
+                              setSignInStep(1);
+                            });
+                        } else {
+                          await signUp
+                            .attemptPhoneNumberVerification({
+                              code: code,
+                            })
+                            .then((res) => {
+                              console.log(res);
+                              createNewUser({
+                                name: name,
+                                created_user_id: res.createdUserId,
+                                id: phoneNumber,
+                                phoneNumber: phoneNumber,
+                                address: address,
+                              }).then(() => {
+                                navigate("/bulletin");
+                              });
+                            });
+                        }
+                      }}
                       size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
+                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      {isSubmitting ? "Processing..." : (signInStep === 0 ? "Submit" : "Verify Phone Number")}
+                      {signInStep === 0 ? "Submit" : "Verify Phone Number"}
                     </Button>
                   </div>
                 </>
@@ -266,7 +225,6 @@ const Index = () => {
                 onClick={() => {
                   setOpenAuthModal(true);
                   setSignInState(true);
-                  setSignInStep(0);
                 }}
                 className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
               >
@@ -277,7 +235,6 @@ const Index = () => {
                 onClick={() => {
                   setOpenAuthModal(true);
                   setSignInState(false);
-                  setSignInStep(0);
                 }}
                 variant="outline"
               >

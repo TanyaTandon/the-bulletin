@@ -1,12 +1,14 @@
-
-import React from "react";
+import React, { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import FriendRequests from "./FriendRequests";
 import { Settings } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SignOutButton, useAuth } from "@clerk/clerk-react";
+import { SignOutButton, useAuth, useSignUp } from "@clerk/clerk-react";
+import { Dialog } from "@mui/material";
+import { Input } from "./ui/input";
+import { toast } from "react-toastify";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -27,9 +29,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   };
 
-  // Determine if user is on bulletin page
-  const isOnBulletinPage = location.pathname === "/bulletin" || 
-                          location.pathname.startsWith("/bulletin/");
+  console.log(isSignedIn);
+
+  const [open, setOpen] = useState(false);
+  const [vCode, setVCode] = useState("");
+  const [phoneNumber, setPhoneNumber] = useState("");
+  const [step, setStep] = useState(0);
+  const [receviedCode, setReceviedCode] = useState(false);
+  const { isLoaded, signUp } = useSignUp();
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -44,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             the bulletin.
           </Link>
-          {isSignedIn && !isOnBulletinPage ? (
+          {isSignedIn && location.pathname !== "/bulletin" ? (
             <div className="flex items-center space-x-2">
               <FriendRequests />
               <Button
@@ -60,6 +67,116 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           ) : null}
         </div>
       </header>
+      {open && (
+        <Dialog
+          PaperProps={{
+            style: {
+              padding: "1em",
+              display: "flex",
+              alignItems: "center",
+              width: "52vw",
+            },
+          }}
+          open
+        >
+          {step === 0 ? (
+            <>
+              <p
+                onClick={() => setOpen(false)}
+                style={{
+                  position: "absolute",
+                  right: "1em",
+                  top: "0px",
+                  cursor: "pointer",
+                }}
+              >
+                x
+              </p>
+              <section
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "1em",
+                }}
+              >
+                <p>Enter your Phone Number</p>
+                <Input
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                  }}
+                />
+                <Button
+                  onClick={async () => {
+                    await signUp.create({
+                      phoneNumber: phoneNumber,
+                    });
+                    await signUp
+                      .preparePhoneNumberVerification({
+                        strategy: "phone_code",
+                      })
+                      .then((res) => {
+                        setReceviedCode(true);
+                      });
+                    setStep(1);
+                  }}
+                >
+                  Submit
+                </Button>
+              </section>
+            </>
+          ) : (
+            <>
+              <p
+                onClick={() => setOpen(false)}
+                style={{
+                  position: "absolute",
+                  right: "1em",
+                  top: "0px",
+                  cursor: "pointer",
+                }}
+              >
+                x
+              </p>
+              <section
+                style={{
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  justifyContent: "center",
+                  gap: "1em",
+                }}
+              >
+                <p>Enter the code you received</p>
+                <Input
+                  value={vCode}
+                  onChange={(e) => {
+                    setVCode(e.target.value);
+                    
+                  }}
+                />
+                <Button
+                  onClick={async () => {
+                    console.log(vCode);
+                    setReceviedCode(true);
+                    await signUp
+                      .attemptPhoneNumberVerification({
+                        code: vCode,
+                      })
+                      .then((res) => {
+                        toast.success("Code verified");
+                        setOpen(false);
+                      });
+                  }}
+                >
+                  submit
+                </Button>
+              </section>
+            </>
+          )}
+        </Dialog>
+      )}
       <main className="flex-1 p-2 container mx-auto bg-gray-50">
         {children}
       </main>
