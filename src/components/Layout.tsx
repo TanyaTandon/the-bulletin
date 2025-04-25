@@ -29,14 +29,67 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   };
 
-  console.log(isSignedIn);
-
   const [open, setOpen] = useState(false);
   const [vCode, setVCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [step, setStep] = useState(0);
   const [receviedCode, setReceviedCode] = useState(false);
+  const [isLoading, setIsLoading] = useState(false);
   const { isLoaded, signUp } = useSignUp();
+
+  const formatPhoneNumber = (input: string) => {
+    const digitsOnly = input.replace(/\D/g, '');
+    return digitsOnly.startsWith('1') ? `+1${digitsOnly.substring(1)}` : `+1${digitsOnly}`;
+  };
+
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(formatPhoneNumber(e.target.value));
+  };
+
+  const handleSubmitPhone = async () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
+      toast.error("Please enter a valid phone number");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signUp.create({
+        phoneNumber,
+      });
+      await signUp.preparePhoneNumberVerification({
+        strategy: "phone_code",
+      });
+      setReceviedCode(true);
+      setStep(1);
+    } catch (error) {
+      console.error("Error in phone verification:", error);
+      toast.error("Failed to send verification code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (!vCode || vCode.length < 4) {
+      toast.error("Please enter a valid verification code");
+      return;
+    }
+
+    setIsLoading(true);
+    try {
+      await signUp.attemptPhoneNumberVerification({
+        code: vCode,
+      });
+      toast.success("Code verified");
+      setOpen(false);
+    } catch (error) {
+      console.error("Error in code verification:", error);
+      toast.error("Invalid verification code. Please try again.");
+    } finally {
+      setIsLoading(false);
+    }
+  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -73,6 +126,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
             <Button
               onClick={() => {
                 setOpen(true);
+                setStep(0);
+                setVCode("");
+                setPhoneNumber("");
               }}
               variant="ghost"
               size="icon"
@@ -90,7 +146,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               padding: "1em",
               display: "flex",
               alignItems: "center",
-              width: "52vw",
+              width: isMobile ? "90vw" : "52vw",
+              maxWidth: "500px",
             },
           }}
           open
@@ -104,6 +161,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   right: "1em",
                   top: "0px",
                   cursor: "pointer",
+                  padding: "10px",
+                  fontSize: "18px",
                 }}
               >
                 x
@@ -115,30 +174,25 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "1em",
+                  width: "100%",
                 }}
               >
                 <p>Enter your Phone Number</p>
                 <Input
-                  onChange={(e) => {
-                    setPhoneNumber(e.target.value);
-                  }}
+                  value={phoneNumber}
+                  onChange={handlePhoneNumberChange}
+                  type="tel"
+                  pattern="[0-9]*"
+                  inputMode="tel"
+                  placeholder="e.g., 2125551234"
+                  style={{ width: "100%" }}
                 />
                 <Button
-                  onClick={async () => {
-                    await signUp.create({
-                      phoneNumber: phoneNumber,
-                    });
-                    await signUp
-                      .preparePhoneNumberVerification({
-                        strategy: "phone_code",
-                      })
-                      .then((res) => {
-                        setReceviedCode(true);
-                      });
-                    setStep(1);
-                  }}
+                  onClick={handleSubmitPhone}
+                  disabled={isLoading}
+                  style={{ width: "100%" }}
                 >
-                  Submit
+                  {isLoading ? "Sending..." : "Submit"}
                 </Button>
               </section>
             </>
@@ -151,6 +205,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   right: "1em",
                   top: "0px",
                   cursor: "pointer",
+                  padding: "10px",
+                  fontSize: "18px",
                 }}
               >
                 x
@@ -162,6 +218,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "1em",
+                  width: "100%",
                 }}
               >
                 <p>Enter the code you received</p>
@@ -169,24 +226,19 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   value={vCode}
                   onChange={(e) => {
                     setVCode(e.target.value);
-                    
                   }}
+                  type="text"
+                  inputMode="numeric"
+                  pattern="[0-9]*"
+                  placeholder="Enter verification code"
+                  style={{ width: "100%" }}
                 />
                 <Button
-                  onClick={async () => {
-                    console.log(vCode);
-                    setReceviedCode(true);
-                    await signUp
-                      .attemptPhoneNumberVerification({
-                        code: vCode,
-                      })
-                      .then((res) => {
-                        toast.success("Code verified");
-                        setOpen(false);
-                      });
-                  }}
+                  onClick={handleVerifyCode}
+                  disabled={isLoading}
+                  style={{ width: "100%" }}
                 >
-                  submit
+                  {isLoading ? "Verifying..." : "Submit"}
                 </Button>
               </section>
             </>
