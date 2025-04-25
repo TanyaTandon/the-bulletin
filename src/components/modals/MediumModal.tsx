@@ -1,3 +1,4 @@
+
 import React, { ReactNode } from "react";
 import { Dialog, IconButton, Stack } from "@mui/material";
 import { useTheme } from "next-themes";
@@ -41,23 +42,13 @@ const MediumModal: React.FC<DefaultModalProps> = ({
       >
         {!hideCloseButton && (
           <IconButton
-            sx={{ position: "absolute", right: 8, top: 8 }}
+            style={{ position: "absolute", right: 8, top: 8 }}
             onClick={closeDialog}
           >
             <ImageComponent src="close.svg" />
           </IconButton>
         )}
-        <section
-          // style={{
-          //   maxHeight: "90%",
-          //   width: "100%",
-          //   overflow: "scroll",
-          //   justifyItems: "center",
-          //   display: "grid",
-          //   minHeight: "90%",
-          // }}
-          className="medium-modal-inner-section"
-        >
+        <section className="medium-modal-inner-section">
           {children}
         </section>
         {!buttons ? (
