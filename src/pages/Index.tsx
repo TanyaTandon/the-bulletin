@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -142,7 +143,7 @@ const Index = () => {
                       size="lg"
                       className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      {signInStep === 0 ? "Send me a one time verification code" : "Verify Code"}
+                      Submit Bulletin
                     </Button>
                   </div>
                 </>
@@ -222,7 +223,7 @@ const Index = () => {
                       size="lg"
                       className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
                     >
-                      {signInStep === 0 ? "Send me a one time verification code" : "Verify Code"}
+                      {signInStep === 0 ? "Submit" : "Verify Phone Number"}
                     </Button>
                   </div>
                 </>
