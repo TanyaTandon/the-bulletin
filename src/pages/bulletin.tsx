@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
@@ -17,6 +16,7 @@ import { Dialog } from "@mui/material";
 import { createNewBulletin, createNewUser } from "@/lib/api";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
+import { log } from "console";
 
 const Bulletin = () => {
   const { friends } = useUser();
@@ -78,7 +78,7 @@ const Bulletin = () => {
         <div className="flex justify-center">
           <Button
             onClick={async () => {
-              const result = await createNewBulletin({
+              await createNewBulletin({
                 user: user,
                 bulletin: {
                   images: images,
@@ -87,15 +87,6 @@ const Bulletin = () => {
                   owner: user.phone_number,
                 },
               });
-              
-              if (result.success) {
-                toast.success(
-                  "Congratulations on submitting your first bulletin! History books has it that you were part of the bulletin pilot. Excited to show you what we got for you. ❤️",
-                  {
-                    duration: 5000,
-                  }
-                );
-              }
             }}
             size="lg"
             className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
