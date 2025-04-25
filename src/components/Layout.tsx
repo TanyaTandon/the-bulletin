@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -30,62 +29,14 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     }
   };
 
+  console.log(isSignedIn);
+
   const [open, setOpen] = useState(false);
   const [vCode, setVCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
   const [step, setStep] = useState(0);
   const [receviedCode, setReceviedCode] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
   const { isLoaded, signUp } = useSignUp();
-
-  const handleSubmitPhoneNumber = async () => {
-    if (!phoneNumber || phoneNumber.trim() === "") {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await signUp.create({
-        phoneNumber: phoneNumber,
-      });
-      
-      await signUp.preparePhoneNumberVerification({
-        strategy: "phone_code",
-      });
-      
-      setReceviedCode(true);
-      setStep(1);
-      toast.success("Verification code sent to your phone");
-    } catch (error) {
-      console.error("Error sending verification code:", error);
-      toast.error("Failed to send verification code. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
-
-  const handleVerifyCode = async () => {
-    if (!vCode || vCode.trim() === "") {
-      toast.error("Please enter the verification code");
-      return;
-    }
-
-    setIsLoading(true);
-    try {
-      await signUp.attemptPhoneNumberVerification({
-        code: vCode,
-      });
-      
-      toast.success("Code verified successfully");
-      setOpen(false);
-    } catch (error) {
-      console.error("Error verifying code:", error);
-      toast.error("Invalid verification code. Please try again.");
-    } finally {
-      setIsLoading(false);
-    }
-  };
 
   return (
     <div className="min-h-screen flex flex-col bg-white">
@@ -100,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             the bulletin.
           </Link>
-          {isSignedIn && location.pathname !== "/bulletin" ? (
+          {isSignedIn ? (
             <div className="flex items-center space-x-2">
               <FriendRequests />
               <Button
@@ -112,8 +63,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Settings className="h-5 w-5" />
                 <SignOutButton />
               </Button>
+              <Button
+                variant="ghost"
+                size="icon"
+                className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+              ></Button>
             </div>
-          ) : null}
+          ) : (
+            <Button
+              onClick={() => {
+                setOpen(true);
+              }}
+              variant="ghost"
+              size="icon"
+              className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+            >
+              Sign In
+            </Button>
+          )}
         </div>
       </header>
       {open && (
@@ -155,13 +122,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onChange={(e) => {
                     setPhoneNumber(e.target.value);
                   }}
-                  disabled={isLoading}
                 />
                 <Button
-                  onClick={handleSubmitPhoneNumber}
-                  disabled={isLoading}
+                  onClick={async () => {
+                    await signUp.create({
+                      phoneNumber: phoneNumber,
+                    });
+                    await signUp
+                      .preparePhoneNumberVerification({
+                        strategy: "phone_code",
+                      })
+                      .then((res) => {
+                        setReceviedCode(true);
+                      });
+                    setStep(1);
+                  }}
                 >
-                  {isLoading ? "Submitting..." : "Submit"}
+                  Submit
                 </Button>
               </section>
             </>
@@ -192,14 +169,24 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   value={vCode}
                   onChange={(e) => {
                     setVCode(e.target.value);
+                    
                   }}
-                  disabled={isLoading}
                 />
                 <Button
-                  onClick={handleVerifyCode}
-                  disabled={isLoading}
+                  onClick={async () => {
+                    console.log(vCode);
+                    setReceviedCode(true);
+                    await signUp
+                      .attemptPhoneNumberVerification({
+                        code: vCode,
+                      })
+                      .then((res) => {
+                        toast.success("Code verified");
+                        setOpen(false);
+                      });
+                  }}
                 >
-                  {isLoading ? "Verifying..." : "Submit"}
+                  submit
                 </Button>
               </section>
             </>
