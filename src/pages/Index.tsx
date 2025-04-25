@@ -101,6 +101,35 @@ const Index = () => {
                         }}
                         pattern="[0-9]{3}-[0-9]{3}-[0-9]{4}"
                       />
+                      <Button
+                        onClick={async () => {
+                          if (signInStep === 0) {
+                            await signIn.create({
+                              strategy: "phone_code",
+                              identifier: phoneNumber,
+                            });
+                            setSignInStep(1);
+                          } else {
+                            await signIn
+                              .attemptFirstFactor({
+                                strategy: "phone_code",
+                                code: code,
+                              })
+                              .then(async (res) => {
+                                console.log("res", res.identifier.split("+1")[1]);
+                                dispatch(
+                                  fetchUser(res.identifier.split("+1")[1])
+                                ).then(() => {
+                                  navigate("/bulletin");
+                                });
+                              });
+                          }
+                        }}
+                        size="lg"
+                        className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                      >
+                        Verification code
+                      </Button>
                     </>
                   ) : (
                     <>
@@ -114,37 +143,6 @@ const Index = () => {
                       />
                     </>
                   )}
-                  <div className="flex justify-center">
-                    <Button
-                      onClick={async () => {
-                        if (signInStep === 0) {
-                          await signIn.create({
-                            strategy: "phone_code",
-                            identifier: phoneNumber,
-                          });
-                          setSignInStep(1);
-                        } else {
-                          await signIn
-                            .attemptFirstFactor({
-                              strategy: "phone_code",
-                              code: code,
-                            })
-                            .then(async (res) => {
-                              console.log("res", res.identifier.split("+1")[1]);
-                              dispatch(
-                                fetchUser(res.identifier.split("+1")[1])
-                              ).then(() => {
-                                navigate("/bulletin");
-                              });
-                            });
-                        }
-                      }}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
-                    >
-                      Create a one time verification code
-                    </Button>
-                  </div>
                 </>
               ) : (
                 <>
