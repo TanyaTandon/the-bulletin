@@ -51,7 +51,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             the bulletin.
           </Link>
-          {isSignedIn && location.pathname !== "/bulletin" ? (
+          {isSignedIn ? (
             <div className="flex items-center space-x-2">
               <FriendRequests />
               <Button
