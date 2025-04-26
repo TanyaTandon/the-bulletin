@@ -14,7 +14,10 @@ export type NewUserItem = {
   id: string;
   created_user_id: string;
   phoneNumber: string;
-  address: string;
+  street_address: string;
+  city: string;
+  state: string;
+  zip_code: string;
 };
 
 export type Bulletin = {
@@ -34,14 +37,17 @@ export async function createNewUser({
   name,
   id,
   created_user_id,
-
   phoneNumber,
-  address,
+  street_address,
+  city,
+  state,
+  zip_code,
 }: NewUserItem) {
   try {
-    // Upload images to the bucket and collect their URLs
+    // Combine address fields
+    const combinedAddress = `${street_address}, ${city}, ${state} ${zip_code}`;
 
-    // Create a new user
+    // Create a new user with combined address
     const { error: userError } = await supabase.from("user_record").insert({
       created_user_id: created_user_id,
       id: created_user_id,
@@ -49,7 +55,7 @@ export async function createNewUser({
       images: [],
       bulletins: [],
       phone_number: phoneNumber,
-      address: address,
+      address: combinedAddress,
     });
 
     if (userError) {

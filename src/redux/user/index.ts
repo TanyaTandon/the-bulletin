@@ -1,6 +1,4 @@
 import { PayloadAction, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import axios from "axios";
-import { set } from "lodash";
 import { supabase } from "@/lib/api.ts";
 
 export type User = {
@@ -9,6 +7,7 @@ export type User = {
   images: string[];
   bulletins: string[];
   phone_number: string;
+  address: string;
 };
 
 export type UserState = {
