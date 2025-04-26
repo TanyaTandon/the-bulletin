@@ -3,7 +3,7 @@ import React, { useState } from "react";
 import { Button } from "./ui/button";
 import { Input } from "./ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "./ui/card";
-import { MapPin, User, Phone, Building, City, Mail } from "lucide-react";
+import { MapPin, User, Phone, Building, Mail } from "lucide-react";
 
 interface SignupFormProps {
   onSubmit: (formData: {
@@ -103,7 +103,7 @@ export const SignupForm: React.FC<SignupFormProps> = ({ onSubmit, isLoading }) =
                 />
               </div>
               <div className="relative">
-                <City className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
+                <Building className="absolute left-3 top-3 h-4 w-4 text-gray-400" />
                 <Input
                   name="state"
                   placeholder="State"
