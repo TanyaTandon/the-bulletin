@@ -1,11 +1,32 @@
-import Layout from "@/components/Layout";
+
 import React from "react";
+import Layout from "@/components/Layout";
+import { Button } from "@/components/ui/button";
+import { useNavigate } from "react-router-dom";
 
 const FilledBulletin: React.FC = () => {
+  const navigate = useNavigate();
+
+  const handleNewSubmission = () => {
+    navigate('/bulletin');
+  };
+
   return (
     <Layout>
-      <div>
-        <h1>Filled Bulletin</h1>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
+        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+          Congrats, you submitted!
+        </h1>
+        <p className="text-muted-foreground text-center">
+          Your bulletin has been successfully saved.
+        </p>
+        <Button 
+          onClick={handleNewSubmission}
+          size="lg"
+          className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+        >
+          Replace with a new submission
+        </Button>
       </div>
     </Layout>
   );

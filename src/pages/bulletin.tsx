@@ -1,5 +1,5 @@
-
 import React, { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
 import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
@@ -19,6 +19,7 @@ import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 
 const Bulletin = () => {
+  const navigate = useNavigate();
   const { friends } = useUser();
   const nextMonth = format(addMonths(new Date(), 1), "MMMM");
   const currentMonth = format(new Date(), "MMMM");
@@ -52,14 +53,12 @@ const Bulletin = () => {
       });
       
       toast.dismiss();
-      toast.success("🎉 Congrats, you just submitted!", {
-        description: "Your bulletin has been saved successfully. Thanks for sharing your moments with us.",
-        duration: 4000, // Show for 4 seconds to ensure visibility
-      });
       
       setImages([]);
       setBlurb("");
       setSavedNotes([]);
+      
+      navigate('/bulletin/filled');
       
     } catch (error) {
       console.error("Error saving bulletin:", error);
