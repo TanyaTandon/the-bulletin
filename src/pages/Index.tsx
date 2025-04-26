@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -10,6 +9,9 @@ import { useAppDispatch } from "@/redux";
 import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "react-toastify";
+import { Label } from "@/components/ui/label";
+import { Mail, Phone, MapPin, Building, Home, User } from "lucide-react";
+import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -25,15 +27,17 @@ const Index = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [receviedCode, setReceviedCode] = useState<boolean>(false);
-  const [address, setAddress] = useState<string | null>(null);
   const [signInStep, setSignInStep] = useState<number>(0);
+  
+  const [streetAddress, setStreetAddress] = useState<string>("");
+  const [city, setCity] = useState<string>("");
+  const [state, setState] = useState<string>("");
+  const [zipCode, setZipCode] = useState<string>("");
 
-  // Validate phone number format
   const validatePhoneNumber = (phone: string) => {
     return phone && phone.trim() !== "";
   };
 
-  // Handle sign in flow
   const handleSignIn = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
       toast.error("Please enter a valid phone number");
@@ -57,7 +61,6 @@ const Index = () => {
     }
   };
 
-  // Handle verification code submission for sign in
   const handleVerifySignIn = async () => {
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
@@ -85,7 +88,6 @@ const Index = () => {
     }
   };
 
-  // Handle sign up flow
   const handleSignUp = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
       toast.error("Please enter a valid phone number");
@@ -94,6 +96,11 @@ const Index = () => {
     
     if (!name || name.trim() === "") {
       toast.error("Please enter your name");
+      return;
+    }
+
+    if (!streetAddress || !city || !state || !zipCode) {
+      toast.error("Please fill in all address fields");
       return;
     }
     
@@ -118,7 +125,6 @@ const Index = () => {
     }
   };
 
-  // Handle verification code submission for sign up
   const handleVerifySignUp = async () => {
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
@@ -132,12 +138,13 @@ const Index = () => {
       });
       
       if (result?.createdUserId) {
+        const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
         await createNewUser({
           name: name,
           created_user_id: result.createdUserId,
           id: phoneNumber,
           phoneNumber: phoneNumber,
-          address: address || "",
+          address: fullAddress,
         });
         
         navigate("/bulletin");
@@ -151,7 +158,6 @@ const Index = () => {
     }
   };
 
-  // Close modal and reset state
   const handleCloseModal = () => {
     setOpenAuthModal(false);
     setSignInStep(0);
@@ -196,15 +202,17 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="flex gap-4 ">
+        <div className="flex gap-4">
           {openAuthModal && (
             <Dialog
               PaperProps={{
                 style: {
-                  padding: "1em",
+                  padding: "2em",
                   display: "flex",
                   alignItems: "center",
                   width: "52vw",
+                  maxHeight: "90vh",
+                  overflowY: "auto",
                   flexDirection: "column",
                   gap: "1em",
                 },
@@ -266,37 +274,113 @@ const Index = () => {
               ) : (
                 <>
                   {signInStep === 0 ? (
-                    <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your information</h1>
-                      <Input
-                        placeholder="Enter your Name"
-                        value={name}
-                        onChange={(e) => {
-                          setName(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-2 w-full"
-                      />
-                      <Input
-                        placeholder="Enter your Phone Number"
-                        type="tel"
-                        value={phoneNumber}
-                        onChange={(e) => {
-                          setPhoneNumber(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-2 w-full"
-                      />
-                      <Input
-                        placeholder="Enter your Address"
-                        value={address || ""}
-                        onChange={(e) => {
-                          setAddress(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
-                      />
-                    </>
+                    <Card className="w-full">
+                      <CardContent className="pt-6">
+                        <h1 className="text-xl font-semibold mb-6 text-center">Create your account</h1>
+                        <div className="space-y-4">
+                          <div className="space-y-2">
+                            <Label htmlFor="name">Full Name</Label>
+                            <div className="relative">
+                              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="name"
+                                placeholder="Enter your name"
+                                value={name}
+                                onChange={(e) => setName(e.target.value)}
+                                className="pl-9"
+                                disabled={isProcessing}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="phone">Phone Number</Label>
+                            <div className="relative">
+                              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="phone"
+                                type="tel"
+                                placeholder="Enter your phone number"
+                                value={phoneNumber}
+                                onChange={(e) => setPhoneNumber(e.target.value)}
+                                className="pl-9"
+                                disabled={isProcessing}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="street">Street Address</Label>
+                            <div className="relative">
+                              <Home className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="street"
+                                placeholder="Enter street address"
+                                value={streetAddress}
+                                onChange={(e) => setStreetAddress(e.target.value)}
+                                className="pl-9"
+                                disabled={isProcessing}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="space-y-2">
+                            <Label htmlFor="city">City</Label>
+                            <div className="relative">
+                              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Input
+                                id="city"
+                                placeholder="Enter city"
+                                value={city}
+                                onChange={(e) => setCity(e.target.value)}
+                                className="pl-9"
+                                disabled={isProcessing}
+                              />
+                            </div>
+                          </div>
+
+                          <div className="grid grid-cols-2 gap-4">
+                            <div className="space-y-2">
+                              <Label htmlFor="state">State</Label>
+                              <div className="relative">
+                                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="state"
+                                  placeholder="Enter state"
+                                  value={state}
+                                  onChange={(e) => setState(e.target.value)}
+                                  className="pl-9"
+                                  disabled={isProcessing}
+                                />
+                              </div>
+                            </div>
+
+                            <div className="space-y-2">
+                              <Label htmlFor="zipcode">ZIP Code</Label>
+                              <div className="relative">
+                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Input
+                                  id="zipcode"
+                                  placeholder="Enter ZIP code"
+                                  value={zipCode}
+                                  onChange={(e) => setZipCode(e.target.value)}
+                                  className="pl-9"
+                                  disabled={isProcessing}
+                                />
+                              </div>
+                            </div>
+                          </div>
+                        </div>
+
+                        <Button
+                          onClick={handleSignUp}
+                          className="w-full mt-6 bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? "Processing..." : "Create Account"}
+                        </Button>
+                      </CardContent>
+                    </Card>
                   ) : (
                     <>
                       <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
