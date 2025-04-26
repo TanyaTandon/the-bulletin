@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
@@ -37,17 +38,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [isLoading, setIsLoading] = useState(false);
   const { isLoaded, signUp } = useSignUp();
 
-  const formatPhoneNumber = (input: string) => {
-    const digitsOnly = input.replace(/\D/g, '');
-    return digitsOnly.startsWith('1') ? `+1${digitsOnly.substring(1)}` : `+1${digitsOnly}`;
-  };
-
-  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-    setPhoneNumber(formatPhoneNumber(e.target.value));
-  };
-
-  const handleSubmitPhone = async () => {
-    if (!phoneNumber || phoneNumber.length < 10) {
+  const handleSubmitPhoneNumber = async () => {
+    if (!phoneNumber || phoneNumber.trim() === "") {
       toast.error("Please enter a valid phone number");
       return;
     }
@@ -55,15 +47,18 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
     setIsLoading(true);
     try {
       await signUp.create({
-        phoneNumber,
+        phoneNumber: phoneNumber,
       });
+      
       await signUp.preparePhoneNumberVerification({
         strategy: "phone_code",
       });
+      
       setReceviedCode(true);
       setStep(1);
+      toast.success("Verification code sent to your phone");
     } catch (error) {
-      console.error("Error in phone verification:", error);
+      console.error("Error sending verification code:", error);
       toast.error("Failed to send verification code. Please try again.");
     } finally {
       setIsLoading(false);
@@ -71,8 +66,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   const handleVerifyCode = async () => {
-    if (!vCode || vCode.length < 4) {
-      toast.error("Please enter a valid verification code");
+    if (!vCode || vCode.trim() === "") {
+      toast.error("Please enter the verification code");
       return;
     }
 
@@ -81,10 +76,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       await signUp.attemptPhoneNumberVerification({
         code: vCode,
       });
-      toast.success("Code verified");
+      
+      toast.success("Code verified successfully");
       setOpen(false);
     } catch (error) {
-      console.error("Error in code verification:", error);
+      console.error("Error verifying code:", error);
       toast.error("Invalid verification code. Please try again.");
     } finally {
       setIsLoading(false);
@@ -104,7 +100,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             the bulletin.
           </Link>
-          {isSignedIn ? (
+          {isSignedIn && location.pathname !== "/bulletin" ? (
             <div className="flex items-center space-x-2">
               <FriendRequests />
               <Button
@@ -116,27 +112,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 <Settings className="h-5 w-5" />
                 <SignOutButton />
               </Button>
-              <Button
-                variant="ghost"
-                size="icon"
-                className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-              ></Button>
             </div>
-          ) : (
-            <Button
-              onClick={() => {
-                setOpen(true);
-                setStep(0);
-                setVCode("");
-                setPhoneNumber("");
-              }}
-              variant="ghost"
-              size="icon"
-              className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-            >
-              Sign In
-            </Button>
-          )}
+          ) : null}
         </div>
       </header>
       {open && (
@@ -146,8 +123,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               padding: "1em",
               display: "flex",
               alignItems: "center",
-              width: isMobile ? "90vw" : "52vw",
-              maxWidth: "500px",
+              width: "52vw",
             },
           }}
           open
@@ -161,8 +137,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   right: "1em",
                   top: "0px",
                   cursor: "pointer",
-                  padding: "10px",
-                  fontSize: "18px",
                 }}
               >
                 x
@@ -174,25 +148,20 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "1em",
-                  width: "100%",
                 }}
               >
                 <p>Enter your Phone Number</p>
                 <Input
-                  value={phoneNumber}
-                  onChange={handlePhoneNumberChange}
-                  type="tel"
-                  pattern="[0-9]*"
-                  inputMode="tel"
-                  placeholder="e.g., 2125551234"
-                  style={{ width: "100%" }}
+                  onChange={(e) => {
+                    setPhoneNumber(e.target.value);
+                  }}
+                  disabled={isLoading}
                 />
                 <Button
-                  onClick={handleSubmitPhone}
+                  onClick={handleSubmitPhoneNumber}
                   disabled={isLoading}
-                  style={{ width: "100%" }}
                 >
-                  {isLoading ? "Sending..." : "Submit"}
+                  {isLoading ? "Submitting..." : "Submit"}
                 </Button>
               </section>
             </>
@@ -205,8 +174,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   right: "1em",
                   top: "0px",
                   cursor: "pointer",
-                  padding: "10px",
-                  fontSize: "18px",
                 }}
               >
                 x
@@ -218,7 +185,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   alignItems: "center",
                   justifyContent: "center",
                   gap: "1em",
-                  width: "100%",
                 }}
               >
                 <p>Enter the code you received</p>
@@ -227,16 +193,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   onChange={(e) => {
                     setVCode(e.target.value);
                   }}
-                  type="text"
-                  inputMode="numeric"
-                  pattern="[0-9]*"
-                  placeholder="Enter verification code"
-                  style={{ width: "100%" }}
+                  disabled={isLoading}
                 />
                 <Button
                   onClick={handleVerifyCode}
                   disabled={isLoading}
-                  style={{ width: "100%" }}
                 >
                   {isLoading ? "Verifying..." : "Submit"}
                 </Button>
