@@ -9,9 +9,7 @@ import { useAppDispatch } from "@/redux";
 import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "react-toastify";
-import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Building, Home, User } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -19,92 +17,92 @@ const Index = () => {
   const navigate = useNavigate();
   const { isLoaded, signUp } = useSignUp();
   const { signIn } = useSignIn();
+  const isMobile = useIsMobile();
 
   const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
-  const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [signInState, setSignInState] = useState<boolean>(true);
   const [name, setName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [receviedCode, setReceviedCode] = useState<boolean>(false);
+  const [address, setAddress] = useState<string>("");
+  const [isLoading, setIsLoading] = useState<boolean>(false);
   const [signInStep, setSignInStep] = useState<number>(0);
-  
-  const [streetAddress, setStreetAddress] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [zipCode, setZipCode] = useState<string>("");
 
-  const validatePhoneNumber = (phone: string) => {
-    return phone && phone.trim() !== "";
+  const formatPhoneNumber = (input: string) => {
+    const digitsOnly = input.replace(/\D/g, '');
+    return digitsOnly.startsWith('1') ? `+1${digitsOnly.substring(1)}` : `+1${digitsOnly}`;
   };
 
-  const handleSignIn = async () => {
-    if (!validatePhoneNumber(phoneNumber)) {
+  const handlePhoneNumberChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setPhoneNumber(formatPhoneNumber(e.target.value));
+  };
+
+  const handleSignInSubmit = async () => {
+    if (!phoneNumber || phoneNumber.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
-    
-    setIsProcessing(true);
+
+    setIsLoading(true);
     try {
       await signIn.create({
         strategy: "phone_code",
         identifier: phoneNumber,
       });
-      
       setSignInStep(1);
-      toast.success("Verification code sent to your phone");
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error("Failed to send verification code. Please try again.");
+      toast.error("Failed to sign in. Please try again.");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
-  const handleVerifySignIn = async () => {
-    if (!code || code.trim() === "") {
-      toast.error("Please enter the verification code");
+  const handleSignInVerify = async () => {
+    if (!code || code.length < 4) {
+      toast.error("Please enter a valid verification code");
       return;
     }
-    
-    setIsProcessing(true);
+
+    setIsLoading(true);
     try {
       const result = await signIn.attemptFirstFactor({
         strategy: "phone_code",
         code: code,
       });
       
-      if (result?.identifier) {
-        const phone = result.identifier.split("+1")[1];
-        await dispatch(fetchUser(phone));
+      if (result.status === "complete") {
+        const phoneId = result.identifier.split("+1")[1];
+        await dispatch(fetchUser(phoneId));
+        setOpenAuthModal(false);
         navigate("/bulletin");
-        toast.success("Successfully signed in!");
       }
     } catch (error) {
-      console.error("Code verification error:", error);
-      toast.error("Invalid verification code. Please try again.");
+      console.error("Verification error:", error);
+      toast.error("Failed to verify code. Please try again.");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
-  const handleSignUp = async () => {
-    if (!validatePhoneNumber(phoneNumber)) {
+  const handleSignUpSubmit = async () => {
+    if (!name) {
+      toast.error("Please enter your name");
+      return;
+    }
+    
+    if (!phoneNumber || phoneNumber.length < 10) {
       toast.error("Please enter a valid phone number");
       return;
     }
     
-    if (!name || name.trim() === "") {
-      toast.error("Please enter your name");
+    if (!address) {
+      toast.error("Please enter your address");
       return;
     }
 
-    if (!streetAddress || !city || !state || !zipCode) {
-      toast.error("Please fill in all address fields");
-      return;
-    }
-    
-    setIsProcessing(true);
+    setIsLoading(true);
     try {
       await signUp.create({
         phoneNumber: phoneNumber,
@@ -116,56 +114,44 @@ const Index = () => {
       
       setReceviedCode(true);
       setSignInStep(1);
-      toast.success("Verification code sent to your phone");
     } catch (error) {
       console.error("Sign up error:", error);
-      toast.error("Failed to send verification code. Please try again.");
+      toast.error("Failed to create account. Please try again.");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
   };
 
-  const handleVerifySignUp = async () => {
-    if (!code || code.trim() === "") {
-      toast.error("Please enter the verification code");
+  const handleSignUpVerify = async () => {
+    if (!code || code.length < 4) {
+      toast.error("Please enter a valid verification code");
       return;
     }
-    
-    setIsProcessing(true);
+
+    setIsLoading(true);
     try {
       const result = await signUp.attemptPhoneNumberVerification({
         code: code,
       });
       
       if (result?.createdUserId) {
-        const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
         await createNewUser({
           name: name,
           created_user_id: result.createdUserId,
           id: phoneNumber,
           phoneNumber: phoneNumber,
-          address: fullAddress,
+          address: address,
         });
         
+        setOpenAuthModal(false);
         navigate("/bulletin");
-        toast.success("Account created successfully!");
       }
     } catch (error) {
-      console.error("Code verification error:", error);
-      toast.error("Invalid verification code. Please try again.");
+      console.error("Verification error:", error);
+      toast.error("Failed to verify code. Please try again.");
     } finally {
-      setIsProcessing(false);
+      setIsLoading(false);
     }
-  };
-
-  const handleCloseModal = () => {
-    setOpenAuthModal(false);
-    setSignInStep(0);
-    setCode("");
-    setPhoneNumber("");
-    setName("");
-    setAddress("");
-    setReceviedCode(false);
   };
 
   return (
@@ -202,215 +188,186 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="flex gap-4">
+        <div className="flex gap-4 ">
           {openAuthModal && (
             <Dialog
               PaperProps={{
                 style: {
-                  padding: "2em",
+                  padding: "1.5em",
                   display: "flex",
                   alignItems: "center",
-                  width: "52vw",
-                  maxHeight: "90vh",
-                  overflowY: "auto",
+                  width: isMobile ? "90vw" : "52vw",
+                  maxWidth: "500px",
                   flexDirection: "column",
                   gap: "1em",
                 },
               }}
               open
-              onClose={handleCloseModal}
             >
-              <div className="w-full relative">
-                <button 
-                  onClick={handleCloseModal}
-                  className="absolute right-2 top-0 text-xl font-medium cursor-pointer"
-                  aria-label="Close"
-                >
-                  ×
-                </button>
-              </div>
-              
               {signInState ? (
                 <>
                   {signInStep === 0 ? (
                     <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your phone number</h1>
+                      <div style={{ width: "100%", textAlign: "right" }}>
+                        <span
+                          onClick={() => setOpenAuthModal(false)}
+                          style={{
+                            cursor: "pointer",
+                            padding: "10px",
+                            fontSize: "18px",
+                          }}
+                        >
+                          x
+                        </span>
+                      </div>
+                      <h1 className="text-xl font-bold mb-2">Sign In</h1>
                       <Input
                         value={phoneNumber}
                         placeholder="Enter your Phone Number"
                         type="tel"
-                        onChange={(e) => {
-                          setPhoneNumber(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
+                        inputMode="tel"
+                        pattern="[0-9]*"
+                        onChange={handlePhoneNumberChange}
+                        className="w-full mb-4"
                       />
+                      <div className="flex justify-center w-full">
+                        <Button
+                          onClick={handleSignInSubmit}
+                          disabled={isLoading}
+                          size="lg"
+                          className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          {isLoading ? "Sending..." : "Submit"}
+                        </Button>
+                      </div>
                     </>
                   ) : (
                     <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
+                      <div style={{ width: "100%", textAlign: "right" }}>
+                        <span
+                          onClick={() => setOpenAuthModal(false)}
+                          style={{
+                            cursor: "pointer",
+                            padding: "10px",
+                            fontSize: "18px",
+                          }}
+                        >
+                          x
+                        </span>
+                      </div>
+                      <h1 className="text-xl font-bold mb-2">Enter your code</h1>
                       <Input
                         value={code}
-                        placeholder="Enter your Code"
+                        placeholder="Enter verification code"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         onChange={(e) => {
                           setCode(e.target.value);
                         }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
+                        className="w-full mb-4"
                       />
+                      <div className="flex justify-center w-full">
+                        <Button
+                          onClick={handleSignInVerify}
+                          disabled={isLoading}
+                          size="lg"
+                          className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          {isLoading ? "Verifying..." : "Submit"}
+                        </Button>
+                      </div>
                     </>
                   )}
-                  <div className="flex justify-center w-full">
-                    <Button
-                      onClick={signInStep === 0 ? handleSignIn : handleVerifySignIn}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? "Processing..." : signInStep === 0 ? "Submit" : "Verify"}
-                    </Button>
-                  </div>
                 </>
               ) : (
                 <>
                   {signInStep === 0 ? (
-                    <Card className="w-full">
-                      <CardContent className="pt-6">
-                        <h1 className="text-xl font-semibold mb-6 text-center">Create your account</h1>
-                        <div className="space-y-4">
-                          <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
-                            <div className="relative">
-                              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input
-                                id="name"
-                                placeholder="Enter your name"
-                                value={name}
-                                onChange={(e) => setName(e.target.value)}
-                                className="pl-9"
-                                disabled={isProcessing}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number</Label>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input
-                                id="phone"
-                                type="tel"
-                                placeholder="Enter your phone number"
-                                value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="pl-9"
-                                disabled={isProcessing}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="street">Street Address</Label>
-                            <div className="relative">
-                              <Home className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input
-                                id="street"
-                                placeholder="Enter street address"
-                                value={streetAddress}
-                                onChange={(e) => setStreetAddress(e.target.value)}
-                                className="pl-9"
-                                disabled={isProcessing}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="space-y-2">
-                            <Label htmlFor="city">City</Label>
-                            <div className="relative">
-                              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input
-                                id="city"
-                                placeholder="Enter city"
-                                value={city}
-                                onChange={(e) => setCity(e.target.value)}
-                                className="pl-9"
-                                disabled={isProcessing}
-                              />
-                            </div>
-                          </div>
-
-                          <div className="grid grid-cols-2 gap-4">
-                            <div className="space-y-2">
-                              <Label htmlFor="state">State</Label>
-                              <div className="relative">
-                                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                  id="state"
-                                  placeholder="Enter state"
-                                  value={state}
-                                  onChange={(e) => setState(e.target.value)}
-                                  className="pl-9"
-                                  disabled={isProcessing}
-                                />
-                              </div>
-                            </div>
-
-                            <div className="space-y-2">
-                              <Label htmlFor="zipcode">ZIP Code</Label>
-                              <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                                <Input
-                                  id="zipcode"
-                                  placeholder="Enter ZIP code"
-                                  value={zipCode}
-                                  onChange={(e) => setZipCode(e.target.value)}
-                                  className="pl-9"
-                                  disabled={isProcessing}
-                                />
-                              </div>
-                            </div>
-                          </div>
-                        </div>
-
-                        <Button
-                          onClick={handleSignUp}
-                          className="w-full mt-6 bg-gradient-to-r from-accent to-primary hover:opacity-90"
-                          disabled={isProcessing}
+                    <>
+                      <div style={{ width: "100%", textAlign: "right" }}>
+                        <span
+                          onClick={() => setOpenAuthModal(false)}
+                          style={{
+                            cursor: "pointer",
+                            padding: "10px",
+                            fontSize: "18px",
+                          }}
                         >
-                          {isProcessing ? "Processing..." : "Create Account"}
+                          x
+                        </span>
+                      </div>
+                      <h1 className="text-xl font-bold mb-2">Sign Up</h1>
+                      <Input
+                        placeholder="Enter your Name"
+                        onChange={(e) => {
+                          setName(e.target.value);
+                        }}
+                        className="w-full mb-2"
+                      />
+                      <Input
+                        placeholder="Enter your Phone Number"
+                        type="tel"
+                        inputMode="tel"
+                        pattern="[0-9]*"
+                        onChange={handlePhoneNumberChange}
+                        className="w-full mb-2"
+                      />
+                      <Input
+                        placeholder="Enter your Address"
+                        onChange={(e) => {
+                          setAddress(e.target.value);
+                        }}
+                        className="w-full mb-4"
+                      />
+                      <div className="flex justify-center w-full">
+                        <Button
+                          onClick={handleSignUpSubmit}
+                          disabled={isLoading}
+                          size="lg"
+                          className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          {isLoading ? "Creating Account..." : "Submit"}
                         </Button>
-                      </CardContent>
-                    </Card>
+                      </div>
+                    </>
                   ) : (
                     <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
+                      <div style={{ width: "100%", textAlign: "right" }}>
+                        <span
+                          onClick={() => setOpenAuthModal(false)}
+                          style={{
+                            cursor: "pointer",
+                            padding: "10px",
+                            fontSize: "18px",
+                          }}
+                        >
+                          x
+                        </span>
+                      </div>
+                      <h1 className="text-xl font-bold mb-2">Enter your code</h1>
                       <Input
                         value={code}
-                        placeholder="Enter your Code"
+                        placeholder="Enter verification code"
+                        type="text"
+                        inputMode="numeric"
+                        pattern="[0-9]*"
                         onChange={(e) => {
                           setCode(e.target.value);
                         }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
+                        className="w-full mb-4"
                       />
+                      <div className="flex justify-center w-full">
+                        <Button
+                          onClick={handleSignUpVerify}
+                          disabled={isLoading}
+                          size="lg"
+                          className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                        >
+                          {isLoading ? "Verifying..." : "Verify Phone Number"}
+                        </Button>
+                      </div>
                     </>
                   )}
-
-                  <div className="flex justify-center w-full">
-                    <Button
-                      onClick={signInStep === 0 ? handleSignUp : handleVerifySignUp}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
-                      disabled={isProcessing}
-                    >
-                      {isProcessing 
-                        ? "Processing..." 
-                        : signInStep === 0 
-                          ? "Submit" 
-                          : "Verify Phone Number"
-                      }
-                    </Button>
-                  </div>
                 </>
               )}
             </Dialog>
@@ -422,6 +379,9 @@ const Index = () => {
                 onClick={() => {
                   setOpenAuthModal(true);
                   setSignInState(true);
+                  setSignInStep(0);
+                  setCode("");
+                  setPhoneNumber("");
                 }}
                 className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
               >
@@ -432,6 +392,11 @@ const Index = () => {
                 onClick={() => {
                   setOpenAuthModal(true);
                   setSignInState(false);
+                  setSignInStep(0);
+                  setCode("");
+                  setPhoneNumber("");
+                  setName("");
+                  setAddress("");
                 }}
                 variant="outline"
               >
