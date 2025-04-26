@@ -13,6 +13,7 @@ import NotFound from "./pages/NotFound";
 import Bulletin from "./pages/bulletin";
 import FilledBulletin from "./pages/filledBulletin";
 
+// Configure Query Client with more reliable settings
 const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
