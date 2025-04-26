@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
@@ -9,7 +8,7 @@ import TypewriterText from "@/components/TypewriterText";
 import { format, addMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Send, Calendar, Image, FileText } from "lucide-react";
+import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { useAuth, useSignUp } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
@@ -17,7 +16,6 @@ import { Dialog } from "@mui/material";
 import { createNewBulletin, createNewUser } from "@/lib/api";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
-import { log } from "console";
 
 const Bulletin = () => {
   const { friends } = useUser();
@@ -29,11 +27,15 @@ const Bulletin = () => {
 
   console.log(user);
 
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
   const handleSubmitBulletin = async () => {
     if (!blurb && images.length === 0) {
       toast.error("Please add some content to your bulletin before submitting");
       return;
     }
+
+    setIsSubmitting(true);
 
     try {
       toast.loading("Saving your bulletin...");
@@ -49,7 +51,7 @@ const Bulletin = () => {
       });
       
       toast.dismiss();
-      toast.success("Your bulletin has been saved! We'll include it in next month's edition.", {
+      toast.success("Your bulletin has been saved!", {
         description: "Thanks for sharing your moments with us.",
       });
       
@@ -60,6 +62,8 @@ const Bulletin = () => {
     } catch (error) {
       console.error("Error saving bulletin:", error);
       toast.error("We couldn't save your bulletin. Please try again.");
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -109,8 +113,15 @@ const Bulletin = () => {
             onClick={handleSubmitBulletin}
             size="lg"
             className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
+            disabled={isSubmitting}
           >
-            Save Bulletin
+            {isSubmitting ? (
+              <span className="flex items-center gap-2">
+                Saving... <LoaderCircle className="animate-spin" />
+              </span>
+            ) : (
+              "Save Bulletin"
+            )}
           </Button>
         </div>
 
