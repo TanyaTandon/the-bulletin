@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useAuth, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
@@ -9,8 +10,6 @@ import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "react-toastify";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SignupForm } from "@/components/SignupForm";
-import Layout from "@/components/Layout";
 
 const Index = () => {
   const dispatch = useAppDispatch();
