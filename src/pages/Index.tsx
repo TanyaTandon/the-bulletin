@@ -10,7 +10,7 @@ import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Building, Home, User } from "lucide-react";
+import { Mail, Phone, MapPin, Building, Home, User, LoaderCircle } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
 const Index = () => {
@@ -275,7 +275,7 @@ const Index = () => {
                           className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
                         >
                           <span className="flex items-center gap-2">
-                            Verifying... <loader-circle className="animate-spin" />
+                            Verifying... <LoaderCircle className="animate-spin" />
                           </span>
                         </Button>
                       : <Button
@@ -427,7 +427,7 @@ const Index = () => {
                           className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
                         >
                           <span className="flex items-center gap-2">
-                            Verifying... <loader-circle className="animate-spin" />
+                            Verifying... <LoaderCircle className="animate-spin" />
                           </span>
                         </Button>
                       : <Button
