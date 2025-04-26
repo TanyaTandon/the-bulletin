@@ -213,11 +213,13 @@ const Index = () => {
                   padding: "2em",
                   display: "flex",
                   alignItems: "center",
-                  width: "52vw",
+                  width: "100%",
+                  maxWidth: "52rem",
                   maxHeight: "90vh",
                   overflowY: "auto",
                   flexDirection: "column",
                   gap: "1em",
+                  margin: "1rem",
                 },
               }}
               open
@@ -226,7 +228,7 @@ const Index = () => {
               <div className="w-full relative">
                 <button 
                   onClick={handleCloseModal}
-                  className="absolute right-2 top-0 text-xl font-medium cursor-pointer"
+                  className="absolute right-2 top-0 text-xl font-medium cursor-pointer hover:opacity-70 transition-opacity"
                   aria-label="Close"
                 >
                   ×
@@ -279,10 +281,10 @@ const Index = () => {
                   {signInStep === 0 ? (
                     <Card className="w-full">
                       <CardContent className="pt-6">
-                        <h1 className="text-xl font-semibold mb-6 text-center">Create your account</h1>
-                        <div className="space-y-4">
+                        <h1 className="text-2xl font-semibold mb-8 text-center">Create your account</h1>
+                        <div className="space-y-6">
                           <div className="space-y-2">
-                            <Label htmlFor="name">Full Name</Label>
+                            <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
                             <div className="relative">
                               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -290,14 +292,15 @@ const Index = () => {
                                 placeholder="Enter your name"
                                 value={name}
                                 onChange={(e) => setName(e.target.value)}
-                                className="pl-9"
+                                className="pl-9 h-12"
                                 disabled={isProcessing}
+                                required
                               />
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="phone">Phone Number</Label>
+                            <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
                             <div className="relative">
                               <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -306,14 +309,15 @@ const Index = () => {
                                 placeholder="Enter your phone number"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="pl-9"
+                                className="pl-9 h-12"
                                 disabled={isProcessing}
+                                required
                               />
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="street">Street Address</Label>
+                            <Label htmlFor="street" className="text-sm font-medium">Street Address</Label>
                             <div className="relative">
                               <Home className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -321,14 +325,15 @@ const Index = () => {
                                 placeholder="Enter street address"
                                 value={streetAddress}
                                 onChange={(e) => setStreetAddress(e.target.value)}
-                                className="pl-9"
+                                className="pl-9 h-12"
                                 disabled={isProcessing}
+                                required
                               />
                             </div>
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="city">City</Label>
+                            <Label htmlFor="city" className="text-sm font-medium">City</Label>
                             <div className="relative">
                               <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -336,15 +341,16 @@ const Index = () => {
                                 placeholder="Enter city"
                                 value={city}
                                 onChange={(e) => setCity(e.target.value)}
-                                className="pl-9"
+                                className="pl-9 h-12"
                                 disabled={isProcessing}
+                                required
                               />
                             </div>
                           </div>
 
-                          <div className="grid grid-cols-2 gap-4">
+                          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="state">State</Label>
+                              <Label htmlFor="state" className="text-sm font-medium">State</Label>
                               <div className="relative">
                                 <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -352,14 +358,15 @@ const Index = () => {
                                   placeholder="Enter state"
                                   value={state}
                                   onChange={(e) => setState(e.target.value)}
-                                  className="pl-9"
+                                  className="pl-9 h-12"
                                   disabled={isProcessing}
+                                  required
                                 />
                               </div>
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor="zipcode">ZIP Code</Label>
+                              <Label htmlFor="zipcode" className="text-sm font-medium">ZIP Code</Label>
                               <div className="relative">
                                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -367,8 +374,9 @@ const Index = () => {
                                   placeholder="Enter ZIP code"
                                   value={zipCode}
                                   onChange={(e) => setZipCode(e.target.value)}
-                                  className="pl-9"
+                                  className="pl-9 h-12"
                                   disabled={isProcessing}
+                                  required
                                 />
                               </div>
                             </div>
@@ -377,7 +385,7 @@ const Index = () => {
 
                         <Button
                           onClick={handleSignUp}
-                          className="w-full mt-6 bg-gradient-to-r from-accent to-primary hover:opacity-90"
+                          className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
                           disabled={isProcessing}
                         >
                           {isProcessing ? "Processing..." : "Create Account"}
