@@ -27,37 +27,11 @@ const Bulletin = () => {
   const user = useAppSelector(staticGetUser);
 
   console.log(user);
-
-  const handleSubmitBulletin = async () => {
-    try {
-      const result = await createNewBulletin({
-        user: user,
-        bulletin: {
-          images: images,
-          blurb: blurb,
-          savedNotes: savedNotes,
-          owner: user.phone_number,
-        },
-      });
-
-      if (result.success) {
-        toast.success("Bulletin sent", {
-          description: "Congratulations on submitting your first bulletin. History books has it that you were part of the bulletin pilot. Excited to show you what we got for you. <3",
-        });
-        
-        setImages([]);
-        setBlurb("");
-        setSavedNotes([]);
-      } else {
-        toast.error("Failed to send bulletin", {
-          description: "Please try again later.",
-        });
-      }
-    } catch (error) {
-      toast.error("Error sending bulletin", {
-        description: "An unexpected error occurred. Please try again.",
-      });
-    }
+  const handleSubmitAll = () => {
+    toast.success("Submitting your bulletin content", {
+      description:
+        "Your images, text, and calendar updates will be included in the next bulletin.",
+    });
   };
 
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -103,7 +77,17 @@ const Bulletin = () => {
 
         <div className="flex justify-center">
           <Button
-            onClick={handleSubmitBulletin}
+            onClick={async () => {
+              await createNewBulletin({
+                user: user,
+                bulletin: {
+                  images: images,
+                  blurb: blurb,
+                  savedNotes: savedNotes,
+                  owner: user.phone_number,
+                },
+              });
+            }}
             size="lg"
             className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
           >
