@@ -12,13 +12,38 @@ const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    fullName: '',
+    email: '',
+    password: '',
+    street: '',
+    city: '',
+    state: '',
+    zipCode: '',
+  });
+
+  const handleInputChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const { id, value } = e.target;
+    setFormData(prev => ({ ...prev, [id]: value }));
+  };
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     
+    // Basic validation
+    if (!formData.street || !formData.city || !formData.state || !formData.zipCode) {
+      toast({
+        title: "Error",
+        description: "Please fill in all address fields",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+    
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
         title: "Account created",
         description: "Welcome! Your account has been created successfully.",
@@ -40,7 +65,7 @@ const SignUp = () => {
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise(resolve => setTimeout(resolve, 1000));
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -123,41 +148,100 @@ const SignUp = () => {
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
-                  <Label htmlFor="name">Full Name</Label>
+                  <Label htmlFor="fullName">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      id="name" 
+                      id="fullName"
                       type="text"
                       className="pl-9"
-                      required 
+                      required
+                      value={formData.fullName}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="email-signup">Email</Label>
+                  <Label htmlFor="email">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      id="email-signup" 
+                      id="email"
                       type="email"
                       className="pl-9"
-                      required 
+                      required
+                      value={formData.email}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
+
                 <div className="space-y-2">
-                  <Label htmlFor="password-signup">Password</Label>
+                  <Label htmlFor="password">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                     <Input 
-                      id="password-signup" 
+                      id="password"
                       type="password"
                       className="pl-9"
-                      required 
+                      required
+                      value={formData.password}
+                      onChange={handleInputChange}
                     />
                   </div>
                 </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="street">Street Address</Label>
+                  <Input 
+                    id="street"
+                    type="text"
+                    required
+                    value={formData.street}
+                    onChange={handleInputChange}
+                    placeholder="123 Main St"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="city">City/Town</Label>
+                  <Input 
+                    id="city"
+                    type="text"
+                    required
+                    value={formData.city}
+                    onChange={handleInputChange}
+                    placeholder="San Francisco"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="state">State</Label>
+                  <Input 
+                    id="state"
+                    type="text"
+                    required
+                    value={formData.state}
+                    onChange={handleInputChange}
+                    placeholder="California"
+                  />
+                </div>
+
+                <div className="space-y-2">
+                  <Label htmlFor="zipCode">ZIP Code</Label>
+                  <Input 
+                    id="zipCode"
+                    type="text"
+                    required
+                    value={formData.zipCode}
+                    onChange={handleInputChange}
+                    placeholder="94105"
+                    pattern="[0-9]{5}"
+                    title="Five digit zip code"
+                  />
+                </div>
+
                 <Button type="submit" className="w-full" disabled={isLoading}>
                   {isLoading ? "Creating account..." : "Create Account"}
                 </Button>
