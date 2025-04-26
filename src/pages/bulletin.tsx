@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
@@ -51,8 +52,9 @@ const Bulletin = () => {
       });
       
       toast.dismiss();
-      toast.success("Your bulletin has been saved!", {
-        description: "Thanks for sharing your moments with us.",
+      toast.success("🎉 Congrats, you just submitted!", {
+        description: "Your bulletin has been saved successfully. Thanks for sharing your moments with us.",
+        duration: 4000, // Show for 4 seconds to ensure visibility
       });
       
       setImages([]);
