@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
@@ -165,7 +164,10 @@ const Index = () => {
     setCode("");
     setPhoneNumber("");
     setName("");
-    setAddress("");
+    setStreetAddress("");
+    setCity("");
+    setState("");
+    setZipCode("");
     setReceviedCode(false);
   };
 
