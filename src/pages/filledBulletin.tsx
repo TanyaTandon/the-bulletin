@@ -15,7 +15,7 @@ const FilledBulletin: React.FC = () => {
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
         <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-          Congrats, you submitted!
+          congratulations on submitting your first bulletin. History books has it that you were part of the bulletin pilot. Excited to show you what we got for you. <3
         </h1>
         <p className="text-muted-foreground text-center">
           Your bulletin has been successfully saved.
@@ -33,3 +33,4 @@ const FilledBulletin: React.FC = () => {
 };
 
 export default FilledBulletin;
+
