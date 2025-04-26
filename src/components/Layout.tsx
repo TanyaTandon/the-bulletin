@@ -1,15 +1,14 @@
-
 import React, { useState } from "react";
 import { useUser } from "@/contexts/UserContext";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import FriendRequests from "./FriendRequests";
-import { Settings } from "lucide-react";
+import { Settings, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SignOutButton, useAuth, useSignUp } from "@clerk/clerk-react";
 import { Dialog } from "@mui/material";
 import { Input } from "./ui/input";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -100,20 +99,30 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           >
             the bulletin.
           </Link>
-          {isSignedIn && location.pathname !== "/bulletin" ? (
+          {isSignedIn && (
             <div className="flex items-center space-x-2">
               <FriendRequests />
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSettingsClick}
-                className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-              >
-                <Settings className="h-5 w-5" />
-                <SignOutButton />
-              </Button>
+              <div className="flex items-center space-x-2">
+                <Button
+                  variant="ghost"
+                  size="icon"
+                  onClick={handleSettingsClick}
+                  className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
+                >
+                  <Settings className="h-5 w-5" />
+                </Button>
+                <SignOutButton redirectUrl="/">
+                  <Button
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </SignOutButton>
+              </div>
             </div>
-          ) : null}
+          )}
         </div>
       </header>
       {open && (
