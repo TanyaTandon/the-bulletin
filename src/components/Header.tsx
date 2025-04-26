@@ -18,8 +18,6 @@ const Header: React.FC = () => {
   // Use both Clerk's isSignedIn and the user object to determine authentication status
   useEffect(() => {
     setIsAuthenticated(!!isSignedIn && !!user);
-    // Add logging to debug authentication state
-    console.log("Auth state updated:", { isSignedIn, hasUser: !!user, isAuthenticated: !!isSignedIn && !!user });
   }, [isSignedIn, user]);
 
   const handleSettingsClick = () => {
@@ -43,7 +41,7 @@ const Header: React.FC = () => {
           the bulletin.
         </Link>
         
-        {/* Show buttons if either condition is true to ensure better reliability */}
+        {/* Use both isSignedIn from Clerk and our local state to determine if we should show the buttons */}
         {(isSignedIn || isAuthenticated) && (
           <div className="flex items-center space-x-2">
             <FriendRequests />
