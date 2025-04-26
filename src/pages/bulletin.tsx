@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
@@ -90,7 +91,7 @@ const Bulletin = () => {
             text={`<p>welcome to the bulletin!  </p>
 <p>we're happy you're here. ❤️ </p>
 <p>upload pictures, text, highlights for april & may with your friends below. </p>
-<p>submit your submission soon, we will ship your bulletin on may 1st. </p>`}
+<p>submit your submission soon, we will ship your bulletin on may 1st. we'll design it beautifully later. </p>`}
             speed={isMobile ? 20 : 25}
           />
         </div>
