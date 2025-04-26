@@ -86,31 +86,34 @@ const Index = () => {
     }
   };
 
-  const handleSignUpSubmit = async () => {
-    if (!name) {
-      toast.error("Please enter your name");
-      return;
-    }
-    
-    if (!phoneNumber || phoneNumber.length < 10) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
-    
-    if (!address) {
-      toast.error("Please enter your address");
+  const handleSignUpSubmit = async (formData: {
+    name: string;
+    phoneNumber: string;
+    streetAddress: string;
+    city: string;
+    state: string;
+    zipCode: string;
+  }) => {
+    if (!formData.name || !formData.phoneNumber) {
+      toast.error("Please fill in all required fields");
       return;
     }
 
     setIsLoading(true);
     try {
+      const fullAddress = `${formData.streetAddress}, ${formData.city}, ${formData.state} ${formData.zipCode}`;
+      
       await signUp.create({
-        phoneNumber: phoneNumber,
+        phoneNumber: formatPhoneNumber(formData.phoneNumber),
       });
       
       await signUp.preparePhoneNumberVerification({
         strategy: "phone_code",
       });
+      
+      setName(formData.name);
+      setAddress(fullAddress);
+      setPhoneNumber(formData.phoneNumber);
       
       setReceviedCode(true);
       setSignInStep(1);
@@ -188,7 +191,7 @@ const Index = () => {
           </p>
         </div>
 
-        <div className="flex gap-4 ">
+        <div className="flex gap-4">
           {openAuthModal && (
             <Dialog
               PaperProps={{
@@ -198,8 +201,6 @@ const Index = () => {
                   alignItems: "center",
                   width: isMobile ? "90vw" : "52vw",
                   maxWidth: "500px",
-                  flexDirection: "column",
-                  gap: "1em",
                 },
               }}
               open
@@ -297,38 +298,10 @@ const Index = () => {
                         </span>
                       </div>
                       <h1 className="text-xl font-bold mb-2">Sign Up</h1>
-                      <Input
-                        placeholder="Enter your Name"
-                        onChange={(e) => {
-                          setName(e.target.value);
-                        }}
-                        className="w-full mb-2"
+                      <SignupForm
+                        onSubmit={handleSignUpSubmit}
+                        isLoading={isLoading}
                       />
-                      <Input
-                        placeholder="Enter your Phone Number"
-                        type="tel"
-                        inputMode="tel"
-                        pattern="[0-9]*"
-                        onChange={handlePhoneNumberChange}
-                        className="w-full mb-2"
-                      />
-                      <Input
-                        placeholder="Enter your Address"
-                        onChange={(e) => {
-                          setAddress(e.target.value);
-                        }}
-                        className="w-full mb-4"
-                      />
-                      <div className="flex justify-center w-full">
-                        <Button
-                          onClick={handleSignUpSubmit}
-                          disabled={isLoading}
-                          size="lg"
-                          className="w-full bg-gradient-to-r from-accent to-primary hover:opacity-90"
-                        >
-                          {isLoading ? "Creating Account..." : "Submit"}
-                        </Button>
-                      </div>
                     </>
                   ) : (
                     <>
