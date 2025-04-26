@@ -13,7 +13,15 @@ import NotFound from "./pages/NotFound";
 import Bulletin from "./pages/bulletin";
 import FilledBulletin from "./pages/filledBulletin";
 
-const queryClient = new QueryClient();
+const queryClient = new QueryClient({
+  defaultOptions: {
+    queries: {
+      refetchOnWindowFocus: false,
+      retry: false,
+      staleTime: 30000,
+    },
+  },
+});
 
 const App = () => {
   return (
@@ -29,12 +37,12 @@ const App = () => {
           <Sonner />
           <BrowserRouter>
             <Routes>
-              <Route path="/" element={<Index />} />
-              <Route path="/signup" element={<SignUp />} />
-              <Route path="/settings" element={<Settings />} />
-              <Route path="/bulletin" element={<Bulletin />} />
-              <Route path="/bulletin/:id" element={<FilledBulletin />} />
-              <Route path="*" element={<NotFound />} />
+              <Route path="/" element={<Index key="index" />} />
+              <Route path="/signup" element={<SignUp key="signup" />} />
+              <Route path="/settings" element={<Settings key="settings" />} />
+              <Route path="/bulletin" element={<Bulletin key="bulletin" />} />
+              <Route path="/bulletin/:id" element={<FilledBulletin key="filled-bulletin" />} />
+              <Route path="*" element={<NotFound key="not-found" />} />
             </Routes>
           </BrowserRouter>
         </UserProvider>

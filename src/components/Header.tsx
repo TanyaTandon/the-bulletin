@@ -1,10 +1,10 @@
 
-import React from "react";
+import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { Settings, LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SignOutButton, useAuth } from "@clerk/clerk-react";
+import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import FriendRequests from "./FriendRequests";
 
 const Header: React.FC = () => {
@@ -12,6 +12,13 @@ const Header: React.FC = () => {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { isSignedIn } = useAuth();
+  const { user } = useUser();
+  const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
+
+  // Use both Clerk's isSignedIn and the user object to determine authentication status
+  useEffect(() => {
+    setIsAuthenticated(!!isSignedIn && !!user);
+  }, [isSignedIn, user]);
 
   const handleSettingsClick = () => {
     if (location.pathname === "/settings") {
@@ -34,7 +41,8 @@ const Header: React.FC = () => {
           the bulletin.
         </Link>
         
-        {isSignedIn && (
+        {/* Use both isSignedIn from Clerk and our local state to determine if we should show the buttons */}
+        {(isSignedIn || isAuthenticated) && (
           <div className="flex items-center space-x-2">
             <FriendRequests />
             <div className="flex items-center space-x-2">
