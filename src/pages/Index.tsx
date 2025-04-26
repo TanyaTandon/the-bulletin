@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -24,17 +25,15 @@ const Index = () => {
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [receviedCode, setReceviedCode] = useState<boolean>(false);
+  const [address, setAddress] = useState<string | null>(null);
   const [signInStep, setSignInStep] = useState<number>(0);
-  
-  const [street, setStreet] = useState<string>("");
-  const [city, setCity] = useState<string>("");
-  const [state, setState] = useState<string>("");
-  const [zipCode, setZipCode] = useState<string>("");
 
+  // Validate phone number format
   const validatePhoneNumber = (phone: string) => {
     return phone && phone.trim() !== "";
   };
 
+  // Handle sign in flow
   const handleSignIn = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
       toast.error("Please enter a valid phone number");
@@ -58,6 +57,7 @@ const Index = () => {
     }
   };
 
+  // Handle verification code submission for sign in
   const handleVerifySignIn = async () => {
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
@@ -85,6 +85,7 @@ const Index = () => {
     }
   };
 
+  // Handle sign up flow
   const handleSignUp = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
       toast.error("Please enter a valid phone number");
@@ -93,11 +94,6 @@ const Index = () => {
     
     if (!name || name.trim() === "") {
       toast.error("Please enter your name");
-      return;
-    }
-    
-    if (!street || !city || !state || !zipCode) {
-      toast.error("Please complete all address fields");
       return;
     }
     
@@ -122,6 +118,7 @@ const Index = () => {
     }
   };
 
+  // Handle verification code submission for sign up
   const handleVerifySignUp = async () => {
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
@@ -135,14 +132,12 @@ const Index = () => {
       });
       
       if (result?.createdUserId) {
-        const fullAddress = `${street}, ${city}, ${state} ${zipCode}`;
-        
         await createNewUser({
           name: name,
           created_user_id: result.createdUserId,
           id: phoneNumber,
           phoneNumber: phoneNumber,
-          address: fullAddress,
+          address: address || "",
         });
         
         navigate("/bulletin");
@@ -156,16 +151,14 @@ const Index = () => {
     }
   };
 
+  // Close modal and reset state
   const handleCloseModal = () => {
     setOpenAuthModal(false);
     setSignInStep(0);
     setCode("");
     setPhoneNumber("");
     setName("");
-    setStreet("");
-    setCity("");
-    setState("");
-    setZipCode("");
+    setAddress("");
     setReceviedCode(false);
   };
 
@@ -294,43 +287,13 @@ const Index = () => {
                         disabled={isProcessing}
                         className="mb-2 w-full"
                       />
-                      
                       <Input
-                        placeholder="Street Address"
-                        value={street}
+                        placeholder="Enter your Address"
+                        value={address || ""}
                         onChange={(e) => {
-                          setStreet(e.target.value);
+                          setAddress(e.target.value);
                         }}
                         disabled={isProcessing}
-                        className="mb-2 w-full"
-                      />
-                      <Input
-                        placeholder="City/Town"
-                        value={city}
-                        onChange={(e) => {
-                          setCity(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-2 w-full"
-                      />
-                      <Input
-                        placeholder="State"
-                        value={state}
-                        onChange={(e) => {
-                          setState(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-2 w-full"
-                      />
-                      <Input
-                        placeholder="ZIP Code"
-                        value={zipCode}
-                        onChange={(e) => {
-                          setZipCode(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        pattern="[0-9]{5}"
-                        title="Five digit zip code"
                         className="mb-4 w-full"
                       />
                     </>
