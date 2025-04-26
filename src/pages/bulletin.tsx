@@ -27,11 +27,39 @@ const Bulletin = () => {
   const user = useAppSelector(staticGetUser);
 
   console.log(user);
-  const handleSubmitAll = () => {
-    toast.success("Submitting your bulletin content", {
-      description:
-        "Your images, text, and calendar updates will be included in the next bulletin.",
-    });
+
+  const handleSubmitBulletin = async () => {
+    if (!blurb && images.length === 0) {
+      toast.error("Please add some content to your bulletin before submitting");
+      return;
+    }
+
+    try {
+      toast.loading("Saving your bulletin...");
+      
+      await createNewBulletin({
+        user: user,
+        bulletin: {
+          images: images,
+          blurb: blurb,
+          savedNotes: savedNotes,
+          owner: user.phone_number,
+        },
+      });
+      
+      toast.dismiss();
+      toast.success("Your bulletin has been saved! We'll include it in next month's edition.", {
+        description: "Thanks for sharing your moments with us.",
+      });
+      
+      setImages([]);
+      setBlurb("");
+      setSavedNotes([]);
+      
+    } catch (error) {
+      console.error("Error saving bulletin:", error);
+      toast.error("We couldn't save your bulletin. Please try again.");
+    }
   };
 
   const [images, setImages] = useState<UploadedImage[]>([]);
@@ -77,17 +105,7 @@ const Bulletin = () => {
 
         <div className="flex justify-center">
           <Button
-            onClick={async () => {
-              await createNewBulletin({
-                user: user,
-                bulletin: {
-                  images: images,
-                  blurb: blurb,
-                  savedNotes: savedNotes,
-                  owner: user.phone_number,
-                },
-              });
-            }}
+            onClick={handleSubmitBulletin}
             size="lg"
             className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
           >

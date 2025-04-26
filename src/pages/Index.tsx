@@ -52,10 +52,10 @@ const Index = () => {
       });
       
       setSignInStep(1);
-      toast.success("Verification code sent to your phone");
+      toast.success("We've sent you a verification code!");
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error("Failed to send verification code. Please try again.");
+      toast.error("We couldn't send the code. Please check your phone number and try again.");
     } finally {
       setIsProcessing(false);
     }
@@ -78,11 +78,11 @@ const Index = () => {
         const phone = result.identifier.split("+1")[1];
         await dispatch(fetchUser(phone));
         navigate("/bulletin");
-        toast.success("Successfully signed in!");
+        toast.success("Welcome back! You're now signed in.");
       }
     } catch (error) {
       console.error("Code verification error:", error);
-      toast.error("Invalid verification code. Please try again.");
+      toast.error("That code didn't work. Double-check and try again, or request a new one.");
     } finally {
       setIsProcessing(false);
     }
@@ -116,10 +116,10 @@ const Index = () => {
       
       setReceviedCode(true);
       setSignInStep(1);
-      toast.success("Verification code sent to your phone");
+      toast.success("Great! We've sent a verification code to your phone.");
     } catch (error) {
       console.error("Sign up error:", error);
-      toast.error("Failed to send verification code. Please try again.");
+      toast.error("We couldn't send the verification code. Please try again or contact support if the problem persists.");
     } finally {
       setIsProcessing(false);
     }
@@ -144,15 +144,18 @@ const Index = () => {
           created_user_id: result.createdUserId,
           id: phoneNumber,
           phoneNumber: phoneNumber,
-          address: fullAddress,
+          street_address: streetAddress,
+          city: city,
+          state: state,
+          zip_code: zipCode,
         });
         
         navigate("/bulletin");
-        toast.success("Account created successfully!");
+        toast.success("Welcome to the bulletin! Your account is ready to go.");
       }
     } catch (error) {
       console.error("Code verification error:", error);
-      toast.error("Invalid verification code. Please try again.");
+      toast.error("That code didn't work. Double-check and try again, or request a new one.");
     } finally {
       setIsProcessing(false);
     }
@@ -266,14 +269,24 @@ const Index = () => {
                     </>
                   )}
                   <div className="flex justify-center w-full">
-                    <Button
-                      onClick={signInStep === 0 ? handleSignIn : handleVerifySignIn}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
-                      disabled={isProcessing}
-                    >
-                      {isProcessing ? "Processing..." : signInStep === 0 ? "Submit" : "Verify"}
-                    </Button>
+                    {isProcessing 
+                      ? <Button
+                          disabled
+                          className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
+                        >
+                          <span className="flex items-center gap-2">
+                            Verifying... <loader-circle className="animate-spin" />
+                          </span>
+                        </Button>
+                      : <Button
+                          onClick={signInStep === 0 ? handleSignIn : handleVerifySignIn}
+                          size="lg"
+                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
+                          disabled={isProcessing}
+                        >
+                          {isProcessing ? "Processing..." : signInStep === 0 ? "Submit" : "Verify"}
+                        </Button>
+                    }
                   </div>
                 </>
               ) : (
@@ -408,19 +421,29 @@ const Index = () => {
                   )}
 
                   <div className="flex justify-center w-full">
-                    <Button
-                      onClick={signInStep === 0 ? handleSignUp : handleVerifySignUp}
-                      size="lg"
-                      className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
-                      disabled={isProcessing}
-                    >
-                      {isProcessing 
-                        ? "Processing..." 
-                        : signInStep === 0 
-                          ? "Submit" 
-                          : "Verify Phone Number"
-                      }
-                    </Button>
+                    {isProcessing 
+                      ? <Button
+                          disabled
+                          className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
+                        >
+                          <span className="flex items-center gap-2">
+                            Verifying... <loader-circle className="animate-spin" />
+                          </span>
+                        </Button>
+                      : <Button
+                          onClick={signInStep === 0 ? handleSignUp : handleVerifySignUp}
+                          size="lg"
+                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
+                          disabled={isProcessing}
+                        >
+                          {isProcessing 
+                            ? "Processing..."
+                            : signInStep === 0 
+                              ? "Submit" 
+                              : "Verify Phone Number"
+                          }
+                        </Button>
+                    }
                   </div>
                 </>
               )}
