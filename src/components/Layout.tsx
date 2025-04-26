@@ -3,11 +3,11 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSignUp } from "@clerk/clerk-react";
+import { useSignUp, useClerk } from "@clerk/clerk-react";
 import { Dialog } from "@mui/material";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -16,6 +16,9 @@ interface LayoutProps {
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
   
+
+  const { isSignedIn } = useClerk();
+
   const [open, setOpen] = useState(false);
   const [vCode, setVCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -23,6 +26,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [receviedCode, setReceviedCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { isLoaded, signUp } = useSignUp();
+
+  console.log(isSignedIn);
 
   const handleSubmitPhoneNumber = async () => {
     if (!phoneNumber || phoneNumber.trim() === "") {

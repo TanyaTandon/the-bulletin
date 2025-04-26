@@ -10,7 +10,7 @@ import { format, addMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
 import { useAuth, useSignUp } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@mui/material";

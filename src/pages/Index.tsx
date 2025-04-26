@@ -1,17 +1,26 @@
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
-import { useAuth, useSignIn, useSignUp } from "@clerk/clerk-react";
+import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch } from "@/redux";
 import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
-import { toast } from "react-toastify";
+import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Building, Home, User, LoaderCircle } from "lucide-react";
+import {
+  Mail,
+  Phone,
+  MapPin,
+  Building,
+  Home,
+  User,
+  LoaderCircle,
+} from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import ReactInputVerificationCode from "react-input-verification-code";
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -19,7 +28,7 @@ const Index = () => {
   const navigate = useNavigate();
   const { isLoaded, signUp } = useSignUp();
   const { signIn } = useSignIn();
-
+  const { setActive } = useClerk();
   const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [signInState, setSignInState] = useState<boolean>(true);
@@ -28,7 +37,7 @@ const Index = () => {
   const [code, setCode] = useState<string>("");
   const [receviedCode, setReceviedCode] = useState<boolean>(false);
   const [signInStep, setSignInStep] = useState<number>(0);
-  
+
   const [streetAddress, setStreetAddress] = useState<string>("");
   const [city, setCity] = useState<string>("");
   const [state, setState] = useState<string>("");
@@ -43,19 +52,21 @@ const Index = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
-    
+
     setIsProcessing(true);
     try {
       await signIn.create({
         strategy: "phone_code",
         identifier: phoneNumber,
       });
-      
+
       setSignInStep(1);
       toast.success("We've sent you a verification code!");
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error("We couldn't send the code. Please check your phone number and try again.");
+      toast.error(
+        "We couldn't send the code. Please check your phone number and try again."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -66,14 +77,28 @@ const Index = () => {
       toast.error("Please enter the verification code");
       return;
     }
-    
+
     setIsProcessing(true);
     try {
-      const result = await signIn.attemptFirstFactor({
-        strategy: "phone_code",
-        code: code,
-      });
-      
+      const result = await signIn
+        .attemptFirstFactor({
+          strategy: "phone_code",
+          code: code,
+        })
+        .then(async (result) => {
+          if (result.status === "complete") {
+            // The verification was successful and the user is now signed up
+            // Create a session to sign in the user
+
+            // Set this session as active, which will update isSignedIn to true
+            await setActive({ session: result.createdSessionId });
+
+            // Now isSignedIn will be true
+            console.log("User is signed in:", isSignedIn);
+          }
+          return result;
+        });
+
       if (result?.identifier) {
         const phone = result.identifier.split("+1")[1];
         await dispatch(fetchUser(phone));
@@ -82,7 +107,9 @@ const Index = () => {
       }
     } catch (error) {
       console.error("Code verification error:", error);
-      toast.error("That code didn't work. Double-check and try again, or request a new one.");
+      toast.error(
+        "That code didn't work. Double-check and try again, or request a new one."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -93,7 +120,7 @@ const Index = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
-    
+
     if (!name || name.trim() === "") {
       toast.error("Please enter your name");
       return;
@@ -103,23 +130,30 @@ const Index = () => {
       toast.error("Please fill in all address fields");
       return;
     }
-    
+
     setIsProcessing(true);
     try {
       await signUp.create({
         phoneNumber: phoneNumber,
       });
-      
+
       await signUp.preparePhoneNumberVerification({
         strategy: "phone_code",
       });
-      
+
       setReceviedCode(true);
       setSignInStep(1);
       toast.success("Great! We've sent a verification code to your phone.");
     } catch (error) {
-      console.error("Sign up error:", error);
-      toast.error("We couldn't send the verification code. Please try again or contact support if the problem persists.");
+      console.error("Sign up error:", error.message);
+      console.error(JSON.stringify(error.e));
+      if (error.message.includes("phone_number must be a valid phone number")) {
+        toast.error("Please enter a valid phone number");
+      } else if (error.message.includes("That phone number is taken")) {
+        toast.error(error.message);
+      } else {
+        toast.error(error.message);
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -130,13 +164,13 @@ const Index = () => {
       toast.error("Please enter the verification code");
       return;
     }
-    
+
     setIsProcessing(true);
     try {
       const result = await signUp.attemptPhoneNumberVerification({
         code: code,
       });
-      
+
       if (result?.createdUserId) {
         const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
         await createNewUser({
@@ -144,18 +178,23 @@ const Index = () => {
           created_user_id: result.createdUserId,
           id: phoneNumber,
           phoneNumber: phoneNumber,
-          street_address: streetAddress,
-          city: city,
-          state: state,
-          zip_code: zipCode,
+          fullAddress: fullAddress,
+        }).then((res) => {
+          if (res.success) {
+            navigate("/bulletin");
+            toast.success(
+              "Welcome to the bulletin! Your account is ready to go."
+            );
+          } else {
+            toast.error("Something went wrong. Please try again.");
+          }
         });
-        
-        navigate("/bulletin");
-        toast.success("Welcome to the bulletin! Your account is ready to go.");
       }
     } catch (error) {
       console.error("Code verification error:", error);
-      toast.error("That code didn't work. Double-check and try again, or request a new one.");
+      toast.error(
+        "That code didn't work. Double-check and try again, or request a new one."
+      );
     } finally {
       setIsProcessing(false);
     }
@@ -178,31 +217,39 @@ const Index = () => {
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
         <div className="text-left space-y-4">
-          <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
+          <img
+            src="/BulletinLogo.svg"
+            alt="logo"
+            className="w-20 h-20 ml-[auto] mr-[auto]"
+          />
           <h1 className="text-4xl font-bold text-left">Welcome to Bulletin</h1>
           <p className="text-md text-muted-foreground text-left">
             hi!
             <br />
             <br />
-            the bulletin team here. we love our friends, we want to keep up with them, and have something to show for it! but we're tired of our phones, ads, & scrolling.
+            the bulletin team here. we love our friends, we want to keep up with
+            them, and have something to show for it! but we're tired of our
+            phones, ads, & scrolling.
             <br />
             <br />
-            so we'd love to present to you — the bulletin! 
+            so we'd love to present to you — the bulletin!
             <br />
             <br />
-            1. you and your friends upload pictures and text to our webapp. 
+            1. you and your friends upload pictures and text to our webapp.
             <br />
-            2. we make a monthly magazine, personalized for you, with all your friends' content. 
+            2. we make a monthly magazine, personalized for you, with all your
+            friends' content.
             <br />
-            3. you're limited to 6 close friends - quality over quantity! 
+            3. you're limited to 6 close friends - quality over quantity!
             <br />
-            4. you get this magazine on high quality paper in a beautiful layout to keep and cherish! 
+            4. you get this magazine on high quality paper in a beautiful layout
+            to keep and cherish!
             <br />
             <br />
             Expect your first bulletin by May 1st!
             <br />
             <br />
-            love, 
+            love,
             <br />
             tanya, adi, jackson - the bulletin team
           </p>
@@ -229,7 +276,7 @@ const Index = () => {
               onClose={handleCloseModal}
             >
               <div className="w-full relative">
-                <button 
+                <button
                   onClick={handleCloseModal}
                   className="absolute right-2 top-0 text-xl font-medium cursor-pointer hover:opacity-70 transition-opacity"
                   aria-label="Close"
@@ -237,12 +284,14 @@ const Index = () => {
                   ×
                 </button>
               </div>
-              
+
               {signInState ? (
                 <>
                   {signInStep === 0 ? (
                     <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your phone number</h1>
+                      <h1 className="text-xl font-semibold mb-2">
+                        Enter your phone number
+                      </h1>
                       <Input
                         value={phoneNumber}
                         placeholder="Enter your Phone Number"
@@ -256,37 +305,42 @@ const Index = () => {
                     </>
                   ) : (
                     <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
-                      <Input
-                        value={code}
-                        placeholder="Enter your Code"
-                        onChange={(e) => {
-                          setCode(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
+                      <h1 className="text-xl font-semibold mb-2">
+                        Enter your code
+                      </h1>
+                      <ReactInputVerificationCode
+                        length={6}
+                        onChange={(code) => setCode(code)}
+                        onCompleted={handleVerifySignIn}
                       />
                     </>
                   )}
                   <div className="flex justify-center w-full">
-                    {isProcessing 
-                      ? <Button
-                          disabled
-                          className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
-                        >
-                          <span className="flex items-center gap-2">
-                            Verifying... <LoaderCircle className="animate-spin" />
-                          </span>
-                        </Button>
-                      : <Button
-                          onClick={signInStep === 0 ? handleSignIn : handleVerifySignIn}
-                          size="lg"
-                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
-                          disabled={isProcessing}
-                        >
-                          {isProcessing ? "Processing..." : signInStep === 0 ? "Submit" : "Verify"}
-                        </Button>
-                    }
+                    {isProcessing ? (
+                      <Button
+                        disabled
+                        className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
+                      >
+                        <span className="flex items-center gap-2">
+                          Verifying... <LoaderCircle className="animate-spin" />
+                        </span>
+                      </Button>
+                    ) : (
+                      <Button
+                        onClick={
+                          signInStep === 0 ? handleSignIn : handleVerifySignIn
+                        }
+                        size="lg"
+                        className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
+                        disabled={isProcessing}
+                      >
+                        {isProcessing
+                          ? "Processing..."
+                          : signInStep === 0
+                          ? "Submit"
+                          : "Verify"}
+                      </Button>
+                    )}
                   </div>
                 </>
               ) : (
@@ -294,10 +348,17 @@ const Index = () => {
                   {signInStep === 0 ? (
                     <Card className="w-full">
                       <CardContent className="pt-6">
-                        <h1 className="text-2xl font-semibold mb-8 text-center">Create your account</h1>
+                        <h1 className="text-2xl font-semibold mb-8 text-center">
+                          Create your account
+                        </h1>
                         <div className="space-y-6">
                           <div className="space-y-2">
-                            <Label htmlFor="name" className="text-sm font-medium">Full Name</Label>
+                            <Label
+                              htmlFor="name"
+                              className="text-sm font-medium"
+                            >
+                              Full Name
+                            </Label>
                             <div className="relative">
                               <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -313,7 +374,12 @@ const Index = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="phone" className="text-sm font-medium">Phone Number</Label>
+                            <Label
+                              htmlFor="phone"
+                              className="text-sm font-medium"
+                            >
+                              Phone Number
+                            </Label>
                             <div className="relative">
                               <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -330,14 +396,21 @@ const Index = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="street" className="text-sm font-medium">Street Address</Label>
+                            <Label
+                              htmlFor="street"
+                              className="text-sm font-medium"
+                            >
+                              Street Address
+                            </Label>
                             <div className="relative">
                               <Home className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
                                 id="street"
                                 placeholder="Enter street address"
                                 value={streetAddress}
-                                onChange={(e) => setStreetAddress(e.target.value)}
+                                onChange={(e) =>
+                                  setStreetAddress(e.target.value)
+                                }
                                 className="pl-9 h-12"
                                 disabled={isProcessing}
                                 required
@@ -346,7 +419,12 @@ const Index = () => {
                           </div>
 
                           <div className="space-y-2">
-                            <Label htmlFor="city" className="text-sm font-medium">City</Label>
+                            <Label
+                              htmlFor="city"
+                              className="text-sm font-medium"
+                            >
+                              City
+                            </Label>
                             <div className="relative">
                               <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
@@ -363,7 +441,12 @@ const Index = () => {
 
                           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                             <div className="space-y-2">
-                              <Label htmlFor="state" className="text-sm font-medium">State</Label>
+                              <Label
+                                htmlFor="state"
+                                className="text-sm font-medium"
+                              >
+                                State
+                              </Label>
                               <div className="relative">
                                 <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -379,7 +462,12 @@ const Index = () => {
                             </div>
 
                             <div className="space-y-2">
-                              <Label htmlFor="zipcode" className="text-sm font-medium">ZIP Code</Label>
+                              <Label
+                                htmlFor="zipcode"
+                                className="text-sm font-medium"
+                              >
+                                ZIP Code
+                              </Label>
                               <div className="relative">
                                 <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                                 <Input
@@ -407,44 +495,16 @@ const Index = () => {
                     </Card>
                   ) : (
                     <>
-                      <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
-                      <Input
-                        value={code}
-                        placeholder="Enter your Code"
-                        onChange={(e) => {
-                          setCode(e.target.value);
-                        }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
+                      <h1 className="text-xl font-semibold mb-2">
+                        Enter your code
+                      </h1>
+                      <ReactInputVerificationCode
+                        length={6}
+                        onChange={(code) => setCode(code)}
+                        onCompleted={handleVerifySignUp}
                       />
                     </>
                   )}
-
-                  <div className="flex justify-center w-full">
-                    {isProcessing 
-                      ? <Button
-                          disabled
-                          className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
-                        >
-                          <span className="flex items-center gap-2">
-                            Verifying... <LoaderCircle className="animate-spin" />
-                          </span>
-                        </Button>
-                      : <Button
-                          onClick={signInStep === 0 ? handleSignUp : handleVerifySignUp}
-                          size="lg"
-                          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
-                          disabled={isProcessing}
-                        >
-                          {isProcessing 
-                            ? "Processing..."
-                            : signInStep === 0 
-                              ? "Submit" 
-                              : "Verify Phone Number"
-                          }
-                        </Button>
-                    }
-                  </div>
                 </>
               )}
             </Dialog>
