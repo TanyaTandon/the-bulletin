@@ -10,6 +10,7 @@ import { createNewUser } from "@/lib/api";
 import { toast } from "react-toastify";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SignupForm } from "@/components/SignupForm";
+import Layout from "@/components/Layout";
 
 const Index = () => {
   const dispatch = useAppDispatch();
