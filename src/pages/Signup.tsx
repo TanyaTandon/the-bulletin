@@ -159,7 +159,7 @@ const SignUp = () => {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  {isLoading ? "Creating account..." : "Create Account"}
+                  Submit
                 </Button>
               </form>
             </TabsContent>
