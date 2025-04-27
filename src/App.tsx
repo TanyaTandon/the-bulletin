@@ -1,4 +1,3 @@
-
 import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
@@ -12,6 +11,10 @@ import Settings from "./pages/Settings";
 import NotFound from "./pages/NotFound";
 import Bulletin from "./pages/bulletin";
 import FilledBulletin from "./pages/filledBulletin";
+import Test from "./pages/test";
+import { showToast } from "./main";
+import { ToastContext } from "./contexts/toastcontextTP";
+import { useEffect } from "react";
 
 // Configure Query Client with more reliable settings
 const queryClient = new QueryClient({
@@ -27,28 +30,36 @@ const queryClient = new QueryClient({
 const App = () => {
   return (
     <QueryClientProvider client={queryClient}>
-      <TooltipProvider>
-        <UserProvider>
-          <Helmet>
-            <link rel="icon" href="/BulletinLogoICON.svg" />
-            <title>The Bulletin</title>
-            <meta name="description" content="Share your moments with friends and family through our monthly bulletin service" />
-            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
-          </Helmet>
-          <Toaster />
-          <Sonner />
-          <BrowserRouter>
-            <Routes>
-              <Route path="/" element={<Index key="index" />} />
-              <Route path="/signup" element={<SignUp key="signup" />} />
-              <Route path="/settings" element={<Settings key="settings" />} />
-              <Route path="/bulletin" element={<Bulletin key="bulletin" />} />
-              <Route path="/bulletin/filled" element={<FilledBulletin key="filled-bulletin" />} />
-              <Route path="*" element={<NotFound key="not-found" />} />
-            </Routes>
-          </BrowserRouter>
-        </UserProvider>
-      </TooltipProvider>
+      <ToastContext.Provider value={{ showToast }}>
+        <TooltipProvider>
+          <UserProvider>
+            <Helmet>
+              <link rel="icon" href="/BulletinLogoICON.svg" />
+              <title>The Bulletin</title>
+              <meta
+                name="description"
+                content="Share your moments with friends and family through our monthly bulletin service"
+              />
+            </Helmet>
+            <Toaster />
+            <Sonner />
+            <BrowserRouter>
+              <Routes>
+                <Route path="/" element={<Index key="index" />} />
+                <Route path="/signup" element={<SignUp key="signup" />} />
+                <Route path="/settings" element={<Settings key="settings" />} />
+                <Route path="/bulletin" element={<Bulletin key="bulletin" />} />
+                <Route
+                  path="/bulletin/:id"
+                  element={<FilledBulletin key="filled-bulletin" />}
+                />
+                <Route path="/test" element={<Test key="test" />} />
+                <Route path="*" element={<NotFound key="not-found" />} />
+              </Routes>
+            </BrowserRouter>
+          </UserProvider>
+        </TooltipProvider>
+      </ToastContext.Provider>
     </QueryClientProvider>
   );
 };

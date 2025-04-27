@@ -1,87 +1,98 @@
-
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
-import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
-import { Textarea } from "@/components/ui/textarea";
-import { useToast } from "@/hooks/use-toast";
+import { useNavigate, useParams } from "react-router-dom";
+import { Sparkles } from "lucide-react";
+import { useAppSelector } from "@/redux";
+import { staticGetUser } from "@/redux/user/selectors";
+import { Bulletin, getBulletin, updateBulletin } from "@/lib/api";
+import ImageUploadGrid from "@/components/ImageUploadGrid";
+import BlurbInput from "@/components/BlurbInput";
 
 const FilledBulletin: React.FC = () => {
+  const user = useAppSelector(staticGetUser);
+
   const navigate = useNavigate();
-  const { toast } = useToast();
-  const [feedback, setFeedback] = useState("");
+  // Using useParams hook from react-router-dom to get URL parameters
+  const params = useParams<{ slug?: string }>();
+  // Access the slug parameter from the URL
+  const slug = params;
+  const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
+
+  console.log("URL Slug:", slug);
 
   const handleNewSubmission = () => {
-    navigate('/bulletin');
+    navigate("/bulletin");
   };
 
-  const handleFeedbackSubmit = () => {
-    if (feedback.trim()) {
-      // TODO: Implement actual feedback submission logic
-      toast({
-        title: "Feedback Received",
-        description: "Thank you for your valuable input!",
-      });
-      setFeedback("");
-    } else {
-      toast({
-        title: "Feedback Empty",
-        description: "Please write something before submitting.",
-        variant: "destructive"
+  const bulletin = user?.bulletins?.filter(
+    (bulletin) => bulletin === slug.id
+  )[0];
+
+  useEffect(() => {
+    if (bulletin && bulletinData === null) {
+      console.log(bulletin);
+      getBulletin(bulletin).then((data) => {
+        console.log(data[0].saved_notes);
+        console.log(
+          Object.keys(data[0].saved_notes).map((item, index) => ({
+            date: item,
+            note: data[0].saved_notes[item],
+          }))
+        );
+        const setData = {
+          ...data[0],
+          savedNotes: Object.keys(data[0].saved_notes).map((item, index) => ({
+            date: new Date(item),
+            note: data[0].saved_notes[item],
+          })),
+          images: data[0].images.map((item) => ({
+            id: item,
+            url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images//${item}.png`,
+          })),
+        };
+        setBulletin(setData);
       });
     }
-  };
+  }, [bulletin, bulletinData]);
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center pt-8 pb-12 space-y-8 px-6 max-w-3xl mx-auto w-full">
-        <div className="space-y-6 w-full text-center">
-          <h1 className="text-4xl font-bold text-foreground">
-            hooray! your bulletin has been submitted.
-          </h1>
-          <p className="text-muted-foreground text-lg max-w-xl mx-auto">
-            thank you for being part of our pilot. 
-            we're excited to show you what your friends have been up to! &lt;3
-          </p>
-          <div className="flex flex-col items-center space-y-2">
-            <Button 
-              onClick={handleNewSubmission}
-              size="lg"
-              variant="default"
-              className="font-medium"
-            >
-              Delete and replace your monthly update
-            </Button>
-            <p className="text-sm text-muted-foreground italic">
-              we'll use the latest submission
-            </p>
-          </div>
-        </div>
+      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
+        {bulletinData && (
+          <ImageUploadGrid
+            images={bulletinData?.images}
+            setImages={(e) => {
+              setBulletin({
+                ...bulletinData,
+                images: e,
+              });
+            }}
+          />
+        )}
 
-        <Card className="w-full">
-          <CardHeader>
-            <CardTitle className="text-lg font-medium">
-              we'd love to hear anything and everything: comments, critiques, suggestions, requests?
-            </CardTitle>
-          </CardHeader>
-          <CardContent>
-            <Textarea 
-              placeholder="Share your thoughts with us..."
-              className="min-h-[100px]"
-              value={feedback}
-              onChange={(e) => setFeedback(e.target.value)}
-            />
-          </CardContent>
-          <CardFooter>
-            <Button 
-              onClick={handleFeedbackSubmit} 
-              className="w-full"
-            >
-              Submit Feedback
-            </Button>
-          </CardFooter>
-        </Card>
+        {bulletinData && (
+          <BlurbInput
+            savedNotes={bulletinData?.savedNotes}
+            setSavedNotes={(e) => {
+              setBulletin({
+                ...bulletinData,
+                savedNotes: e,
+              });
+            }}
+            blurb={bulletinData?.blurb}
+            setBlurb={(e) => setBulletin({ ...bulletinData, blurb: e })}
+          />
+        )}
+
+        <Button
+          onClick={() => updateBulletin(user, bulletinData)}
+          size="lg"
+          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium"
+        >
+          <Sparkles className="mr-2" />
+          Update your Bulletin
+        </Button>
       </div>
     </Layout>
   );

@@ -1,4 +1,13 @@
-import React, { createContext, useContext, useState, ReactNode } from "react";
+import { useAppDispatch } from "@/redux";
+import { fetchBulletins, fetchUser } from "@/redux/user";
+import React, {
+  createContext,
+  useContext,
+  useState,
+  ReactNode,
+  useEffect,
+} from "react";
+import { useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
 
 export type ContentType = "picture" | "note" | "writing" | "calendar";
 
@@ -62,8 +71,11 @@ interface UserContextType {
   getGroupById: (id: string) => Group | undefined;
   addFriend: (friend: Omit<Friend, "id">) => void;
   addFriendRequest: (request: Omit<FriendRequest, "id">) => void;
-  updateFriendRequestStatus: (id: string, status: "accepted" | "rejected") => void;
-  importContacts: (contacts: Array<{name: string, phone: string}>) => void;
+  updateFriendRequestStatus: (
+    id: string,
+    status: "accepted" | "rejected"
+  ) => void;
+  importContacts: (contacts: Array<{ name: string; phone: string }>) => void;
 }
 
 const UserContext = createContext<UserContextType | undefined>(undefined);
@@ -92,14 +104,39 @@ const initialFriendRequests: FriendRequest[] = [
   { id: "fr3", name: "Jamie", phone: "+1567890123", status: "pending" },
 ];
 
-export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
+export const UserProvider: React.FC<{ children: ReactNode }> = ({
+  children,
+}) => {
+  // const { user } = useClerkUser();
+  const { isSignedIn, user } = useClerk();
+
+  const dispatch = useAppDispatch();
+
+  useEffect(() => {
+    console.log(user);
+    if (user) {
+      dispatch(
+        fetchUser(user.primaryPhoneNumber.phoneNumber.split("+1")[1])
+      ).then((response) => {
+        console.log(response.payload);
+        if (response.payload.bulletins.length > 0) {
+          dispatch(fetchBulletins());
+        }
+      });
+    }
+  }, [user]);
+
   const [personas, setPersonas] = useState<Persona[]>(initialPersonas);
   const [groups, setGroups] = useState<Group[]>(initialGroups);
   const [contents, setContents] = useState<Content[]>(initialContents);
-  const [activePersona, setActivePersonaState] = useState<Persona | null>(initialPersonas[0]);
+  const [activePersona, setActivePersonaState] = useState<Persona | null>(
+    initialPersonas[0]
+  );
   const [activeGroup, setActiveGroupState] = useState<Group | null>(null);
   const [friends, setFriends] = useState<Friend[]>(initialFriends);
-  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>(initialFriendRequests);
+  const [friendRequests, setFriendRequests] = useState<FriendRequest[]>(
+    initialFriendRequests
+  );
 
   const addPersona = (persona: Omit<Persona, "id">) => {
     const newPersona = {
@@ -172,33 +209,36 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
     setFriendRequests([...friendRequests, newRequest]);
   };
 
-  const updateFriendRequestStatus = (id: string, status: "accepted" | "rejected") => {
-    const updatedRequests = friendRequests.map(request => 
+  const updateFriendRequestStatus = (
+    id: string,
+    status: "accepted" | "rejected"
+  ) => {
+    const updatedRequests = friendRequests.map((request) =>
       request.id === id ? { ...request, status } : request
     );
-    
+
     setFriendRequests(updatedRequests);
-    
+
     if (status === "accepted") {
-      const acceptedRequest = friendRequests.find(r => r.id === id);
+      const acceptedRequest = friendRequests.find((r) => r.id === id);
       if (acceptedRequest) {
         addFriend({
           name: acceptedRequest.name,
           phone: acceptedRequest.phone,
-          avatar: acceptedRequest.avatar
+          avatar: acceptedRequest.avatar,
         });
       }
     }
   };
 
-  const importContacts = (contacts: Array<{name: string, phone: string}>) => {
-    const existingPhones = new Set(friends.map(f => f.phone));
+  const importContacts = (contacts: Array<{ name: string; phone: string }>) => {
+    const existingPhones = new Set(friends.map((f) => f.phone));
     const newFriends = contacts
-      .filter(contact => !existingPhones.has(contact.phone))
+      .filter((contact) => !existingPhones.has(contact.phone))
       .map((contact, index) => ({
         id: `f${friends.length + index + 1}`,
         name: contact.name,
-        phone: contact.phone
+        phone: contact.phone,
       }));
 
     if (newFriends.length > 0) {
@@ -226,7 +266,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
         addFriend,
         addFriendRequest,
         updateFriendRequestStatus,
-        importContacts
+        importContacts,
       }}
     >
       {children}

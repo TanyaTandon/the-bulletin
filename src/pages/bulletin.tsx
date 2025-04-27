@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
@@ -9,9 +8,14 @@ import MonthlyTimer from "@/components/MonthlyTimer";
 import TypewriterText from "@/components/TypewriterText";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { LoaderCircle } from "lucide-react";
+
 import { toast } from "sonner";
 import { createNewBulletin } from "@/lib/api";
+import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
+import { useAuth, useSignUp } from "@clerk/clerk-react";
+import { Input } from "@/components/ui/input";
+import { Dialog } from "@mui/material";
+
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 
@@ -36,7 +40,7 @@ const Bulletin = () => {
 
     try {
       toast.loading("Saving your bulletin...");
-      
+
       await createNewBulletin({
         user: user,
         bulletin: {
@@ -46,15 +50,14 @@ const Bulletin = () => {
           owner: user?.phone_number || "",
         },
       });
-      
+
       toast.dismiss();
-      
+
       setImages([]);
       setBlurb("");
       setSavedNotes([]);
-      
-      navigate('/bulletin/filled');
-      
+
+      navigate("/bulletin/filled");
     } catch (error) {
       console.error("Error saving bulletin:", error);
       toast.error("We couldn't save your bulletin. Please try again.");

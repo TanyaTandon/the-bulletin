@@ -2,11 +2,20 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSignUp } from "@clerk/clerk-react";
+import { useSignUp, useClerk } from "@clerk/clerk-react";
 import { Dialog } from "@mui/material";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
-import { toast } from "sonner";
+import { toast } from "react-toastify";
+import { selectShowFriendsModal } from "@/redux/nonpersistent/controllers/selectors";
+import { useAppSelector } from "@/redux";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
+import FriendModalContent from "./FriendModalContent";
 
 interface LayoutProps {
   children: React.ReactNode;
@@ -14,7 +23,11 @@ interface LayoutProps {
 
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
-  
+
+  const showFriendsModal = useAppSelector(selectShowFriendsModal);
+
+  const { isSignedIn } = useClerk();
+
   const [open, setOpen] = useState(false);
   const [vCode, setVCode] = useState("");
   const [phoneNumber, setPhoneNumber] = useState("");
@@ -22,6 +35,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [receviedCode, setReceviedCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const { isLoaded, signUp } = useSignUp();
+
+  console.log(isSignedIn);
 
   const handleSubmitPhoneNumber = async () => {
     if (!phoneNumber || phoneNumber.trim() === "") {
@@ -34,11 +49,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       await signUp.create({
         phoneNumber: phoneNumber,
       });
-      
+
       await signUp.preparePhoneNumberVerification({
         strategy: "phone_code",
       });
-      
+
       setReceviedCode(true);
       setStep(1);
       toast.success("Verification code sent to your phone");
@@ -61,7 +76,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       await signUp.attemptPhoneNumberVerification({
         code: vCode,
       });
-      
+
       toast.success("Code verified successfully");
       setOpen(false);
     } catch (error) {
@@ -75,7 +90,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   return (
     <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
-      
+
       {open && (
         <Dialog
           PaperProps={{
@@ -117,10 +132,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }}
                   disabled={isLoading}
                 />
-                <Button
-                  onClick={handleSubmitPhoneNumber}
-                  disabled={isLoading}
-                >
+                <Button onClick={handleSubmitPhoneNumber} disabled={isLoading}>
                   {isLoading ? "Submitting..." : "Submit"}
                 </Button>
               </section>
@@ -155,10 +167,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                   }}
                   disabled={isLoading}
                 />
-                <Button
-                  onClick={handleVerifyCode}
-                  disabled={isLoading}
-                >
+                <Button onClick={handleVerifyCode} disabled={isLoading}>
                   {isLoading ? "Verifying..." : "Submit"}
                 </Button>
               </section>
@@ -166,8 +175,23 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           )}
         </Dialog>
       )}
-      
-      <main className="flex-1 min-h-screen">
+
+      {showFriendsModal && (
+        <Dialog
+          PaperProps={{
+            style: {
+              padding: "1em",
+              display: "flex",
+              alignItems: "center",
+              width: "52vw",
+            },
+          }}
+          open
+        >
+          <FriendModalContent />
+        </Dialog>
+      )}
+      <main className="flex-1 p-2 container mx-auto bg-gray-50">
         {children}
       </main>
 

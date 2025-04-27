@@ -19,7 +19,7 @@ import {
 import storage from "redux-persist/lib/storage";
 import { reducers } from "./separateReducers.ts";
 import { thunk, ThunkAction } from "redux-thunk";
-
+import controllersReducer from "./nonpersistent/controllers/index.ts";
 /** Must be last in the middleware chain! */
 const customLogger: Middleware = createLogger({
   timestamp: true,
@@ -42,6 +42,9 @@ export const makeStore = () => {
   // Combining reducers including the persisted and non-persisted reducers
   const appReducer = combineReducers({
     app: persistedGlobalReducer,
+    nonpersisted: combineReducers({
+      controllers: controllersReducer,
+    }),
   });
 
   // Root reducer with reset functionality
