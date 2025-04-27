@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -9,27 +10,22 @@ import TypewriterText from "@/components/TypewriterText";
 import { format, addMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
+import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
-import { useAuth, useSignUp } from "@clerk/clerk-react";
-import { Input } from "@/components/ui/input";
-import { Dialog } from "@mui/material";
-import { createNewBulletin, createNewUser } from "@/lib/api";
+import { createNewBulletin } from "@/lib/api";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 
 const Bulletin = () => {
   const navigate = useNavigate();
-  const { friends } = useUser();
   const nextMonth = format(addMonths(new Date(), 1), "MMMM");
   const currentMonth = format(new Date(), "MMMM");
   const isMobile = useIsMobile();
-
   const user = useAppSelector(staticGetUser);
-
-  console.log(user);
-
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [blurb, setBlurb] = useState<string>("");
+  const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
 
   const handleSubmitBulletin = async () => {
     if (!blurb && images.length === 0) {
@@ -68,68 +64,59 @@ const Bulletin = () => {
     }
   };
 
-  const [images, setImages] = useState<UploadedImage[]>([]);
-
-  const friendsList = friends.map((friend) => friend.name).join(", ");
-
-  const { isSignedIn } = useAuth();
-
-  const { isLoaded, signUp } = useSignUp();
-
-  const [phoneNumber, setPhoneNumber] = useState<string | null>(null);
-  const [vCode, setVCode] = useState<string | null>(null);
-  const [receviedCode, setReceviedCode] = useState<boolean>(false);
-  const [blurb, setBlurb] = useState<string>("");
-  const [name, setName] = useState<string>("");
-
-  const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
-
   return (
     <Layout>
-      <div
-        className={`mx-auto space-y-3 ${
-          isMobile ? "max-w-[95%] px-1" : "max-w-3xl"
-        }`}
-      >
-        <div className="space-y-1">
-          <TypewriterText
-            text={`<p>welcome to the bulletin!</p>
+      <div className={`mx-auto ${isMobile ? "px-2" : "container py-6"}`}>
+        <div className="max-w-3xl mx-auto space-y-8">
+          <div className="space-y-4 text-center">
+            <TypewriterText
+              text={`<p>welcome to the bulletin!</p>
 
 <p>we're happy you're here. ❤️</p>
 
 <p>upload your pictures, text, and calendar dates below.</p>
 
 <p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
-            speed={isMobile ? 20 : 25}
-          />
+              speed={isMobile ? 20 : 25}
+            />
+          </div>
+
+          <div className="space-y-12">
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <ImageUploadGrid images={images} setImages={setImages} />
+            </div>
+
+            <div className="bg-white rounded-lg shadow-sm p-6">
+              <BlurbInput
+                savedNotes={savedNotes}
+                setSavedNotes={setSavedNotes}
+                blurb={blurb}
+                setBlurb={setBlurb}
+              />
+            </div>
+
+            <div className="flex flex-col items-center space-y-8">
+              <Button
+                onClick={handleSubmitBulletin}
+                size="lg"
+                className="w-full max-w-md bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-md"
+                disabled={isSubmitting}
+              >
+                {isSubmitting ? (
+                  <span className="flex items-center gap-2">
+                    Saving... <LoaderCircle className="animate-spin" />
+                  </span>
+                ) : (
+                  "Submit your monthly update"
+                )}
+              </Button>
+
+              <div className="w-full max-w-md">
+                <MonthlyTimer />
+              </div>
+            </div>
+          </div>
         </div>
-
-        <ImageUploadGrid images={images} setImages={setImages} />
-        <BlurbInput
-          savedNotes={savedNotes}
-          setSavedNotes={setSavedNotes}
-          blurb={blurb}
-          setBlurb={setBlurb}
-        />
-
-        <div className="flex justify-center">
-          <Button
-            onClick={handleSubmitBulletin}
-            size="lg"
-            className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
-            disabled={isSubmitting}
-          >
-            {isSubmitting ? (
-              <span className="flex items-center gap-2">
-                Saving... <LoaderCircle className="animate-spin" />
-              </span>
-            ) : (
-              "Submit your monthly update"
-            )}
-          </Button>
-        </div>
-
-        <MonthlyTimer />
       </div>
     </Layout>
   );

@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
@@ -74,7 +73,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   };
 
   return (
-    <div className="min-h-screen flex flex-col bg-white">
+    <div className="min-h-screen flex flex-col bg-gray-50">
       <Header />
       
       {open && (
@@ -168,11 +167,11 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
         </Dialog>
       )}
       
-      <main className="flex-1 p-2 container mx-auto bg-gray-50">
+      <main className="flex-1 min-h-screen">
         {children}
       </main>
 
-      <footer className="border-t border-gray-200 p-2 text-center text-gray-500 bg-white text-xs">
+      <footer className="border-t border-gray-200 p-4 text-center text-gray-500 bg-white text-xs mt-12">
         <div
           className="container mx-auto"
           style={{ fontFamily: "Sometype Mono, monospace" }}
