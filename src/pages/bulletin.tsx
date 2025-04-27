@@ -69,13 +69,7 @@ const Bulletin = () => {
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="text-left min-h-[6em]">
             <TypewriterText
-              text={`<p>welcome to the bulletin!</p>
-
-<p>we're happy you're here. ❤️</p>
-
-<p>upload your pictures, text, and calendar dates below.</p>
-
-<p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
+              text={`<p>welcome to the bulletin!</p><p>we're happy you're here. ❤️</p><p>upload your pictures, text, and calendar dates below.</p><p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
               speed={isMobile ? 30 : 35}
               className="text-xl"
             />
