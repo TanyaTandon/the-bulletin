@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Plus, Edit, Trash2, Upload } from "lucide-react";
 import { Card } from "./ui/card";
@@ -116,20 +115,6 @@ const ImageUploadGrid: React.FC<{
   return (
     <div className="mb-4 flex justify-center flex-col items-center">
       <div className="w-full max-w-md">
-        <div className="space-y-1 mb-4">
-          <p className="text-sm" style={{ fontFamily: "Sometype Mono, monospace" }}>
-            welcome to the bulletin!
-          </p>
-          <p className="text-sm" style={{ fontFamily: "Sometype Mono, monospace" }}>
-            we're happy you're here. ❤️
-          </p>
-          <p className="text-sm" style={{ fontFamily: "Sometype Mono, monospace" }}>
-            upload your pictures, text, and calendar dates below.
-          </p>
-          <p className="text-sm" style={{ fontFamily: "Sometype Mono, monospace" }}>
-            we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.
-          </p>
-        </div>
         <h3
           className={`font-semibold text-black mb-2 text-left ${
             isMobile ? "text-base" : "text-lg"
@@ -139,6 +124,8 @@ const ImageUploadGrid: React.FC<{
           upload pictures below. 
           
           choose up to 9 pictures.
+          
+          ----------------------------------------------------------------------------
         </h3>
         <div
           className="grid gap-1 mx-auto"
