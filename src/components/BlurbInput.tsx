@@ -77,6 +77,12 @@ const BlurbInput: React.FC<{
           
           parties? birthdays? things you're excited for?
         </h3>
+        <p 
+          className="text-xs text-gray-500 mb-2" 
+          style={{ fontFamily: "Sometype Mono, monospace" }}
+        >
+          eg: 5/8 tanya is flying to NYC
+        </p>
         <Separator className="my-4 bg-gray-200" />
         <Calendar
           mode="single"
