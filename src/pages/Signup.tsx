@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
@@ -159,7 +160,7 @@ const SignUp = () => {
                   </div>
                 </div>
                 <Button type="submit" className="w-full" disabled={isLoading}>
-                  Submit
+                  {isLoading ? "Creating account..." : "Submit"}
                 </Button>
               </form>
             </TabsContent>
