@@ -4,6 +4,7 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Separator } from "./ui/separator";
 
 export interface UploadedImage {
   id: string;
@@ -124,9 +125,8 @@ const ImageUploadGrid: React.FC<{
           upload pictures below. 
           
           choose up to 9 pictures.
-          
-          ----------------------------------------------------------------------------
         </h3>
+        <Separator className="my-4 bg-gray-200" />
         <div
           className="grid gap-1 mx-auto"
           style={{
