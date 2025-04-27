@@ -5,7 +5,7 @@ import { useIsMobile } from '@/hooks/use-mobile';
 
 const MonthlyTimer = () => {
   const [now, setNow] = useState(new Date());
-  const targetDate = parseISO('2025-05-01T23:59:00-07:00'); // April 25, 11:59 PM PST
+  const targetDate = parseISO('2025-05-05T23:59:00-07:00'); // May 5th, 11:59 PM PST
   const isMobile = useIsMobile();
 
   useEffect(() => {

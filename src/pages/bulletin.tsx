@@ -5,7 +5,6 @@ import Layout from "@/components/Layout";
 import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import MonthlyTimer from "@/components/MonthlyTimer";
-import { useUser } from "@/contexts/UserContext";
 import TypewriterText from "@/components/TypewriterText";
 import { format, addMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";

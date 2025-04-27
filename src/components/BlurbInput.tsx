@@ -1,9 +1,10 @@
+
 import React, { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Calendar } from "./ui/calendar";
 import { Button } from "./ui/button";
 import { Heart } from "lucide-react";
-import { format } from "date-fns";
+import { format, isBefore, isAfter } from "date-fns";
 import { CSSProperties } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "./ui/separator";
@@ -19,9 +20,13 @@ const BlurbInput: React.FC<{
   blurb: string;
   setBlurb: React.Dispatch<React.SetStateAction<string>>;
 }> = ({ savedNotes, setSavedNotes, blurb, setBlurb }) => {
-  const [date, setDate] = useState<Date | undefined>(new Date());
+  const [date, setDate] = useState<Date | undefined>(new Date(2025, 4, 1)); // May 1st, 2025
   const [calendarNote, setCalendarNote] = useState("");
   const isMobile = useIsMobile();
+
+  // Calculate the start and end of May 2025
+  const startOfMay2025 = new Date(2025, 4, 1); // May 1st, 2025
+  const endOfMay2025 = new Date(2025, 4, 31); // May 31st, 2025
 
   const handleSaveNote = () => {
     if (date && calendarNote.trim()) {
@@ -44,15 +49,21 @@ const BlurbInput: React.FC<{
   const modifiersClassNames = {
     withNote: "relative group",
   };
+  
+  // Disable dates outside May 2025
+  const isDateDisabled = (date: Date) => {
+    return isBefore(date, startOfMay2025) || isAfter(date, endOfMay2025);
+  };
 
   return (
     <div className="flex flex-col items-center w-full space-y-4">
       <h3
-        className={`font-semibold text-black mb-1 text-center w-full ${
+        className={`font-semibold text-black text-center w-full ${
           isMobile ? "text-base" : "text-lg"
         }`}
         style={{ fontFamily: "Sometype Mono, monospace" }}
       >
+
         add a monthly summary, story, poem, 
         
         or whatever your heart desires.
@@ -62,17 +73,18 @@ const BlurbInput: React.FC<{
         value={blurb}
         onChange={(e) => setBlurb(e.target.value)}
         placeholder="e.g. April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. I'm trying to build a cult of people who don't sleep with their phones in their rooms — and honestly, I'm kinda succeeding. I am terrified of all the FUN that May will bring!!"
-        className="min-h-[200px] resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm"
+        className={`resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm ${isMobile ? "min-h-[250px]" : "min-h-[200px]"}`}
         style={{ fontFamily: "Sometype Mono, monospace" }}
       />
 
-      <div className="flex flex-col items-center space-y-2">
+      <div className="flex flex-col items-center space-y-2 w-full">
         <h3
           className={`font-semibold text-black ${
             isMobile ? "text-base" : "text-lg"
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
+
           add important dates for may: 
           
           parties? birthdays? things you're excited for?
@@ -92,6 +104,10 @@ const BlurbInput: React.FC<{
           modifiers={modifiers}
           modifiersStyles={modifiersStyles}
           modifiersClassNames={modifiersClassNames}
+          defaultMonth={new Date(2025, 4)}
+          fromMonth={new Date(2025, 4)}
+          toMonth={new Date(2025, 4)}
+          disabled={isDateDisabled}
           formatters={{
             formatDay: (date) => {
               const hasNote = savedNotes.some(
