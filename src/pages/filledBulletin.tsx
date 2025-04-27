@@ -15,7 +15,7 @@ const FilledBulletin: React.FC = () => {
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
-        <h1 className="text-4xl font-bold text-center bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
+        <h1 className="text-4xl font-bold text-center text-foreground">
           hooray! your bulletin has been submitted.
         </h1>
         <p className="text-muted-foreground text-center max-w-xl text-lg">
@@ -26,12 +26,11 @@ const FilledBulletin: React.FC = () => {
         <Button 
           onClick={handleNewSubmission}
           size="lg"
-          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium"
+          variant="default"
+          className="font-medium"
         >
           <Sparkles className="mr-2" />
-          **Delete and replace your monthly update** 
-
-          **(we'll use the latest submission)**
+          Delete and replace your monthly update (we'll use the latest submission)
         </Button>
       </div>
     </Layout>
