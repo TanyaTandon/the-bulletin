@@ -184,27 +184,33 @@ const Index = () => {
             hi!
             <br />
             <br />
-            the bulletin team here. we love our friends, we want to keep up with them, and have something to show for it! but we're tired of our phones, ads, & scrolling.
+            tanya, adi, jack and jacob here.
+            <br />
+            we love our friends and want to keep up with them.
+            <br />
+            and we're tired of phones, ads, & scrolling.
+            <br />
+            so we made the bulletin!
             <br />
             <br />
-            so we'd love to present to you — the bulletin! 
+            <strong>here's how it works:</strong>
             <br />
             <br />
-            1. you and your friends upload pictures and text to our webapp. 
+            💖 you and your friends upload pictures & text to our webapp.
             <br />
-            2. we make a monthly magazine, personalized for you, with all your friends' content. 
+            💖 we make a monthly magazine, personalized for you, with all your friends' content.
             <br />
-            3. you're limited to 6 close friends - quality over quantity! 
+            💖 you're limited to 6 close friends - quality over quantity!
             <br />
-            4. you get this magazine on high quality paper in a beautiful layout to keep and cherish! 
-            <br />
-            <br />
-            Expect your first bulletin by May 1st!
+            💖 you get this magazine on high quality paper in a beautiful layout to keep and cherish!
             <br />
             <br />
-            love, 
+            we ship your first bulletin on may 5th.
             <br />
-            tanya, adi, jackson - the bulletin team
+            <br />
+            love,
+            <br />
+            the bulletin team
           </p>
         </div>
 
