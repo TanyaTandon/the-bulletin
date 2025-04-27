@@ -177,7 +177,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
           className="container mx-auto"
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          &copy; {new Date().getFullYear()} the bulletin.
+          &copy; {new Date().getFullYear()} the bulletin. love,
+tanya, adi, jackson, jacob - the bulletin team
         </div>
       </footer>
     </div>
@@ -185,3 +186,4 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 };
 
 export default Layout;
+
