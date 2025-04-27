@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Calendar } from "./ui/calendar";
@@ -7,6 +8,7 @@ import { format, isBefore, isAfter } from "date-fns";
 import { CSSProperties } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Separator } from "./ui/separator";
+import ImageUploadGrid, { UploadedImage } from "./ImageUploadGrid";
 
 export interface CalendarNote {
   date: Date;
@@ -18,7 +20,9 @@ const BlurbInput: React.FC<{
   setSavedNotes: React.Dispatch<React.SetStateAction<CalendarNote[]>>;
   blurb: string;
   setBlurb: React.Dispatch<React.SetStateAction<string>>;
-}> = ({ savedNotes, setSavedNotes, blurb, setBlurb }) => {
+  images: UploadedImage[];
+  setImages: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
+}> = ({ savedNotes, setSavedNotes, blurb, setBlurb, images, setImages }) => {
   const [date, setDate] = useState<Date | undefined>(new Date(2025, 4, 1));
   const [calendarNote, setCalendarNote] = useState("");
   const isMobile = useIsMobile();
@@ -57,6 +61,19 @@ const BlurbInput: React.FC<{
   return (
     <div className="flex flex-col items-center w-full space-y-8">
       <div className="w-full bg-white rounded-lg shadow-sm p-6">
+        <div className="mb-6">
+          <h3
+            className={`font-semibold text-black mb-2 text-left ${
+              isMobile ? "text-base" : "text-lg"
+            }`}
+            style={{ fontFamily: "Sometype Mono, monospace" }}
+          >
+            upload pictures below. choose up to 9 pictures.
+          </h3>
+          <Separator className="my-4 bg-gray-200" />
+          <ImageUploadGrid images={images} setImages={setImages} />
+        </div>
+        
         <h3
           className={`font-semibold text-black mb-2 text-left ${
             isMobile ? "text-base" : "text-lg"

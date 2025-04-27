@@ -3,7 +3,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
 import { UserProvider } from "@/contexts/UserContext";
 import { Helmet } from "react-helmet";
 import Index from "./pages/Index";
@@ -42,7 +42,7 @@ const App = () => {
               <Route path="/signup" element={<SignUp key="signup" />} />
               <Route path="/settings" element={<Settings key="settings" />} />
               <Route path="/bulletin" element={<Bulletin key="bulletin" />} />
-              <Route path="/bulletin/:id" element={<FilledBulletin key="filled-bulletin" />} />
+              <Route path="/bulletin/filled" element={<FilledBulletin key="filled-bulletin" />} />
               <Route path="*" element={<NotFound key="not-found" />} />
             </Routes>
           </BrowserRouter>

@@ -2,7 +2,7 @@
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
+import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import MonthlyTimer from "@/components/MonthlyTimer";
 import TypewriterText from "@/components/TypewriterText";
@@ -43,7 +43,7 @@ const Bulletin = () => {
           images: images,
           blurb: blurb,
           savedNotes: savedNotes,
-          owner: user.phone_number,
+          owner: user?.phone_number || "",
         },
       });
       
@@ -83,15 +83,13 @@ const Bulletin = () => {
 
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <ImageUploadGrid images={images} setImages={setImages} />
-            </div>
-
-            <div className="bg-white rounded-lg shadow-sm p-6">
               <BlurbInput
                 savedNotes={savedNotes}
                 setSavedNotes={setSavedNotes}
                 blurb={blurb}
                 setBlurb={setBlurb}
+                images={images}
+                setImages={setImages}
               />
             </div>
 
