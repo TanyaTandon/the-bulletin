@@ -3,7 +3,6 @@ import React from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Sparkles } from "lucide-react";
 
 const FilledBulletin: React.FC = () => {
   const navigate = useNavigate();
@@ -23,15 +22,19 @@ const FilledBulletin: React.FC = () => {
 
           we're excited to show you what your friends have been up to! &lt;3
         </p>
-        <Button 
-          onClick={handleNewSubmission}
-          size="lg"
-          variant="default"
-          className="font-medium"
-        >
-          <Sparkles className="mr-2" />
-          Delete and replace your monthly update (we'll use the latest submission)
-        </Button>
+        <div className="flex flex-col items-center space-y-2">
+          <Button 
+            onClick={handleNewSubmission}
+            size="lg"
+            variant="default"
+            className="font-medium"
+          >
+            Delete and replace your monthly update
+          </Button>
+          <p className="text-sm text-muted-foreground italic">
+            we'll use the latest submission
+          </p>
+        </div>
       </div>
     </Layout>
   );
