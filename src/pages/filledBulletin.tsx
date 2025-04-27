@@ -35,7 +35,7 @@ const FilledBulletin: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-8 px-4 max-w-3xl mx-auto w-full">
+      <div className="flex flex-col items-center justify-center pt-8 pb-12 space-y-8 px-6 max-w-3xl mx-auto w-full">
         <div className="space-y-6 w-full text-center">
           <h1 className="text-4xl font-bold text-foreground">
             hooray! your bulletin has been submitted.

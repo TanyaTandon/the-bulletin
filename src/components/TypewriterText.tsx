@@ -29,10 +29,18 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25, class
     }
   }, [currentIndex, text, speed]);
 
+  // Calculate the height needed for the full text (approximation)
+  const lines = text.split('\n').length;
+  const minHeight = `${Math.max(lines * 1.5, 6)}em`; // Minimum height based on line count
+
   return (
     <div 
       className={`text-black mb-2 ${isMobile ? 'text-lg' : 'text-xl'} ${className}`}
-      style={{ fontFamily: 'Sometype Mono, monospace' }}
+      style={{ 
+        fontFamily: 'Sometype Mono, monospace',
+        minHeight, 
+        height: 'auto'
+      }}
       dangerouslySetInnerHTML={{ __html: displayedText }}
     />
   );

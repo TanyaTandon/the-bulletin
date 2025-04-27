@@ -67,7 +67,7 @@ const Bulletin = () => {
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-4" : "container py-6"}`}>
         <div className="max-w-3xl mx-auto space-y-6">
-          <div className="space-y-4 text-left">
+          <div className="space-y-4 text-left min-h-[300px]">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p>
 
