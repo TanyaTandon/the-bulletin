@@ -66,7 +66,7 @@ const Bulletin = () => {
   return (
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-2" : "container py-6"}`}>
-        <div className="max-w-3xl mx-auto space-y-8">
+        <div className="max-w-3xl mx-auto space-y-6"> {/* Reduced space-y from space-y-8 to space-y-6 */}
           <div className="space-y-4 text-center">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p>
@@ -80,7 +80,7 @@ const Bulletin = () => {
             />
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-6"> {/* Reduced space-y from space-y-12 to space-y-6 */}
             <div className="bg-white rounded-lg shadow-sm p-6">
               <ImageUploadGrid images={images} setImages={setImages} />
             </div>
