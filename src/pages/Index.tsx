@@ -188,12 +188,17 @@ const Index = () => {
           <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
           <p className="text-md text-muted-foreground text-left">
             hi!
-
+            <br />
+            <br />
             tanya, adi, jack and jacob here.
+            <br />
             we love our friends and want to keep up with them.
+            <br />
             and we're tired of phones, ads, & scrolling.
-
+            <br />
             so we made the bulletin!
+            <br />
+            <br />
             <strong>here's how it works:</strong>
             <br />
             <br />
@@ -210,6 +215,7 @@ const Index = () => {
             <br />
             <br />
             love,
+            <br />
             the bulletin team
           </p>
         </div>
