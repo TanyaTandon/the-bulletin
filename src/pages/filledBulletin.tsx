@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,23 +12,19 @@ import BlurbInput from "@/components/BlurbInput";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
-
   const navigate = useNavigate();
+  
   // Using useParams hook from react-router-dom to get URL parameters
-  const params = useParams<{ slug?: string }>();
-  // Access the slug parameter from the URL
-  const slug = params;
+  const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
 
-  console.log("URL Slug:", slug);
+  console.log("URL Slug:", id);
 
   const handleNewSubmission = () => {
     navigate("/bulletin");
   };
 
-  const bulletin = user?.bulletins?.filter(
-    (bulletin) => bulletin === slug.id
-  )[0];
+  const bulletin = user?.bulletins?.find(bulletin => bulletin === id);
 
   useEffect(() => {
     if (bulletin && bulletinData === null) {
@@ -42,7 +39,7 @@ const FilledBulletin: React.FC = () => {
         );
         const setData = {
           ...data[0],
-          savedNotes: Object.keys(data[0].saved_notes).map((item, index) => ({
+          savedNotes: Object.keys(data[0].saved_notes).map((item) => ({
             date: new Date(item),
             note: data[0].saved_notes[item],
           })),
@@ -61,11 +58,11 @@ const FilledBulletin: React.FC = () => {
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
         {bulletinData && (
           <ImageUploadGrid
-            images={bulletinData?.images}
-            setImages={(e) => {
+            images={bulletinData.images}
+            setImages={(newImages) => {
               setBulletin({
                 ...bulletinData,
-                images: e,
+                images: newImages,
               });
             }}
           />
@@ -73,15 +70,22 @@ const FilledBulletin: React.FC = () => {
 
         {bulletinData && (
           <BlurbInput
-            savedNotes={bulletinData?.savedNotes}
-            setSavedNotes={(e) => {
+            savedNotes={bulletinData.savedNotes}
+            setSavedNotes={(newNotes) => {
               setBulletin({
                 ...bulletinData,
-                savedNotes: e,
+                savedNotes: newNotes,
               });
             }}
-            blurb={bulletinData?.blurb}
-            setBlurb={(e) => setBulletin({ ...bulletinData, blurb: e })}
+            blurb={bulletinData.blurb}
+            setBlurb={(newBlurb) => setBulletin({ ...bulletinData, blurb: newBlurb })}
+            images={bulletinData.images}
+            setImages={(newImages) => {
+              setBulletin({
+                ...bulletinData,
+                images: newImages,
+              });
+            }}
           />
         )}
 

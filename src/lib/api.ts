@@ -233,7 +233,7 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
       throw bulletinError;
     }
 
-    return { success: true, bulletinId };
+    return { success: true, bulletinId: bulletin.id };
   } catch (error) {
     console.error("Error in createNewUser:", error);
     return { success: false, error };

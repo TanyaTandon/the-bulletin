@@ -24,16 +24,14 @@ const FriendInput: React.FC<{
   const [fractionalData, setFractionalData] = useState(null);
   const [addDetails, setAddDetails] = useState<boolean>(false);
   const [addFriend, setAddFriend] = useState<boolean>(false);
+
   useEffect(() => {
-    // Clear previous timer if it exists
     if (timer) {
       clearTimeout(timer);
     }
 
-    // Only set a new timer if phoneNumber has a value
     if (phoneNumber) {
       const newTimer = setTimeout(async () => {
-        // Call API after 4 seconds
         console.log("Calling API with phone number:", phoneNumber);
 
         if (phoneNumber.length === 10) {
@@ -76,7 +74,6 @@ const FriendInput: React.FC<{
       setTimer(newTimer);
     }
 
-    // Cleanup function to clear the timer when component unmounts or phoneNumber changes
     return () => {
       if (timer) {
         clearTimeout(timer);
@@ -237,7 +234,7 @@ const FriendModalContent: React.FC = () => {
 
       <div className="flex flex-col gap-4">
         {friendInputs.map((friend) => (
-          <FriendInput friend={friend} setFriend={setFriendInputs} />
+          <FriendInput friend={friend} setFriendInputs={setFriendInputs} />
         ))}
         {friendInputs.length !== 6 && (
           <Button

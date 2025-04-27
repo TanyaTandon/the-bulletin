@@ -81,14 +81,14 @@ const Index = () => {
     }
   };
 
-  const handleVerifySignIn = async (e: string) => {
-    if (e.includes("·")) return;
+  const handleVerifySignIn = async (code: string) => {
+    if (code.includes("·")) return;
     setIsProcessing(true);
     try {
       const result = await signIn
         .attemptFirstFactor({
           strategy: "phone_code",
-          code: e,
+          code: code,
         })
         .then(async (result) => {
           if (result.status === "complete") {
@@ -332,7 +332,8 @@ const Index = () => {
                       </h1>
                       <ReactInputVerificationCode
                         length={6}
-                        onCompleted={(e) => handleVerifySignIn(e)}
+                        onChange={(code) => setCode(code)}
+                        onCompleted={(code) => handleVerifySignIn(code)}
                       />
                     </>
                   )}
@@ -521,7 +522,8 @@ const Index = () => {
                       </h1>
                       <ReactInputVerificationCode
                         length={6}
-                        onCompleted={(e) => handleVerifySignIn(e)}
+                        onChange={(code) => setCode(code)}
+                        onCompleted={(code) => handleVerifySignIn(code)}
                       />
                     </>
                   )}
