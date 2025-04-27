@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -15,7 +14,6 @@ const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
   const navigate = useNavigate();
   
-  // Using useParams hook from react-router-dom to get URL parameters
   const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
 
@@ -54,55 +52,30 @@ const FilledBulletin: React.FC = () => {
     }
   }, [bulletin, bulletinData]);
 
-  // Create type-safe setter functions to work with ImageUploadGrid and BlurbInput components
-  const setImages = (newImages: React.SetStateAction<UploadedImage[]>) => {
+  const setImages = (newImages: UploadedImage[]) => {
     if (bulletinData) {
-      if (typeof newImages === 'function') {
-        const updatedImages = newImages(bulletinData.images);
-        setBulletin({
-          ...bulletinData,
-          images: updatedImages,
-        });
-      } else {
-        setBulletin({
-          ...bulletinData,
-          images: newImages,
-        });
-      }
+      setBulletin({
+        ...bulletinData,
+        images: Array.isArray(newImages) ? newImages : bulletinData.images,
+      });
     }
   };
 
-  const setSavedNotes = (newNotes: React.SetStateAction<CalendarNote[]>) => {
+  const setSavedNotes = (newNotes: CalendarNote[]) => {
     if (bulletinData) {
-      if (typeof newNotes === 'function') {
-        const updatedNotes = newNotes(bulletinData.savedNotes);
-        setBulletin({
-          ...bulletinData,
-          savedNotes: updatedNotes,
-        });
-      } else {
-        setBulletin({
-          ...bulletinData,
-          savedNotes: newNotes,
-        });
-      }
+      setBulletin({
+        ...bulletinData,
+        savedNotes: Array.isArray(newNotes) ? newNotes : bulletinData.savedNotes,
+      });
     }
   };
 
-  const setBlurb = (newBlurb: React.SetStateAction<string>) => {
+  const setBlurb = (newBlurb: string) => {
     if (bulletinData) {
-      if (typeof newBlurb === 'function') {
-        const updatedBlurb = newBlurb(bulletinData.blurb);
-        setBulletin({
-          ...bulletinData,
-          blurb: updatedBlurb,
-        });
-      } else {
-        setBulletin({
-          ...bulletinData,
-          blurb: newBlurb,
-        });
-      }
+      setBulletin({
+        ...bulletinData,
+        blurb: typeof newBlurb === 'string' ? newBlurb : bulletinData.blurb,
+      });
     }
   };
 
