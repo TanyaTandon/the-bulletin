@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
@@ -10,8 +11,16 @@ import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "react-toastify";
 import { Label } from "@/components/ui/label";
-import { Mail, Phone, MapPin, Building, Home, User, LoaderCircle } from "lucide-react";
+import { Mail, Phone, MapPin, Building, Home, User, LoaderCircle, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+
+// Create a reusable NumberedHeart component
+const NumberedHeart = ({ number }: { number: number }) => (
+  <span className="inline-flex relative items-center justify-center">
+    <Heart className="w-6 h-6 stroke-red-500 stroke-[1.5] fill-none" />
+    <span className="absolute text-xs font-medium text-red-500">{number}</span>
+  </span>
+);
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -179,7 +188,6 @@ const Index = () => {
       <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8">
         <div className="text-left space-y-4">
           <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
-          <h1 className="text-4xl font-bold text-left">Welcome to Bulletin</h1>
           <p className="text-md text-muted-foreground text-left">
             hi!
             <br />
@@ -196,13 +204,13 @@ const Index = () => {
             <strong>here's how it works:</strong>
             <br />
             <br />
-            💖 you and your friends upload pictures & text to our webapp.
+            <NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.
             <br />
-            💖 we make a monthly magazine, personalized for you, with all your friends' content.
+            <NumberedHeart number={2} /> we make a monthly magazine, personalized for you, with all your friends' content.
             <br />
-            💖 you're limited to 6 close friends - quality over quantity!
+            <NumberedHeart number={3} /> you're limited to 6 close friends - quality over quantity!
             <br />
-            💖 you get this magazine on high quality paper in a beautiful layout to keep and cherish!
+            <NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!
             <br />
             <br />
             we ship your first bulletin on may 5th.
