@@ -183,7 +183,7 @@ const Index = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8 px-4 md:px-0">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8 px-6 md:px-12 py-12">
         <div className="text-left space-y-4">
           <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
           <p className="text-md text-muted-foreground text-left">

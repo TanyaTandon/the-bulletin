@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -85,7 +86,7 @@ const Bulletin = () => {
               <ImageUploadGrid images={images} setImages={setImages} />
             </div>
 
-            <div className="space-y-6 bg-white rounded-lg shadow-sm p-6">
+            <div className="bg-white rounded-lg shadow-sm p-6">
               <BlurbInput
                 savedNotes={savedNotes}
                 setSavedNotes={setSavedNotes}
