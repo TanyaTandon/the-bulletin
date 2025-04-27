@@ -196,19 +196,24 @@ const Index = () => {
             <br />
             and we're tired of phones, ads, & scrolling.
             <br />
-            so we made the bulletin!
             <br />
+            so we made the bulletin!
             <br />
             <strong>here's how it works:</strong>
             <br />
             <br />
-            <span className="flex items-center"><NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.</span>
-            <br />
-            <span className="flex items-center"><NumberedHeart number={2} /> we make a monthly magazine, personalized for you, with all your friends' content.</span>
-            <br />
-            <span className="flex items-center"><NumberedHeart number={3} /> you're limited to 6 close friends - quality over quantity!</span>
-            <br />
-            <span className="flex items-center"><NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!</span>
+            <span className="flex items-center">
+              <NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.
+            </span>
+            <span className="flex items-center">
+              <NumberedHeart number={2} /> we make a monthly magazine, personalized for you, with all your friends' content.
+            </span>
+            <span className="flex items-center">
+              <NumberedHeart number={3} /> you're limited to 6 close friends - quality over quantity!
+            </span>
+            <span className="flex items-center">
+              <NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!
+            </span>
             <br />
             <br />
             we ship your first bulletin on may 5th.
