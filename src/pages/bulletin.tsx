@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -66,8 +65,8 @@ const Bulletin = () => {
   return (
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-2" : "container py-6"}`}>
-        <div className="max-w-3xl mx-auto space-y-8">
-          <div className="space-y-4 text-center">
+        <div className="max-w-3xl mx-auto space-y-6">
+          <div className="space-y-4 text-left">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p>
 
@@ -76,11 +75,12 @@ const Bulletin = () => {
 <p>upload your pictures, text, and calendar dates below.</p>
 
 <p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
-              speed={isMobile ? 20 : 25}
+              speed={isMobile ? 30 : 35}
+              className="text-xl"
             />
           </div>
 
-          <div className="space-y-12">
+          <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
               <ImageUploadGrid images={images} setImages={setImages} />
             </div>

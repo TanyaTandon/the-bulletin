@@ -5,9 +5,10 @@ import { useIsMobile } from "@/hooks/use-mobile";
 interface TypewriterTextProps {
   text: string;
   speed?: number;
+  className?: string;
 }
 
-const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => {
+const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25, className = "" }) => {
   const [displayedText, setDisplayedText] = useState("");
   const [currentIndex, setCurrentIndex] = useState(0);
   const isMobile = useIsMobile();
@@ -30,7 +31,7 @@ const TypewriterText: React.FC<TypewriterTextProps> = ({ text, speed = 25 }) => 
 
   return (
     <div 
-      className={`text-black mb-2 ${isMobile ? 'text-sm' : 'text-lg'}`}
+      className={`text-black mb-2 ${isMobile ? 'text-lg' : 'text-xl'} ${className}`}
       style={{ fontFamily: 'Sometype Mono, monospace' }}
       dangerouslySetInnerHTML={{ __html: displayedText }}
     />
