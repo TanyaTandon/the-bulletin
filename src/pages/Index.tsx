@@ -188,20 +188,14 @@ const Index = () => {
           <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
           <p className="text-md text-muted-foreground text-left">
             hi!
-            <br />
-            <br />
+
             tanya, adi, jack and jacob here.
-            <br />
             we love our friends and want to keep up with them.
-            <br />
             and we're tired of phones, ads, & scrolling.
-            <br />
-            <br />
+
             so we made the bulletin!
-            <br />
-            <strong>here's how it works:</strong>
-            <br />
-            <br />
+
+            **here's how it works:**
             <span className="flex items-center">
               <NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.
             </span>
@@ -214,13 +208,10 @@ const Index = () => {
             <span className="flex items-center">
               <NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!
             </span>
-            <br />
-            <br />
+
             we ship your first bulletin on may 5th.
-            <br />
-            <br />
+
             love,
-            <br />
             the bulletin team
           </p>
         </div>
