@@ -52,12 +52,12 @@ const BlurbInput: React.FC<{
         }`}
         style={{ fontFamily: "Sometype Mono, monospace" }}
       >
-        Add your monthly summary
+        add a monthly summary, story, poem, or whatever your heart desires.
       </h3>
       <Textarea
         value={blurb}
         onChange={(e) => setBlurb(e.target.value)}
-        placeholder="April was so fucking LIT. I nommed nommed and crushed on my crush and biked on my bike"
+        placeholder="e.g. April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. I'm trying to build a cult of people who don't sleep with their phones in their rooms — and honestly, I'm kinda succeeding. I am terrified of all the FUN that May will bring!!"
         className="min-h-[80px] resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm"
         style={{ fontFamily: "Sometype Mono, monospace" }}
       />
@@ -68,7 +68,7 @@ const BlurbInput: React.FC<{
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          Add your key April highlights
+          add important dates for may: parties? birthdays? things you're excited for?
         </h3>
         <Calendar
           mode="single"

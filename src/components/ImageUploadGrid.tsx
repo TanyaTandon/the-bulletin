@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Plus, Edit, Trash2, Upload } from "lucide-react";
 import { Card } from "./ui/card";
@@ -116,12 +117,12 @@ const ImageUploadGrid: React.FC<{
     <div className="mb-4 flex justify-center flex-col items-center">
       <div className="w-full max-w-md">
         <h3
-          className={`font-semibold text-black mb-2 ${
+          className={`font-semibold text-black mb-2 text-left ${
             isMobile ? "text-base" : "text-lg"
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          Upload your 1-9 pictures
+          upload pictures below. choose up to 9 pictures.
         </h3>
         <div
           className="grid gap-1 mx-auto"
