@@ -64,7 +64,7 @@ const Bulletin = () => {
 
   return (
     <Layout>
-      <div className={`mx-auto ${isMobile ? "px-2" : "container py-6"}`}>
+      <div className={`mx-auto ${isMobile ? "px-4" : "container py-6"}`}>
         <div className="max-w-3xl mx-auto space-y-6">
           <div className="space-y-4 text-left">
             <TypewriterText
@@ -85,7 +85,7 @@ const Bulletin = () => {
               <ImageUploadGrid images={images} setImages={setImages} />
             </div>
 
-            <div className="bg-white rounded-lg shadow-sm p-6">
+            <div className="space-y-6 bg-white rounded-lg shadow-sm p-6">
               <BlurbInput
                 savedNotes={savedNotes}
                 setSavedNotes={setSavedNotes}
