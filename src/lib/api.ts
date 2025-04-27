@@ -166,39 +166,47 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
     const imageUrls: string[] = [];
 
     for (const image of images) {
-      const fetchBlob = await fetch(image.url, {
-        method: "GET",
-        headers: {
-          Accept: "image/png",
-        },
-      });
-
-      const buff = await fetchBlob.blob();
-
-      const { data: fileData, error: uploadError } = await supabase.storage
-        .from("user-images")
-        .upload(`/${image.id}.png`, buff, {
-          contentType: "image/png",
+      if (!image.url.includes("supabase.co")) {
+        // Only process images that haven't been uploaded to Supabase yet
+        const fetchBlob = await fetch(image.url, {
+          method: "GET",
+          headers: {
+            Accept: "image/png",
+          },
         });
-
-      if (uploadError) {
-        console.error("Error uploading image:", uploadError);
-        continue;
-      }
-
-      // Get the public URL for the uploaded image
-      const { data: urlData } = supabase.storage
-        .from("user-images")
-        .getPublicUrl(image.id);
-
-      if (urlData?.publicUrl) {
-        imageUrls.push(urlData.publicUrl);
+  
+        const buff = await fetchBlob.blob();
+  
+        const { data: fileData, error: uploadError } = await supabase.storage
+          .from("user-images")
+          .upload(`/${image.id}.png`, buff, {
+            contentType: "image/png",
+          });
+  
+        if (uploadError) {
+          console.error("Error uploading image:", uploadError);
+          continue;
+        }
+  
+        // Get the public URL for the uploaded image
+        const { data: urlData } = supabase.storage
+          .from("user-images")
+          .getPublicUrl(image.id);
+  
+        if (urlData?.publicUrl) {
+          imageUrls.push(urlData.publicUrl);
+        }
       }
     }
 
     function arrayToDict(arr) {
       return arr.reduce((dict, item) => {
-        dict[item.date] = item.note;
+        // Convert Date objects to ISO strings for storage
+        const dateKey = item.date instanceof Date 
+          ? item.date.toISOString() 
+          : item.date.toString();
+        
+        dict[dateKey] = item.note;
         return dict;
       }, {});
     }
@@ -209,33 +217,38 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
       saved_notes: arrayToDict(bulletin.savedNotes),
     };
 
+    console.log("Updating bulletin with data:", updatedBulletin);
+    console.log("Bulletin ID:", bulletin.id);
+
     const { error: bulletinError } = await supabase
       .from("bulletins")
       .update(updatedBulletin)
-      .eq("id", bulletin.id)
-      .then(async (item) => {
-        const { error: userError } = await supabase
-          .from("user_record")
-          .update({
-            images: [...images.map((item) => item.id), ...user.images],
-          })
-          .eq("phone_number", user.phone_number);
-
-        if (userError) {
-          console.error("Error creating user:", userError);
-          throw userError;
-        }
-        return item;
-      });
+      .eq("id", bulletin.id);
 
     if (bulletinError) {
-      console.error("Error creating bulletin:", bulletinError);
+      console.error("Error updating bulletin:", bulletinError);
       throw bulletinError;
+    }
+
+    // Update user's images array if new images were added
+    const newImageIds = images.map(item => item.id).filter(id => !user.images.includes(id));
+    if (newImageIds.length > 0) {
+      const { error: userError } = await supabase
+        .from("user_record")
+        .update({
+          images: [...newImageIds, ...user.images],
+        })
+        .eq("phone_number", user.phone_number);
+
+      if (userError) {
+        console.error("Error updating user images:", userError);
+        throw userError;
+      }
     }
 
     return { success: true, bulletinId: bulletin.id };
   } catch (error) {
-    console.error("Error in createNewUser:", error);
+    console.error("Error in updateBulletin:", error);
     return { success: false, error };
   }
 }

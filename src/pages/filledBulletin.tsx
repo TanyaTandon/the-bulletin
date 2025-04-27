@@ -10,6 +10,7 @@ import { Bulletin, getBulletin, updateBulletin } from "@/lib/api";
 import ImageUploadGrid from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
+import { toast } from "sonner";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -18,6 +19,7 @@ const FilledBulletin: React.FC = () => {
   // Using useParams hook from react-router-dom to get URL parameters
   const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
+  const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
   console.log("URL Slug:", id);
 
@@ -55,7 +57,7 @@ const FilledBulletin: React.FC = () => {
   }, [bulletin, bulletinData]);
 
   // Create type-safe setter functions to work with ImageUploadGrid and BlurbInput components
-  const setImages = (newImages: React.SetStateAction<UploadedImage[]>) => {
+  const setImages = (newImages: UploadedImage[] | ((prev: UploadedImage[]) => UploadedImage[])) => {
     if (bulletinData) {
       if (typeof newImages === 'function') {
         const updatedImages = newImages(bulletinData.images);
@@ -72,7 +74,7 @@ const FilledBulletin: React.FC = () => {
     }
   };
 
-  const setSavedNotes = (newNotes: React.SetStateAction<CalendarNote[]>) => {
+  const setSavedNotes = (newNotes: CalendarNote[] | ((prev: CalendarNote[]) => CalendarNote[])) => {
     if (bulletinData) {
       if (typeof newNotes === 'function') {
         const updatedNotes = newNotes(bulletinData.savedNotes);
@@ -89,7 +91,7 @@ const FilledBulletin: React.FC = () => {
     }
   };
 
-  const setBlurb = (newBlurb: React.SetStateAction<string>) => {
+  const setBlurb = (newBlurb: string | ((prev: string) => string)) => {
     if (bulletinData) {
       if (typeof newBlurb === 'function') {
         const updatedBlurb = newBlurb(bulletinData.blurb);
@@ -103,6 +105,28 @@ const FilledBulletin: React.FC = () => {
           blurb: newBlurb,
         });
       }
+    }
+  };
+
+  const handleUpdateBulletin = async () => {
+    if (!user || !bulletinData) return;
+    
+    setIsUpdating(true);
+    try {
+      const result = await updateBulletin(user, bulletinData);
+      if (result.success) {
+        toast.success("Bulletin updated successfully!");
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
+      } else {
+        toast.error("Failed to update bulletin");
+      }
+    } catch (error) {
+      console.error("Error updating bulletin:", error);
+      toast.error("An error occurred while updating your bulletin");
+    } finally {
+      setIsUpdating(false);
     }
   };
 
@@ -128,12 +152,19 @@ const FilledBulletin: React.FC = () => {
         )}
 
         <Button
-          onClick={() => updateBulletin(user, bulletinData)}
+          onClick={handleUpdateBulletin}
           size="lg"
           className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium"
+          disabled={isUpdating}
         >
-          <Sparkles className="mr-2" />
-          Update your Bulletin
+          {isUpdating ? (
+            "Updating..."
+          ) : (
+            <>
+              <Sparkles className="mr-2" />
+              Update your Bulletin
+            </>
+          )}
         </Button>
       </div>
     </Layout>
