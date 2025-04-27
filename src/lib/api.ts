@@ -151,6 +151,95 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
   }
 }
 
+export async function getBulletin(bulletinId: string) {
+  const { data, error } = await supabase
+    .from("bulletins")
+    .select("*")
+    .eq("id", bulletinId);
+  return data;
+}
+
+export async function updateBulletin(user: User, bulletin: Bulletin) {
+  try {
+    const images = bulletin.images;
+    // Upload images to the bucket and collect their URLs
+    const imageUrls: string[] = [];
+
+    for (const image of images) {
+      const fetchBlob = await fetch(image.url, {
+        method: "GET",
+        headers: {
+          Accept: "image/png",
+        },
+      });
+
+      const buff = await fetchBlob.blob();
+
+      const { data: fileData, error: uploadError } = await supabase.storage
+        .from("user-images")
+        .upload(`/${image.id}.png`, buff, {
+          contentType: "image/png",
+        });
+
+      if (uploadError) {
+        console.error("Error uploading image:", uploadError);
+        continue;
+      }
+
+      // Get the public URL for the uploaded image
+      const { data: urlData } = supabase.storage
+        .from("user-images")
+        .getPublicUrl(image.id);
+
+      if (urlData?.publicUrl) {
+        imageUrls.push(urlData.publicUrl);
+      }
+    }
+
+    function arrayToDict(arr) {
+      return arr.reduce((dict, item) => {
+        dict[item.date] = item.note;
+        return dict;
+      }, {});
+    }
+
+    const updatedBulletin = {
+      blurb: bulletin.blurb,
+      images: images.map((item) => item.id),
+      saved_notes: arrayToDict(bulletin.savedNotes),
+    };
+
+    const { error: bulletinError } = await supabase
+      .from("bulletins")
+      .update(updatedBulletin)
+      .eq("id", bulletin.id)
+      .then(async (item) => {
+        const { error: userError } = await supabase
+          .from("user_record")
+          .update({
+            images: [...images.map((item) => item.id), ...user.images],
+          })
+          .eq("phone_number", user.phone_number);
+
+        if (userError) {
+          console.error("Error creating user:", userError);
+          throw userError;
+        }
+        return item;
+      });
+
+    if (bulletinError) {
+      console.error("Error creating bulletin:", bulletinError);
+      throw bulletinError;
+    }
+
+    return { success: true, bulletinId };
+  } catch (error) {
+    console.error("Error in createNewUser:", error);
+    return { success: false, error };
+  }
+}
+
 export async function addFriendToSupabase({
   friend,
   fractionalUser,

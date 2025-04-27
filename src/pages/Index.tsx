@@ -5,7 +5,7 @@ import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
 import { Input } from "@/components/ui/input";
-import { useAppDispatch } from "@/redux";
+import { useAppDispatch, useAppSelector } from "@/redux";
 import { fetchUser } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "sonner";
@@ -18,9 +18,18 @@ import {
   Home,
   User,
   LoaderCircle,
+  Heart,
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
+import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
+
+const NumberedHeart = ({ number }: { number: number }) => (
+  <span className="inline-flex relative items-center justify-center align-middle mr-2">
+    <Heart className="w-6 h-6 stroke-red-500 stroke-[1.5] fill-none" />
+    <span className="absolute text-xs font-medium text-red-500">{number}</span>
+  </span>
+);
 
 const Index = () => {
   const dispatch = useAppDispatch();
@@ -98,7 +107,12 @@ const Index = () => {
       if (result?.identifier) {
         const phone = result.identifier.split("+1")[1];
         await dispatch(fetchUser(phone));
-        navigate("/bulletin");
+        console.log(user);
+        if (user.bulletins.length > 0) {
+          navigate(`/bulletin/${user.bulletins[0]}`);
+        } else {
+          navigate("/bulletin");
+        }
         toast.success("Welcome back! You're now signed in.");
       }
     } catch (error) {
@@ -196,6 +210,8 @@ const Index = () => {
     }
   };
 
+  const user = useAppSelector(staticGetUser);
+
   const handleCloseModal = () => {
     setOpenAuthModal(false);
     setSignInStep(0);
@@ -238,8 +254,22 @@ const Index = () => {
             <br />
             3. you're limited to 6 close friends - quality over quantity!
             <br />
-            4. you get this magazine on high quality paper in a beautiful layout
-            to keep and cherish!
+            <span className="flex items-center">
+              <NumberedHeart number={1} /> you and your friends upload pictures
+              & text to our webapp.
+            </span>
+            <span className="flex items-center">
+              <NumberedHeart number={2} /> we make a monthly magazine,
+              personalized for you, with all your friends' content.
+            </span>
+            <span className="flex items-center">
+              <NumberedHeart number={3} /> you're limited to 6 close friends -
+              quality over quantity!
+            </span>
+            <span className="flex items-center">
+              <NumberedHeart number={4} /> you get this magazine on high quality
+              paper in a beautiful layout to keep and cherish!
+            </span>
             <br />
             <br />
             Expect your first bulletin by May 1st!
@@ -529,7 +559,13 @@ const Index = () => {
           ) : (
             <Button
               size="lg"
-              onClick={() => navigate("/bulletin")}
+              onClick={() => {
+                if (user.bulletins) {
+                  navigate(`/bulletin/${user.bulletins[0]}`);
+                } else {
+                  navigate("/bulletin");
+                }
+              }}
               className="bg-gradient-to-r from-accent to-primary hover:opacity-90"
             >
               Go to Bulletin

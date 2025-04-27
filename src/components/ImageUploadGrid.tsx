@@ -114,7 +114,7 @@ const ImageUploadGrid: React.FC<{
 
   return (
     <div className="mb-4 flex justify-center flex-col items-center">
-      <div className="w-full max-w-md">
+      <div className="w-full max-w-[40rem]">
         <h3
           className={`font-semibold text-black mb-2 ${
             isMobile ? "text-base" : "text-lg"
@@ -197,7 +197,7 @@ const ImageUploadGrid: React.FC<{
         <input
           ref={fileInputRef}
           type="file"
-          accept="image/*"
+          accept="image/png, image/jpeg, image/jpg"
           multiple={editingIndex === null}
           className="hidden"
           onChange={handleFileSelect}

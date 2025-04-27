@@ -24,13 +24,14 @@ const BlurbInput: React.FC<{
 
   const handleSaveNote = () => {
     if (date && calendarNote.trim()) {
+      console.log(savedNotes);
       setSavedNotes([...savedNotes, { date, note: calendarNote.trim() }]);
       setCalendarNote("");
     }
   };
 
   const modifiers = {
-    withNote: savedNotes.map((note) => note.date),
+    withNote: savedNotes?.map((note) => note.date),
   };
 
   const modifiersStyles: Record<string, CSSProperties> = {
@@ -80,7 +81,7 @@ const BlurbInput: React.FC<{
           modifiersClassNames={modifiersClassNames}
           formatters={{
             formatDay: (date) => {
-              const hasNote = savedNotes.some(
+              const hasNote = savedNotes?.some(
                 (note) => note.date.toDateString() === date.toDateString()
               );
               return (
@@ -98,8 +99,8 @@ const BlurbInput: React.FC<{
           }}
         />
 
-        <div className="w-full max-w-md space-y-1 mt-2">
-          {savedNotes.map((savedNote, index) => (
+        <div className="w-full max-w-[40rem] space-y-1 mt-2">
+          {savedNotes?.map((savedNote, index) => (
             <div
               key={index}
               className="flex items-start space-x-1 text-xs"
@@ -114,7 +115,7 @@ const BlurbInput: React.FC<{
         </div>
 
         {date && (
-          <div className="mt-2 w-full max-w-md p-3 border rounded-lg bg-white shadow-sm">
+          <div className="mt-2 w-full max-w-[40rem] p-3 border rounded-lg bg-white shadow-sm">
             <p
               className="text-xs mb-1"
               style={{ fontFamily: "Sometype Mono, monospace" }}
