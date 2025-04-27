@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -125,7 +124,7 @@ const Bulletin = () => {
                 Saving... <LoaderCircle className="animate-spin" />
               </span>
             ) : (
-              "Save Bulletin"
+              "Submit your monthly update"
             )}
           </Button>
         </div>
@@ -137,4 +136,3 @@ const Bulletin = () => {
 };
 
 export default Bulletin;
-
