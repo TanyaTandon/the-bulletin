@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
@@ -14,9 +13,8 @@ import { Label } from "@/components/ui/label";
 import { Mail, Phone, MapPin, Building, Home, User, LoaderCircle, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 
-// Create a reusable NumberedHeart component
 const NumberedHeart = ({ number }: { number: number }) => (
-  <span className="inline-flex relative items-center justify-center">
+  <span className="inline-flex relative items-center justify-center align-middle mr-2">
     <Heart className="w-6 h-6 stroke-red-500 stroke-[1.5] fill-none" />
     <span className="absolute text-xs font-medium text-red-500">{number}</span>
   </span>
@@ -204,13 +202,13 @@ const Index = () => {
             <strong>here's how it works:</strong>
             <br />
             <br />
-            <NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.
+            <span className="flex items-center"><NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.</span>
             <br />
-            <NumberedHeart number={2} /> we make a monthly magazine, personalized for you, with all your friends' content.
+            <span className="flex items-center"><NumberedHeart number={2} /> we make a monthly magazine, personalized for you, with all your friends' content.</span>
             <br />
-            <NumberedHeart number={3} /> you're limited to 6 close friends - quality over quantity!
+            <span className="flex items-center"><NumberedHeart number={3} /> you're limited to 6 close friends - quality over quantity!</span>
             <br />
-            <NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!
+            <span className="flex items-center"><NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!</span>
             <br />
             <br />
             we ship your first bulletin on may 5th.
