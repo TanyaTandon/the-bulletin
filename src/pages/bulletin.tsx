@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
@@ -66,7 +67,7 @@ const Bulletin = () => {
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-4 pt-0" : "container py-6"}`}>
         <div className="max-w-3xl mx-auto space-y-6">
-          <div className="space-y-2 text-left min-h-[6em]">
+          <div className="text-left min-h-[6em]">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p>
 
