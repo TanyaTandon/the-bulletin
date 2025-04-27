@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Calendar } from "./ui/calendar";
@@ -27,9 +26,8 @@ const BlurbInput: React.FC<{
   const [calendarNote, setCalendarNote] = useState("");
   const isMobile = useIsMobile();
 
-  // Calculate the start and end of May 2025
-  const startOfMay2025 = new Date(2025, 4, 1); // May 1st, 2025
-  const endOfMay2025 = new Date(2025, 4, 31); // May 31st, 2025
+  const startOfMay2025 = new Date(2025, 4, 1);
+  const endOfMay2025 = new Date(2025, 4, 31);
 
   const handleSaveNote = () => {
     if (date && calendarNote.trim()) {
@@ -52,8 +50,7 @@ const BlurbInput: React.FC<{
   const modifiersClassNames = {
     withNote: "relative group",
   };
-  
-  // Disable dates outside May 2025
+
   const isDateDisabled = (date: Date) => {
     return isBefore(date, startOfMay2025) || isAfter(date, endOfMay2025);
   };
@@ -103,7 +100,7 @@ const BlurbInput: React.FC<{
             className="text-xs text-gray-500 mb-4" 
             style={{ fontFamily: "Sometype Mono, monospace" }}
           >
-            eg: flying to NYC
+            eg: 5/8 flying to NYC
           </p>
           <Separator className="my-4 bg-gray-200" />
           <div className="flex flex-col items-center space-y-4">
