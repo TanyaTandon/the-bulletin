@@ -1,16 +1,36 @@
 
-import React from "react";
+import React, { useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
 import { useNavigate } from "react-router-dom";
-import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
+import { Card, CardContent, CardHeader, CardTitle, CardFooter } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import { useToast } from "@/hooks/use-toast";
 
 const FilledBulletin: React.FC = () => {
   const navigate = useNavigate();
+  const { toast } = useToast();
+  const [feedback, setFeedback] = useState("");
 
   const handleNewSubmission = () => {
     navigate('/bulletin');
+  };
+
+  const handleFeedbackSubmit = () => {
+    if (feedback.trim()) {
+      // TODO: Implement actual feedback submission logic
+      toast({
+        title: "Feedback Received",
+        description: "Thank you for your valuable input!",
+      });
+      setFeedback("");
+    } else {
+      toast({
+        title: "Feedback Empty",
+        description: "Please write something before submitting.",
+        variant: "destructive"
+      });
+    }
   };
 
   return (
@@ -49,8 +69,18 @@ const FilledBulletin: React.FC = () => {
             <Textarea 
               placeholder="Share your thoughts with us..."
               className="min-h-[100px]"
+              value={feedback}
+              onChange={(e) => setFeedback(e.target.value)}
             />
           </CardContent>
+          <CardFooter>
+            <Button 
+              onClick={handleFeedbackSubmit} 
+              className="w-full"
+            >
+              Submit Feedback
+            </Button>
+          </CardFooter>
         </Card>
       </div>
     </Layout>
