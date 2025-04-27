@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Calendar } from "./ui/calendar";
@@ -102,7 +103,7 @@ const BlurbInput: React.FC<{
             className="text-xs text-gray-500 mb-4" 
             style={{ fontFamily: "Sometype Mono, monospace" }}
           >
-            eg: 5/8 tanya is flying to NYC
+            eg: flying to NYC
           </p>
           <Separator className="my-4 bg-gray-200" />
           <div className="flex flex-col items-center space-y-4">
