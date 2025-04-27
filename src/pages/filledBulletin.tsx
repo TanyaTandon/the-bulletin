@@ -117,7 +117,7 @@ const FilledBulletin: React.FC = () => {
       if (result.success) {
         toast.success("Bulletin updated successfully!");
         setTimeout(() => {
-          navigate("/bulletin");  // Changed from "/" to "/bulletin"
+          navigate("/");
         }, 1500);
       } else {
         toast.error("Failed to update bulletin");
