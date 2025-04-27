@@ -65,9 +65,9 @@ const Bulletin = () => {
 
   return (
     <Layout>
-      <div className={`mx-auto ${isMobile ? "px-4" : "container py-6"}`}>
+      <div className={`mx-auto ${isMobile ? "px-4 pt-0" : "container py-6"}`}>
         <div className="max-w-3xl mx-auto space-y-6">
-          <div className="space-y-4 text-left min-h-[300px]">
+          <div className="space-y-2 text-left">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p>
 
@@ -121,3 +121,4 @@ const Bulletin = () => {
 };
 
 export default Bulletin;
+
