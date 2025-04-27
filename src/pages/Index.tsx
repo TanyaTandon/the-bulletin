@@ -350,7 +350,9 @@ const Index = () => {
                     ) : (
                       <Button
                         onClick={
-                          signInStep === 0 ? handleSignIn : handleVerifySignIn
+                          signInStep === 0 ? handleSignIn : (event) => {
+                            if (code) handleVerifySignIn(code);
+                          }
                         }
                         size="lg"
                         className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"

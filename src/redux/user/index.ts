@@ -46,8 +46,8 @@ export const fetchUser = createAsyncThunk(
 export const fetchBulletins = createAsyncThunk(
   "user/fetchBulletins",
   async (_, { dispatch, getState }) => {
-    const state = getState() as any;
-    const user: User = state.app.userUpdater.user;
+    const state = getState() as { userUpdater: UserState };
+    const user: User = state.userUpdater.user;
     console.log(getState());
     const { data: res, error } = await supabase
       .from("bulletins")

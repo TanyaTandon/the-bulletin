@@ -8,7 +8,8 @@ import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { Bulletin, getBulletin, updateBulletin } from "@/lib/api";
 import ImageUploadGrid from "@/components/ImageUploadGrid";
-import BlurbInput from "@/components/BlurbInput";
+import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
+import { UploadedImage } from "@/components/ImageUploadGrid";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -53,39 +54,76 @@ const FilledBulletin: React.FC = () => {
     }
   }, [bulletin, bulletinData]);
 
+  // Create type-safe setter functions to work with ImageUploadGrid and BlurbInput components
+  const setImages = (newImages: React.SetStateAction<UploadedImage[]>) => {
+    if (bulletinData) {
+      if (typeof newImages === 'function') {
+        const updatedImages = newImages(bulletinData.images);
+        setBulletin({
+          ...bulletinData,
+          images: updatedImages,
+        });
+      } else {
+        setBulletin({
+          ...bulletinData,
+          images: newImages,
+        });
+      }
+    }
+  };
+
+  const setSavedNotes = (newNotes: React.SetStateAction<CalendarNote[]>) => {
+    if (bulletinData) {
+      if (typeof newNotes === 'function') {
+        const updatedNotes = newNotes(bulletinData.savedNotes);
+        setBulletin({
+          ...bulletinData,
+          savedNotes: updatedNotes,
+        });
+      } else {
+        setBulletin({
+          ...bulletinData,
+          savedNotes: newNotes,
+        });
+      }
+    }
+  };
+
+  const setBlurb = (newBlurb: React.SetStateAction<string>) => {
+    if (bulletinData) {
+      if (typeof newBlurb === 'function') {
+        const updatedBlurb = newBlurb(bulletinData.blurb);
+        setBulletin({
+          ...bulletinData,
+          blurb: updatedBlurb,
+        });
+      } else {
+        setBulletin({
+          ...bulletinData,
+          blurb: newBlurb,
+        });
+      }
+    }
+  };
+
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
         {bulletinData && (
           <ImageUploadGrid
             images={bulletinData.images}
-            setImages={(newImages) => {
-              setBulletin({
-                ...bulletinData,
-                images: newImages,
-              });
-            }}
+            setImages={setImages}
           />
         )}
 
         {bulletinData && (
           <BlurbInput
             savedNotes={bulletinData.savedNotes}
-            setSavedNotes={(newNotes) => {
-              setBulletin({
-                ...bulletinData,
-                savedNotes: newNotes,
-              });
-            }}
+            setSavedNotes={setSavedNotes}
             blurb={bulletinData.blurb}
-            setBlurb={(newBlurb) => setBulletin({ ...bulletinData, blurb: newBlurb })}
+            setBlurb={setBlurb}
             images={bulletinData.images}
-            setImages={(newImages) => {
-              setBulletin({
-                ...bulletinData,
-                images: newImages,
-              });
-            }}
+            setImages={setImages}
           />
         )}
 
