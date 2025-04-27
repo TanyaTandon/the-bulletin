@@ -1,72 +1,31 @@
-import React, { useState, useEffect } from "react";
-import { format } from "date-fns";
-import { useIsMobile } from "@/hooks/use-mobile";
+
+import React, { useState, useEffect } from 'react';
+import { differenceInDays, differenceInHours, differenceInMinutes, parseISO } from 'date-fns';
+import { useIsMobile } from '@/hooks/use-mobile';
 
 const MonthlyTimer = () => {
-  const [timeRemaining, setTimeRemaining] = useState(getTimeRemaining());
+  const [now, setNow] = useState(new Date());
+  const targetDate = parseISO('2025-05-05T23:59:00-07:00'); // May 5th, 11:59 PM PST
   const isMobile = useIsMobile();
-
-  function getTimeRemaining() {
-    const now = new Date();
-    const currentYear = now.getFullYear();
-    const currentMonth = now.getMonth();
-
-    // Set the target date to the 5th of the next month
-    let targetDate = new Date(currentYear, currentMonth + 1, 5);
-
-    // If today is after the 5th, target the 5th of the following month
-    if (now.getDate() > 5) {
-      targetDate = new Date(currentYear, currentMonth + 2, 5);
-    }
-
-    const difference = targetDate.getTime() - now.getTime();
-
-    let timeLeft = {
-      days: 0,
-      hours: 0,
-      minutes: 0,
-      seconds: 0,
-    };
-
-    if (difference > 0) {
-      timeLeft = {
-        days: Math.floor(difference / (1000 * 60 * 60 * 24)),
-        hours: Math.floor((difference / (1000 * 60 * 60)) % 24),
-        minutes: Math.floor((difference / 1000 / 60) % 60),
-        seconds: Math.floor((difference / 1000) % 60),
-      };
-    }
-
-    return timeLeft;
-  }
 
   useEffect(() => {
     const timer = setInterval(() => {
-      setTimeRemaining(getTimeRemaining());
-    }, 1000);
+      setNow(new Date());
+    }, 60000); // Update every minute
 
     return () => clearInterval(timer);
   }, []);
 
+  const days = differenceInDays(targetDate, now);
+  const hours = differenceInHours(targetDate, now) % 24;
+  const minutes = differenceInMinutes(targetDate, now) % 60;
+
   return (
-    <div className="text-center">
-      <div className="text-2xl font-bold mb-2" style={{ fontFamily: "Sometype Mono, monospace" }}>
-        Time until the next bulletin ships!
-      </div>
-      <div className="flex justify-center items-center space-x-4">
-        <div className="text-lg">
-          {timeRemaining.days} <span className="text-sm">Days</span>
-        </div>
-        <div className="text-lg">
-          {timeRemaining.hours} <span className="text-sm">Hours</span>
-        </div>
-        <div className="text-lg">
-          {timeRemaining.minutes} <span className="text-sm">Minutes</span>
-        </div>
-        <div className="text-lg">
-          {timeRemaining.seconds} <span className="text-sm">Seconds</span>
-        </div>
-      </div>
+    <div className="text-center bg-gradient-to-r from-accent/10 to-primary/10 p-3 rounded-lg">
+      <p className="text-muted-foreground mb-1 text-sm">Time to print:</p>
+      <p className={`font-semibold bg-gradient-to-r from-accent to-primary bg-clip-text text-transparent ${isMobile ? 'text-base' : 'text-lg'}`}>
+        {days} days, {hours} hours, {minutes} minutes
+      </p>
     </div>
   );
 };
