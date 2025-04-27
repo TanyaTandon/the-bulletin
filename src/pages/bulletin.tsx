@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
@@ -93,10 +94,13 @@ const Bulletin = () => {
       >
         <div className="space-y-1">
           <TypewriterText
-            text={`<p>welcome to the bulletin!  </p>
-<p>we're happy you're here. ❤️ </p>
-<p>upload pictures, text, highlights for april & may with your friends below. </p>
-<p>submit your submission soon, we will ship your bulletin on may 1st. we'll design it beautifully later. </p>`}
+            text={`<p>welcome to the bulletin!</p>
+
+<p>we're happy you're here. ❤️</p>
+
+<p>upload your pictures, text, and calendar dates below.</p>
+
+<p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
             speed={isMobile ? 20 : 25}
           />
         </div>
@@ -133,3 +137,4 @@ const Bulletin = () => {
 };
 
 export default Bulletin;
+
