@@ -1,12 +1,11 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
+import { format, addMonths } from "date-fns";
 import Layout from "@/components/Layout";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import MonthlyTimer from "@/components/MonthlyTimer";
 import TypewriterText from "@/components/TypewriterText";
-import { format, addMonths } from "date-fns";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { LoaderCircle } from "lucide-react";
@@ -67,7 +66,7 @@ const Bulletin = () => {
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-4 pt-0" : "container py-6"}`}>
         <div className="max-w-3xl mx-auto space-y-6">
-          <div className="space-y-2 text-left">
+          <div className="space-y-2 text-left min-h-[6em]">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p>
 
@@ -121,4 +120,3 @@ const Bulletin = () => {
 };
 
 export default Bulletin;
-
