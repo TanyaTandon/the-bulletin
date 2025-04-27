@@ -9,6 +9,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Heart } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -16,6 +17,7 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
+  const isMobile = useIsMobile();
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -110,22 +112,24 @@ const SignUp = () => {
             <CardDescription>Enter the 6-digit code sent to your email</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-6">
-            <InputOTP
-              maxLength={6}
-              value={verificationCode}
-              onChange={setVerificationCode}
-              className="gap-2"
-              containerClassName="justify-center"
-            >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={1} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={2} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={3} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={4} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={5} className="h-12 w-12 text-lg" />
-              </InputOTPGroup>
-            </InputOTP>
+            <div className="w-full flex justify-center px-2">
+              <InputOTP
+                maxLength={6}
+                value={verificationCode}
+                onChange={setVerificationCode}
+                className="gap-1 md:gap-2"
+                containerClassName={isMobile ? "justify-center" : "justify-center"}
+              >
+                <InputOTPGroup>
+                  <InputOTPSlot index={0} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                  <InputOTPSlot index={1} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                  <InputOTPSlot index={2} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                  <InputOTPSlot index={3} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                  <InputOTPSlot index={4} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                  <InputOTPSlot index={5} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
 
             <div className="space-y-4 w-full">
               <Button 
