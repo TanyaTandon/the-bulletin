@@ -8,11 +8,14 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Heart } from "lucide-react";
+import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 
 const SignUp = () => {
   const navigate = useNavigate();
   const { toast } = useToast();
   const [isLoading, setIsLoading] = useState(false);
+  const [showVerification, setShowVerification] = useState(false);
+  const [verificationCode, setVerificationCode] = useState("");
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -20,6 +23,37 @@ const SignUp = () => {
     
     try {
       await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      
+      // Instead of immediately navigating, show verification step
+      setShowVerification(true);
+      toast({
+        title: "Verification required",
+        description: "Please enter the code sent to your email.",
+      });
+    } catch (error) {
+      toast({
+        title: "Error",
+        description: "Something went wrong. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleVerifyCode = async () => {
+    if (verificationCode.length < 6) {
+      toast({
+        title: "Invalid code",
+        description: "Please enter all 6 digits of your verification code.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
+    setIsLoading(true);
+    try {
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate verification API call
       toast({
         title: "Account created",
         description: "Welcome! Your account has been created successfully.",
@@ -27,8 +61,8 @@ const SignUp = () => {
       navigate("/");
     } catch (error) {
       toast({
-        title: "Error",
-        description: "Something went wrong. Please try again.",
+        title: "Verification failed",
+        description: "Invalid code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -58,8 +92,69 @@ const SignUp = () => {
     }
   };
 
+  if (showVerification) {
+    return (
+      <div className="container flex h-screen w-screen flex-col items-center justify-center px-4 max-w-md mx-auto">
+        <div className="mb-8 text-center">
+          <h1 className="text-4xl font-bold text-black lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+            the bulletin.
+          </h1>
+          <div className="flex items-center justify-center mt-2 text-black">
+            <Mail className="h-5 w-5" />
+            <Heart className="h-4 w-4 ml-1 fill-current" />
+          </div>
+        </div>
+        <Card className="w-full">
+          <CardHeader className="text-center">
+            <CardTitle className="text-2xl font-semibold">Verification</CardTitle>
+            <CardDescription>Enter the 6-digit code sent to your email</CardDescription>
+          </CardHeader>
+          <CardContent className="flex flex-col items-center space-y-6">
+            <InputOTP
+              maxLength={6}
+              value={verificationCode}
+              onChange={setVerificationCode}
+              className="gap-2"
+              containerClassName="justify-center"
+            >
+              <InputOTPGroup>
+                <InputOTPSlot index={0} className="h-12 w-12 text-lg" />
+                <InputOTPSlot index={1} className="h-12 w-12 text-lg" />
+                <InputOTPSlot index={2} className="h-12 w-12 text-lg" />
+                <InputOTPSlot index={3} className="h-12 w-12 text-lg" />
+                <InputOTPSlot index={4} className="h-12 w-12 text-lg" />
+                <InputOTPSlot index={5} className="h-12 w-12 text-lg" />
+              </InputOTPGroup>
+            </InputOTP>
+
+            <div className="space-y-4 w-full">
+              <Button 
+                onClick={handleVerifyCode} 
+                className="w-full" 
+                disabled={isLoading || verificationCode.length !== 6}
+              >
+                {isLoading ? "Verifying..." : "Verify"}
+              </Button>
+              <Button 
+                variant="outline" 
+                className="w-full" 
+                onClick={() => setShowVerification(false)}
+                disabled={isLoading}
+              >
+                Back
+              </Button>
+            </div>
+            <p className="text-center text-sm text-muted-foreground pt-2">
+              Didn't receive a code? <button className="text-primary font-medium hover:underline" onClick={() => toast({ title: "Code resent", description: "Please check your email for a new code." })}>Resend</button>
+            </p>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
   return (
-    <div className="container flex h-screen w-screen flex-col items-center justify-center">
+    <div className="container flex h-screen w-screen flex-col items-center justify-center px-4">
       <div className="mb-8 text-center">
         <h1 className="text-4xl font-bold text-black lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
           the bulletin.
@@ -69,7 +164,7 @@ const SignUp = () => {
           <Heart className="h-4 w-4 ml-1 fill-current" />
         </div>
       </div>
-      <Card className="w-[380px]">
+      <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">Welcome</CardTitle>
           <CardDescription>Sign in to your account or create a new one</CardDescription>
