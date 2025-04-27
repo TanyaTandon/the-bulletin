@@ -52,7 +52,9 @@ const BlurbInput: React.FC<{
         }`}
         style={{ fontFamily: "Sometype Mono, monospace" }}
       >
-        add a monthly summary, story, poem, or whatever your heart desires.
+        add a monthly summary, story, poem, 
+        
+        or whatever your heart desires.
       </h3>
       <Textarea
         value={blurb}
@@ -61,6 +63,7 @@ const BlurbInput: React.FC<{
         className="min-h-[80px] resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm"
         style={{ fontFamily: "Sometype Mono, monospace" }}
       />
+
       <div className="flex flex-col items-center space-y-2">
         <h3
           className={`font-semibold text-black ${
@@ -68,7 +71,9 @@ const BlurbInput: React.FC<{
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          add important dates for may: parties? birthdays? things you're excited for?
+          add important dates for may: 
+          
+          parties? birthdays? things you're excited for?
         </h3>
         <Calendar
           mode="single"

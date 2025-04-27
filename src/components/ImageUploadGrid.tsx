@@ -122,7 +122,9 @@ const ImageUploadGrid: React.FC<{
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          upload pictures below. choose up to 9 pictures.
+          upload pictures below. 
+          
+          choose up to 9 pictures.
         </h3>
         <div
           className="grid gap-1 mx-auto"
@@ -209,3 +211,4 @@ const ImageUploadGrid: React.FC<{
 };
 
 export default ImageUploadGrid;
+
