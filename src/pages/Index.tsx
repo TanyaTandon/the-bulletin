@@ -191,14 +191,11 @@ const Index = () => {
             <br />
             <br />
             tanya, adi, jack and jacob here.
-            <br />
             we love our friends and want to keep up with them.
-            <br />
             and we're tired of phones, ads, & scrolling.
-            <br />
-            <br />
+
             so we made the bulletin!
-            <br />
+
             <strong>here's how it works:</strong>
             <br />
             <br />
