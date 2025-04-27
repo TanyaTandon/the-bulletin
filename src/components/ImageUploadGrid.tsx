@@ -1,3 +1,4 @@
+
 import React, { useState, useRef } from "react";
 import { Plus, Edit, Trash2, Upload } from "lucide-react";
 import { Card } from "./ui/card";
@@ -122,9 +123,7 @@ const ImageUploadGrid: React.FC<{
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          upload pictures below. 
-          
-          choose up to 9 pictures.
+          upload pictures below. choose up to 9 pictures.
         </h3>
         <Separator className="my-4 bg-gray-200" />
         <div

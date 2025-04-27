@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Calendar } from "./ui/calendar";
@@ -62,15 +61,6 @@ const BlurbInput: React.FC<{
     <div className="flex flex-col items-center w-full space-y-8">
       <div className="w-full bg-white rounded-lg shadow-sm p-6">
         <div className="mb-6">
-          <h3
-            className={`font-semibold text-black mb-2 text-left ${
-              isMobile ? "text-base" : "text-lg"
-            }`}
-            style={{ fontFamily: "Sometype Mono, monospace" }}
-          >
-            upload pictures below. choose up to 9 pictures.
-          </h3>
-          <Separator className="my-4 bg-gray-200" />
           <ImageUploadGrid images={images} setImages={setImages} />
         </div>
         
