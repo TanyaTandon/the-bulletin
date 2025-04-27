@@ -110,22 +110,23 @@ const SignUp = () => {
             <CardDescription>Enter the 6-digit code sent to your email</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-6">
-            <InputOTP
-              maxLength={6}
-              value={verificationCode}
-              onChange={setVerificationCode}
-              className="gap-2"
-              containerClassName="justify-center"
-            >
-              <InputOTPGroup>
-                <InputOTPSlot index={0} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={1} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={2} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={3} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={4} className="h-12 w-12 text-lg" />
-                <InputOTPSlot index={5} className="h-12 w-12 text-lg" />
-              </InputOTPGroup>
-            </InputOTP>
+            <div className="w-full flex justify-center overflow-x-auto py-2">
+              <InputOTP
+                maxLength={6}
+                value={verificationCode}
+                onChange={setVerificationCode}
+                className="gap-1 sm:gap-2"
+              >
+                <InputOTPGroup className="flex justify-center w-full">
+                  <InputOTPSlot index={0} className="h-10 w-10 sm:h-12 sm:w-12 text-lg" />
+                  <InputOTPSlot index={1} className="h-10 w-10 sm:h-12 sm:w-12 text-lg" />
+                  <InputOTPSlot index={2} className="h-10 w-10 sm:h-12 sm:w-12 text-lg" />
+                  <InputOTPSlot index={3} className="h-10 w-10 sm:h-12 sm:w-12 text-lg" />
+                  <InputOTPSlot index={4} className="h-10 w-10 sm:h-12 sm:w-12 text-lg" />
+                  <InputOTPSlot index={5} className="h-10 w-10 sm:h-12 sm:w-12 text-lg" />
+                </InputOTPGroup>
+              </InputOTP>
+            </div>
 
             <div className="space-y-4 w-full">
               <Button 
