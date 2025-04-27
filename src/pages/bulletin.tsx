@@ -1,7 +1,6 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
-import { format, addMonths } from "date-fns";
+import { format, addMonths } from "date-fns"; // Corrected import
 import Layout from "@/components/Layout";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
