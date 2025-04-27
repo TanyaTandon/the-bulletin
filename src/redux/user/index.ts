@@ -1,5 +1,5 @@
 import { PayloadAction, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { supabase } from "@/lib/api.ts";
+import { Bulletin, supabase } from "@/lib/api.ts";
 
 export type User = {
   id: number;
@@ -8,14 +8,17 @@ export type User = {
   bulletins: string[];
   phone_number: string;
   address: string;
+  recipients: string[];
 };
 
 export type UserState = {
   user: User | null;
+  bulletins: Bulletin[] | null;
 };
 
 const initialState: UserState = {
   user: null,
+  bulletins: [],
 };
 
 export const fetchUser = createAsyncThunk(
@@ -39,6 +42,20 @@ export const fetchUser = createAsyncThunk(
   }
 );
 
+export const fetchBulletins = createAsyncThunk(
+  "user/fetchBulletins",
+  async (_, { dispatch, getState }) => {
+    const user: User = getState().app.userUpdater.user;
+    console.log(getState());
+    const { data: res, error } = await supabase
+      .from("bulletins")
+      .select("*")
+      .in("id", user.bulletins);
+    console.log(res);
+    dispatch(setBulletins(res));
+  }
+);
+
 export const userUpdater = createSlice({
   name: "userUpdater",
   initialState,
@@ -46,9 +63,12 @@ export const userUpdater = createSlice({
     setUser: (state, action: PayloadAction<User>) => {
       state.user = action.payload;
     },
+    setBulletins: (state, action: PayloadAction<Bulletin[]>) => {
+      state.bulletins = action.payload;
+    },
   },
 });
 
-export const { setUser } = userUpdater.actions;
+export const { setUser, setBulletins } = userUpdater.actions;
 
 export default userUpdater.reducer;

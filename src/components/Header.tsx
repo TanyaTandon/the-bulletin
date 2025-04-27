@@ -6,6 +6,8 @@ import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import FriendRequests from "./FriendRequests";
+import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
+import { useAppDispatch } from "@/redux";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -28,6 +30,8 @@ const Header: React.FC = () => {
     }
   };
 
+  const dispatch = useAppDispatch();
+
   return (
     <header className="border-b border-gray-200 bg-white p-3 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-1">
@@ -44,7 +48,7 @@ const Header: React.FC = () => {
         {/* Use both isSignedIn from Clerk and our local state to determine if we should show the buttons */}
         {(isSignedIn || isAuthenticated) && (
           <div className="flex items-center space-x-2">
-            <FriendRequests />
+            <FriendRequests/>
             <div className="flex items-center space-x-2">
               <Button
                 variant="ghost"

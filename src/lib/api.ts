@@ -38,7 +38,6 @@ export async function createNewUser({
   fullAddress,
 }: NewUserItem) {
   try {
-
     // Create a new user with combined address
     const { error: userError } = await supabase.from("user_record").insert({
       created_user_id: created_user_id,
@@ -48,6 +47,7 @@ export async function createNewUser({
       bulletins: [],
       phone_number: phoneNumber,
       address: fullAddress,
+      recipients: [],
     });
 
     if (userError) {
@@ -148,5 +148,53 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
   } catch (error) {
     console.error("Error in createNewUser:", error);
     return { success: false, error };
+  }
+}
+
+export async function addFriendToSupabase({
+  friend,
+  fractionalUser,
+  user,
+  fractionalData,
+}) {
+  if (fractionalUser == -1) {
+    await supabase
+      .from("fractional_user_record")
+      .insert({
+        id: friend.phone_number,
+        suggested_name: [friend.name],
+        suggested_addresses: [friend.address],
+        added_by: [user.phone_number],
+      })
+      .then(async () => {
+        await supabase
+          .from("user_record")
+          .update({
+            recipients: [...user.recipients, friend.phone_number],
+          })
+          .eq("phone_number", user.phone_number);
+      });
+  } else if (fractionalUser == 0) {
+    await supabase
+      .from("fractional_user_record")
+      .update({
+        suggested_name: [...fractionalData.suggested_name, friend.name],
+        added_by: [...fractionalData.added_by, user.phone_number],
+      })
+      .then(async () => {
+        await supabase
+          .from("user_record")
+          .update({
+            recipients: [...user.recipients, friend.phone_number],
+          })
+          .eq("phone_number", user.phone_number);
+      });
+  } else if (fractionalUser == 1) {
+    await supabase
+      .from("user_record")
+      .update({
+        recipients: [...user.recipients, friend.phone_number],
+      })
+      .eq("phone_number", user.phone_number);
   }
 }
