@@ -20,11 +20,9 @@ import {
   LoaderCircle,
   Heart,
 } from "lucide-react";
-import { Mail, Phone, MapPin, Building, Home, User, LoaderCircle, Heart } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
-
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -231,7 +229,11 @@ const Index = () => {
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8 px-6 md:px-12 py-12">
         <div className="text-left space-y-4">
-          <img src="/BulletinLogo.svg" alt="logo" className="w-20 h-20 ml-[auto] mr-[auto]" />
+          <img
+            src="/BulletinLogo.svg"
+            alt="logo"
+            className="w-20 h-20 ml-[auto] mr-[auto]"
+          />
           <p className="text-md text-muted-foreground text-left">
             hi!
             <br />
@@ -249,16 +251,20 @@ const Index = () => {
             <br />
             <br />
             <span className="flex items-center">
-              <NumberedHeart number={1} /> you and your friends upload pictures & text to our webapp.
+              <NumberedHeart number={1} /> you and your friends upload pictures
+              & text to our webapp.
             </span>
             <span className="flex items-center">
-              <NumberedHeart number={2} /> we make a monthly magazine, personalized for you, with all your friends' content.
+              <NumberedHeart number={2} /> we make a monthly magazine,
+              personalized for you, with all your friends' content.
             </span>
             <span className="flex items-center">
-              <NumberedHeart number={3} /> you're limited to 6 close friends - quality over quantity!
+              <NumberedHeart number={3} /> you're limited to 6 close friends -
+              quality over quantity!
             </span>
             <span className="flex items-center">
-              <NumberedHeart number={4} /> you get this magazine on high quality paper in a beautiful layout to keep and cherish!
+              <NumberedHeart number={4} /> you get this magazine on high quality
+              paper in a beautiful layout to keep and cherish!
             </span>
             <br />
             <br />
