@@ -6,6 +6,7 @@ import { Heart } from "lucide-react";
 import { format } from "date-fns";
 import { CSSProperties } from "react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { Separator } from "./ui/separator";
 
 export interface CalendarNote {
   date: Date;
@@ -56,6 +57,7 @@ const BlurbInput: React.FC<{
         
         or whatever your heart desires.
       </h3>
+      <Separator className="my-4 bg-gray-200" />
       <Textarea
         value={blurb}
         onChange={(e) => setBlurb(e.target.value)}
@@ -75,6 +77,7 @@ const BlurbInput: React.FC<{
           
           parties? birthdays? things you're excited for?
         </h3>
+        <Separator className="my-4 bg-gray-200" />
         <Calendar
           mode="single"
           selected={date}
