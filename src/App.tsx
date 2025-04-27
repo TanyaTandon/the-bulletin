@@ -37,13 +37,14 @@ const App = () => {
           </Helmet>
           <Toaster />
           <Sonner />
-          <BrowserRouter>
+          <BrowserRouter basename="/">
             <Routes>
               <Route path="/" element={<Index key="index" />} />
               <Route path="/signup" element={<SignUp key="signup" />} />
               <Route path="/settings" element={<Settings key="settings" />} />
               <Route path="/bulletin" element={<Bulletin key="bulletin" />} />
               <Route path="/bulletin/filled" element={<FilledBulletin key="filled-bulletin" />} />
+              {/* Handle 404s */}
               <Route path="*" element={<NotFound key="not-found" />} />
             </Routes>
           </BrowserRouter>

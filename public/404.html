@@ -17,7 +17,13 @@
       redirectUrl = redirectUrl + window.location.pathname.slice(1) + window.location.search;
     }
     
-    window.location.replace(redirectUrl);
+    // Use History API if available, otherwise fallback to redirect
+    if (window.history && window.history.replaceState) {
+      history.replaceState(null, document.title, redirectUrl);
+      location.reload();
+    } else {
+      window.location.replace(redirectUrl);
+    }
   </script>
 </head>
 <body>
