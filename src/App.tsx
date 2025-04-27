@@ -33,6 +33,7 @@ const App = () => {
             <link rel="icon" href="/BulletinLogoICON.svg" />
             <title>The Bulletin</title>
             <meta name="description" content="Share your moments with friends and family through our monthly bulletin service" />
+            <meta name="viewport" content="width=device-width, initial-scale=1, maximum-scale=1" />
           </Helmet>
           <Toaster />
           <Sonner />
