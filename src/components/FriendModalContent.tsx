@@ -1,3 +1,4 @@
+
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useEffect, useState } from "react";
@@ -120,7 +121,7 @@ const FriendInput: React.FC<{
               user,
               fractionalData,
             }).then((response) => {
-              if (typeof response !== null || undefined) {
+              if (response && typeof response === 'object') {
                 if (response.status === 200 || response.status === 204) {
                   toast.success("Friend added successfully");
                   setFriendIsAdded(true);
@@ -157,7 +158,7 @@ const FriendInput: React.FC<{
                   user,
                   fractionalData,
                 }).then((response) => {
-                    if (typeof response !== null || undefined) {
+                    if (response && typeof response === 'object') {
                       if (response.status === 200 || response.status === 204) {
                         toast.success("Friend added successfully");
                         setFriendIsAdded(true);

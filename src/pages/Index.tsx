@@ -328,8 +328,12 @@ const Index = () => {
                         length={6}
                         onChange={(code) => setCode(code)}
                         onCompleted={(code) => signInState ? handleVerifySignIn(code) : handleVerifySignUp(code)}
-                        fieldWidth={36}
-                        fieldHeight={36}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
                         autoFocus
                       />
                     </>
@@ -523,6 +527,13 @@ const Index = () => {
                         length={6}
                         onChange={(code) => setCode(code)}
                         onCompleted={(code) => handleVerifySignUp(code)}
+                        style={{
+                          width: '100%',
+                          display: 'flex',
+                          justifyContent: 'center',
+                          gap: '8px'
+                        }}
+                        autoFocus
                       />
                     </>
                   )}
