@@ -22,11 +22,7 @@ import {
 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { staticGetUser } from "@/redux/user/selectors";
-import {
-  InputOTP,
-  InputOTPGroup,
-  InputOTPSlot,
-} from "@/components/ui/input-otp";
+import ReactInputVerificationCode from "react-input-verification-code";
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -96,7 +92,13 @@ const Index = () => {
         })
         .then(async (result) => {
           if (result.status === "complete") {
+            // The verification was successful and the user is now signed up
+            // Create a session to sign in the user
+
+            // Set this session as active, which will update isSignedIn to true
             await setActive({ session: result.createdSessionId });
+
+            // Now isSignedIn will be true
             console.log("User is signed in:", isSignedIn);
           }
           return result;
@@ -167,7 +169,7 @@ const Index = () => {
     }
   };
 
-  const handleVerifySignUp = async (code: string) => {
+  const handleVerifySignUp = async (code) => {
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
       return;
@@ -280,11 +282,11 @@ const Index = () => {
             <Dialog
               PaperProps={{
                 style: {
-                  padding: "1.5em",
+                  padding: "2em",
                   display: "flex",
                   alignItems: "center",
                   width: "100%",
-                  maxWidth: "24rem",
+                  maxWidth: "52rem",
                   maxHeight: "90vh",
                   overflowY: "auto",
                   flexDirection: "column",
@@ -328,23 +330,11 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <div className="w-full flex justify-center">
-                        <InputOTP 
-                          maxLength={6} 
-                          value={code}
-                          onChange={setCode}
-                          onComplete={signInState ? handleVerifySignIn : handleVerifySignUp}
-                        >
-                          <InputOTPGroup className="flex gap-1 md:gap-2">
-                            <InputOTPSlot index={0} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={1} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={2} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={3} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={4} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={5} className="w-8 h-8 md:w-10 md:h-10" />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </div>
+                      <ReactInputVerificationCode
+                        length={6}
+                        onChange={(code) => setCode(code)}
+                        onCompleted={(code) => handleVerifySignIn(code)}
+                      />
                     </>
                   )}
                   <div className="flex justify-center w-full">
@@ -532,23 +522,11 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <div className="w-full flex justify-center">
-                        <InputOTP 
-                          maxLength={6} 
-                          value={code}
-                          onChange={setCode}
-                          onComplete={handleVerifySignUp}
-                        >
-                          <InputOTPGroup className="flex gap-1 md:gap-2">
-                            <InputOTPSlot index={0} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={1} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={2} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={3} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={4} className="w-8 h-8 md:w-10 md:h-10" />
-                            <InputOTPSlot index={5} className="w-8 h-8 md:w-10 md:h-10" />
-                          </InputOTPGroup>
-                        </InputOTP>
-                      </div>
+                      <ReactInputVerificationCode
+                        length={6}
+                        onChange={(code) => setCode(code)}
+                        onCompleted={(code) => handleVerifySignUp(code)}
+                      />
                     </>
                   )}
                 </>
@@ -595,12 +573,6 @@ const Index = () => {
           )}
         </div>
       </div>
-
-      <style>
-        {`
-          /* No custom styles needed anymore as we're using shadcn/ui InputOTP */
-        `}
-      </style>
     </Layout>
   );
 };
