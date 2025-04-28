@@ -174,25 +174,25 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
             Accept: "image/png",
           },
         });
-  
+
         const buff = await fetchBlob.blob();
-  
+
         const { data: fileData, error: uploadError } = await supabase.storage
           .from("user-images")
           .upload(`/${image.id}.png`, buff, {
             contentType: "image/png",
           });
-  
+
         if (uploadError) {
           console.error("Error uploading image:", uploadError);
           continue;
         }
-  
+
         // Get the public URL for the uploaded image
         const { data: urlData } = supabase.storage
           .from("user-images")
           .getPublicUrl(image.id);
-  
+
         if (urlData?.publicUrl) {
           imageUrls.push(urlData.publicUrl);
         }
@@ -202,10 +202,11 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
     function arrayToDict(arr) {
       return arr.reduce((dict, item) => {
         // Convert Date objects to ISO strings for storage
-        const dateKey = item.date instanceof Date 
-          ? item.date.toISOString() 
-          : item.date.toString();
-        
+        const dateKey =
+          item.date instanceof Date
+            ? item.date.toISOString()
+            : item.date.toString();
+
         dict[dateKey] = item.note;
         return dict;
       }, {});
@@ -231,7 +232,9 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
     }
 
     // Update user's images array if new images were added
-    const newImageIds = images.map(item => item.id).filter(id => !user.images.includes(id));
+    const newImageIds = images
+      .map((item) => item.id)
+      .filter((id) => !user.images.includes(id));
     if (newImageIds.length > 0) {
       const { error: userError } = await supabase
         .from("user_record")
@@ -260,7 +263,7 @@ export async function addFriendToSupabase({
   fractionalData,
 }) {
   if (fractionalUser == -1) {
-    await supabase
+    return await supabase
       .from("fractional_user_record")
       .insert({
         id: friend.phone_number,
@@ -274,10 +277,11 @@ export async function addFriendToSupabase({
           .update({
             recipients: [...user.recipients, friend.phone_number],
           })
-          .eq("phone_number", user.phone_number);
+          .eq("phone_number", user.phone_number)
+          .then((res) => res);
       });
   } else if (fractionalUser == 0) {
-    await supabase
+    return await supabase
       .from("fractional_user_record")
       .update({
         suggested_name: [...fractionalData.suggested_name, friend.name],
@@ -289,14 +293,16 @@ export async function addFriendToSupabase({
           .update({
             recipients: [...user.recipients, friend.phone_number],
           })
-          .eq("phone_number", user.phone_number);
+          .eq("phone_number", user.phone_number)
+          .then((res) => res);
       });
   } else if (fractionalUser == 1) {
-    await supabase
+    return await supabase
       .from("user_record")
       .update({
         recipients: [...user.recipients, friend.phone_number],
       })
-      .eq("phone_number", user.phone_number);
+      .eq("phone_number", user.phone_number)
+      .then((res) => res);
   }
 }

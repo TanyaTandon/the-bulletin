@@ -24,6 +24,7 @@ const FriendInput: React.FC<{
   const [fractionalData, setFractionalData] = useState(null);
   const [addDetails, setAddDetails] = useState<boolean>(false);
   const [addFriend, setAddFriend] = useState<boolean>(false);
+  const [friendIsAdded, setFriendIsAdded] = useState<boolean>(false);
 
   useEffect(() => {
     if (timer) {
@@ -84,7 +85,20 @@ const FriendInput: React.FC<{
   const user = useAppSelector(staticGetUser);
 
   function renderIcon() {
-    if (phoneNumber?.length !== 10) {
+    if (friendIsAdded) {
+      return (
+        <Check
+        style={{
+            cursor: "pointer",
+            width: 50,
+            height: "-webkit-fill-available",
+            padding: 8,
+            background: "lightgrey",
+            borderRadius: 4,
+          }}
+        />
+      );
+    } else if (phoneNumber?.length !== 10) {
       return (
         <Ellipsis
           style={{
@@ -105,6 +119,15 @@ const FriendInput: React.FC<{
               fractionalUser: friendStatus,
               user,
               fractionalData,
+            }).then((response) => {
+              if (typeof response !== null || undefined) {
+                if (response.status === 200 || response.status === 204) {
+                  toast.success("Friend added successfully");
+                  setFriendIsAdded(true);
+                } else {
+                  toast.error("Failed to add friend");
+                }
+              }
             });
           }}
           style={{
@@ -133,7 +156,16 @@ const FriendInput: React.FC<{
                   fractionalUser: friendStatus,
                   user,
                   fractionalData,
-                });
+                }).then((response) => {
+                    if (typeof response !== null || undefined) {
+                      if (response.status === 200 || response.status === 204) {
+                        toast.success("Friend added successfully");
+                        setFriendIsAdded(true);
+                      } else {
+                        toast.error("Failed to add friend");
+                      }
+                    }
+                  });
               }}
               style={{
                 cursor: "pointer",
