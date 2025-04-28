@@ -92,13 +92,7 @@ const Index = () => {
         })
         .then(async (result) => {
           if (result.status === "complete") {
-            // The verification was successful and the user is now signed up
-            // Create a session to sign in the user
-
-            // Set this session as active, which will update isSignedIn to true
             await setActive({ session: result.createdSessionId });
-
-            // Now isSignedIn will be true
             console.log("User is signed in:", isSignedIn);
           }
           return result;
@@ -282,11 +276,11 @@ const Index = () => {
             <Dialog
               PaperProps={{
                 style: {
-                  padding: "2em",
+                  padding: "1.5em",
                   display: "flex",
                   alignItems: "center",
                   width: "100%",
-                  maxWidth: "52rem",
+                  maxWidth: "24rem",
                   maxHeight: "90vh",
                   overflowY: "auto",
                   flexDirection: "column",
@@ -333,7 +327,10 @@ const Index = () => {
                       <ReactInputVerificationCode
                         length={6}
                         onChange={(code) => setCode(code)}
-                        onCompleted={(code) => handleVerifySignIn(code)}
+                        onCompleted={(code) => signInState ? handleVerifySignIn(code) : handleVerifySignUp(code)}
+                        fieldWidth={36}
+                        fieldHeight={36}
+                        autoFocus
                       />
                     </>
                   )}
