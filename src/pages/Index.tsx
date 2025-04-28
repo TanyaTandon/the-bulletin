@@ -525,7 +525,7 @@ const Index = () => {
                       <ReactInputVerificationCode
                         length={6}
                         onChange={(code) => setCode(code)}
-                        onCompleted={(code) => handleVerifySignIn(code)}
+                        onCompleted={(code) => handleVerifySignUp(code)}
                       />
                     </>
                   )}
