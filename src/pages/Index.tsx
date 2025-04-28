@@ -169,7 +169,7 @@ const Index = () => {
     }
   };
 
-  const handleVerifySignUp = async () => {
+  const handleVerifySignUp = async (code) => {
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
       return;

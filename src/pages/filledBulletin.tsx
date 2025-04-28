@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { Button } from "@/components/ui/button";
@@ -11,11 +10,19 @@ import ImageUploadGrid from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import { toast } from "sonner";
+import {
+  Card,
+  CardContent,
+  CardHeader,
+  CardTitle,
+  CardFooter,
+} from "@/components/ui/card";
+import { Textarea } from "@/components/ui/textarea";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
   const navigate = useNavigate();
-  
+
   // Using useParams hook from react-router-dom to get URL parameters
   const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
@@ -27,7 +34,7 @@ const FilledBulletin: React.FC = () => {
     navigate("/bulletin");
   };
 
-  const bulletin = user?.bulletins?.find(bulletin => bulletin === id);
+  const bulletin = user?.bulletins?.find((bulletin) => bulletin === id);
 
   useEffect(() => {
     if (bulletin && bulletinData === null) {
@@ -57,9 +64,11 @@ const FilledBulletin: React.FC = () => {
   }, [bulletin, bulletinData]);
 
   // Create type-safe setter functions to work with ImageUploadGrid and BlurbInput components
-  const setImages = (newImages: UploadedImage[] | ((prev: UploadedImage[]) => UploadedImage[])) => {
+  const setImages = (
+    newImages: UploadedImage[] | ((prev: UploadedImage[]) => UploadedImage[])
+  ) => {
     if (bulletinData) {
-      if (typeof newImages === 'function') {
+      if (typeof newImages === "function") {
         const updatedImages = newImages(bulletinData.images);
         setBulletin({
           ...bulletinData,
@@ -74,9 +83,11 @@ const FilledBulletin: React.FC = () => {
     }
   };
 
-  const setSavedNotes = (newNotes: CalendarNote[] | ((prev: CalendarNote[]) => CalendarNote[])) => {
+  const setSavedNotes = (
+    newNotes: CalendarNote[] | ((prev: CalendarNote[]) => CalendarNote[])
+  ) => {
     if (bulletinData) {
-      if (typeof newNotes === 'function') {
+      if (typeof newNotes === "function") {
         const updatedNotes = newNotes(bulletinData.savedNotes);
         setBulletin({
           ...bulletinData,
@@ -93,7 +104,7 @@ const FilledBulletin: React.FC = () => {
 
   const setBlurb = (newBlurb: string | ((prev: string) => string)) => {
     if (bulletinData) {
-      if (typeof newBlurb === 'function') {
+      if (typeof newBlurb === "function") {
         const updatedBlurb = newBlurb(bulletinData.blurb);
         setBulletin({
           ...bulletinData,
@@ -110,7 +121,7 @@ const FilledBulletin: React.FC = () => {
 
   const handleUpdateBulletin = async () => {
     if (!user || !bulletinData) return;
-    
+
     setIsUpdating(true);
     try {
       const result = await updateBulletin(user, bulletinData);
@@ -130,42 +141,93 @@ const FilledBulletin: React.FC = () => {
     }
   };
 
+  const renderContent = () => {
+    switch (id) {
+      case "filled":
+        return (
+          <>
+            <div className="flex flex-col items-center justify-center pt-8 pb-12 space-y-8 px-6 max-w-3xl mx-auto w-full">
+              <div className="space-y-6 w-full text-center">
+                <h1 className="text-4xl font-bold text-foreground">
+                  hooray! your bulletin has been submitted.
+                </h1>
+                <p className="text-muted-foreground text-lg max-w-xl mx-auto">
+                  thank you for being part of our pilot. we're excited to show
+                  you what your friends have been up to! &lt;3
+                </p>
+                <div className="flex flex-col items-center space-y-2"></div>
+              </div>
+              <Card className="w-full">
+                <CardHeader>
+                  <CardTitle className="text-lg font-medium">
+                    we'd love to hear anything and everything: comments,
+                    critiques, suggestions, requests?
+                  </CardTitle>
+                </CardHeader>
+                <CardContent></CardContent>
+                <CardFooter>
+                  {/* <Button onClick={handleFeedbackSubmit} className="w-full">
+                    Submit Feedback
+                  </Button> */}
+                </CardFooter>
+              </Card>
+            </div>
+            <Button onClick={() => navigate("/bulletin/")}>
+              Go see your bulletin →
+            </Button>
+          </>
+        );
+      default:
+        if (bulletinData) {
+          return (
+            <>
+              <ImageUploadGrid
+                images={bulletinData.images}
+                setImages={setImages}
+              />
+
+              <BlurbInput
+                savedNotes={bulletinData.savedNotes}
+                setSavedNotes={setSavedNotes}
+                blurb={bulletinData.blurb}
+                setBlurb={setBlurb}
+                images={bulletinData.images}
+                setImages={setImages}
+              />
+              <Button
+                onClick={handleUpdateBulletin}
+                size="lg"
+                className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium"
+                disabled={isUpdating}
+              >
+                {isUpdating ? (
+                  "Updating..."
+                ) : (
+                  <>
+                    <Sparkles className="mr-2" />
+                    Update your Bulletin
+                  </>
+                )}
+              </Button>
+            </>
+          );
+        } else {
+          return (
+            <>
+              <Button onClick={() => navigate("/bulletin")}>
+                <Sparkles className="mr-2" />
+                Go create a bulletin! →
+              </Button>
+            </>
+          );
+        }
+    }
+  };
+
   return (
     <Layout>
       <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
-        {bulletinData && (
-          <ImageUploadGrid
-            images={bulletinData.images}
-            setImages={setImages}
-          />
-        )}
-
-        {bulletinData && (
-          <BlurbInput
-            savedNotes={bulletinData.savedNotes}
-            setSavedNotes={setSavedNotes}
-            blurb={bulletinData.blurb}
-            setBlurb={setBlurb}
-            images={bulletinData.images}
-            setImages={setImages}
-          />
-        )}
-
-        <Button
-          onClick={handleUpdateBulletin}
-          size="lg"
-          className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium"
-          disabled={isUpdating}
-        >
-          {isUpdating ? (
-            "Updating..."
-          ) : (
-            <>
-              <Sparkles className="mr-2" />
-              Update your Bulletin
-            </>
-          )}
-        </Button>
+        {renderContent()}
       </div>
     </Layout>
   );

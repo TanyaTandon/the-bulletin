@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
 import Layout from "@/components/Layout";
-import { UploadedImage } from "@/components/ImageUploadGrid";
+import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import MonthlyTimer from "@/components/MonthlyTimer";
 import TypewriterText from "@/components/TypewriterText";
@@ -80,6 +80,7 @@ const Bulletin = () => {
 
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
+              <ImageUploadGrid images={images} setImages={setImages} />
               <BlurbInput
                 savedNotes={savedNotes}
                 setSavedNotes={setSavedNotes}
