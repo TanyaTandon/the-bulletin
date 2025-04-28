@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
@@ -324,18 +325,15 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <ReactInputVerificationCode
-                        length={6}
-                        onChange={(code) => setCode(code)}
-                        onCompleted={(code) => signInState ? handleVerifySignIn(code) : handleVerifySignUp(code)}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          gap: '8px'
-                        }}
-                        autoFocus
-                      />
+                      <div className="w-full flex justify-center gap-2">
+                        <ReactInputVerificationCode
+                          length={6}
+                          onChange={(code) => setCode(code)}
+                          onCompleted={(code) => signInState ? handleVerifySignIn(code) : handleVerifySignUp(code)}
+                          autoFocus
+                          className="verification-input"
+                        />
+                      </div>
                     </>
                   )}
                   <div className="flex justify-center w-full">
@@ -523,18 +521,15 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <ReactInputVerificationCode
-                        length={6}
-                        onChange={(code) => setCode(code)}
-                        onCompleted={(code) => handleVerifySignUp(code)}
-                        style={{
-                          width: '100%',
-                          display: 'flex',
-                          justifyContent: 'center',
-                          gap: '8px'
-                        }}
-                        autoFocus
-                      />
+                      <div className="w-full flex justify-center gap-2">
+                        <ReactInputVerificationCode
+                          length={6}
+                          onChange={(code) => setCode(code)}
+                          onCompleted={(code) => handleVerifySignUp(code)}
+                          autoFocus
+                          className="verification-input"
+                        />
+                      </div>
                     </>
                   )}
                 </>
@@ -581,6 +576,21 @@ const Index = () => {
           )}
         </div>
       </div>
+
+      <style jsx global>{`
+        .verification-input {
+          width: 100%;
+          display: flex;
+          justify-content: center;
+          gap: 8px;
+        }
+        
+        /* Adjust the individual input boxes */
+        .verification-input > div {
+          width: 36px !important;
+          height: 36px !important;
+        }
+      `}</style>
     </Layout>
   );
 };
