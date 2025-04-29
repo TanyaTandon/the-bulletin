@@ -1,27 +1,21 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
 import Layout from "@/components/Layout";
-import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
+import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import MonthlyTimer from "@/components/MonthlyTimer";
 import TypewriterText from "@/components/TypewriterText";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-
+import { LoaderCircle } from "lucide-react";
 import { toast } from "sonner";
 import { createNewBulletin } from "@/lib/api";
-import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
-import { useAuth, useSignUp } from "@clerk/clerk-react";
-import { Input } from "@/components/ui/input";
-import { Dialog } from "@mui/material";
-
-import { useAppDispatch, useAppSelector } from "@/redux";
+import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
-import { setUser } from "@/redux/user";
 
 const Bulletin = () => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const nextMonth = format(addMonths(new Date(), 1), "MMMM");
   const currentMonth = format(new Date(), "MMMM");
@@ -42,7 +36,7 @@ const Bulletin = () => {
 
     try {
       toast.loading("Saving your bulletin...");
-
+      
       await createNewBulletin({
         user: user,
         bulletin: {
@@ -51,25 +45,16 @@ const Bulletin = () => {
           savedNotes: savedNotes,
           owner: user?.phone_number || "",
         },
-      }).then((response) => {
-        console.log("Response:", response);
-        if (response.newUserData) {
-          dispatch(setUser(response.newUserData[0]))
-        }
-        if (response.success) {
-          navigate(`/bulletin/${response.bulletinId}`);
-        } else {
-          toast.error("We couldn't save your bulletin. Please try again.");
-        }
       });
-
+      
       toast.dismiss();
-
+      
       setImages([]);
       setBlurb("");
       setSavedNotes([]);
-
-      navigate("/bulletin/filled");
+      
+      navigate('/bulletin/filled');
+      
     } catch (error) {
       console.error("Error saving bulletin:", error);
       toast.error("We couldn't save your bulletin. Please try again.");
@@ -77,8 +62,6 @@ const Bulletin = () => {
       setIsSubmitting(false);
     }
   };
-
-  console.log("User:", savedNotes);
 
   return (
     <Layout>

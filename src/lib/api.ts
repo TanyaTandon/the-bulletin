@@ -106,8 +106,11 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
       }, {});
     }
 
+    console.log("notes:", arrayToDict(bulletin.savedNotes));
     let returnBulletin: Bulletin[] = [];
 
+    let newUserData: User;
+    console.log("Creating new bulletin");
     // Create a new bulletin item with UUID
     const bulletinId = uuidv4();
     const { error: bulletinError } = await supabase
@@ -124,14 +127,17 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
           returnBulletin = [item.data[0]];
         }
 
-        const { error: userError } = await supabase
+        const { data: userData, error: userError } = await supabase
           .from("user_record")
           .update({
             images: [...images.map((item) => item.id), ...user.images],
             bulletins: [bulletinId, ...user.bulletins],
           })
-          .eq("phone_number", user.phone_number);
+          .eq("phone_number", user.phone_number)
+          .select("*");
 
+        console.log("User data:", userData);
+        newUserData = userData;
         if (userError) {
           console.error("Error creating user:", userError);
           throw userError;
@@ -144,7 +150,7 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
       throw bulletinError;
     }
 
-    return { success: true, bulletinId };
+    return { success: true, bulletinId, newUserData };
   } catch (error) {
     console.error("Error in createNewUser:", error);
     return { success: false, error };
@@ -156,6 +162,7 @@ export async function getBulletin(bulletinId: string) {
     .from("bulletins")
     .select("*")
     .eq("id", bulletinId);
+  console.log("raw Bulletin:", data);
   return data;
 }
 

@@ -1,5 +1,6 @@
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
+import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { useNavigate, useParams } from "react-router-dom";
 import { Sparkles } from "lucide-react";
@@ -22,13 +23,14 @@ import { Textarea } from "@/components/ui/textarea";
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   // Using useParams hook from react-router-dom to get URL parameters
   const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
 
-  console.log("URL Slug:", id);
+  console.log("URL Slug:", bulletinData, user);
 
   const handleNewSubmission = () => {
     navigate("/bulletin");
@@ -140,6 +142,7 @@ const FilledBulletin: React.FC = () => {
       setIsUpdating(false);
     }
   };
+  console.log("Bulletin data:", user);
 
   const renderContent = () => {
     switch (id) {
@@ -165,14 +168,12 @@ const FilledBulletin: React.FC = () => {
                   </CardTitle>
                 </CardHeader>
                 <CardContent></CardContent>
-                <CardFooter>
-                  {/* <Button onClick={handleFeedbackSubmit} className="w-full">
-                    Submit Feedback
-                  </Button> */}
-                </CardFooter>
+                <CardFooter></CardFooter>
               </Card>
             </div>
-            <Button onClick={() => navigate("/bulletin/")}>
+            <Button
+              onClick={() => navigate(`/bulletin/${user.bulletins?.[0]}`)}
+            >
               Go see your bulletin →
             </Button>
           </>
@@ -181,11 +182,6 @@ const FilledBulletin: React.FC = () => {
         if (bulletinData) {
           return (
             <>
-              <ImageUploadGrid
-                images={bulletinData.images}
-                setImages={setImages}
-              />
-
               <BlurbInput
                 savedNotes={bulletinData.savedNotes}
                 setSavedNotes={setSavedNotes}
@@ -197,6 +193,11 @@ const FilledBulletin: React.FC = () => {
               <Button
                 onClick={handleUpdateBulletin}
                 size="lg"
+                style={{
+                  marginRight: "auto",
+                  marginLeft: "auto",
+                  display: "flex",
+                }}
                 className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium"
                 disabled={isUpdating}
               >
@@ -226,8 +227,8 @@ const FilledBulletin: React.FC = () => {
 
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[60vh] space-y-6 px-4">
-        {renderContent()}
+      <div className={`mx-auto ${isMobile ? "px-4 pt-0" : "container py-6"}`}>
+        <div className="max-w-3xl mx-auto space-y-6">{renderContent()}</div>
       </div>
     </Layout>
   );
