@@ -1,7 +1,7 @@
 
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
-import { LogOut, Settings } from "lucide-react";
+import { LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
@@ -24,14 +24,6 @@ const Header: React.FC = () => {
     console.log("Auth state updated:", { isSignedIn, hasUser: !!user, isAuthenticated: !!isSignedIn && !!user });
   }, [isSignedIn, user]);
 
-  const handleSettingsClick = () => {
-    if (location.pathname === "/settings") {
-      navigate("/");
-    } else {
-      navigate("/settings");
-    }
-  };
-
   const dispatch = useAppDispatch();
 
   return (
@@ -52,14 +44,6 @@ const Header: React.FC = () => {
           <div className="flex items-center space-x-2">
             <FriendRequests/>
             <div className="flex items-center space-x-2">
-              <Button
-                variant="ghost"
-                size="icon"
-                onClick={handleSettingsClick}
-                className="text-violet-600 hover:text-violet-700 hover:bg-violet-50"
-              >
-                <Settings className="h-5 w-5" />
-              </Button>
               <SignOutButton redirectUrl="/">
                 <Button
                   variant="ghost"
