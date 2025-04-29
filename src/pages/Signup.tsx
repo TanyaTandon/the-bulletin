@@ -10,6 +10,7 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Heart } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useSignIn, useSignUp } from "@clerk/clerk-react";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -18,24 +19,50 @@ const SignUp = () => {
   const [showVerification, setShowVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
   const isMobile = useIsMobile();
+  
+  // Clerk hooks
+  const { isLoaded: signUpLoaded, signUp } = useSignUp();
+  const { isLoaded: signInLoaded, signIn } = useSignIn();
+  
+  // Form state
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [name, setName] = useState("");
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
+    if (!signUpLoaded) {
+      toast({
+        title: "Error",
+        description: "Authentication is still loading. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      // Start the sign-up process with Clerk
+      await signUp.create({
+        emailAddress: email,
+        password,
+      });
       
-      // Instead of immediately navigating, show verification step
+      // Prepare verification (sends email)
+      await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+      
       setShowVerification(true);
       toast({
         title: "Verification required",
         description: "Please enter the code sent to your email.",
       });
     } catch (error) {
+      console.error("Sign up error:", error);
       toast({
         title: "Error",
-        description: "Something went wrong. Please try again.",
+        description: error.message || "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -55,16 +82,29 @@ const SignUp = () => {
     
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate verification API call
+      // Attempt verification with the provided code
+      const completeSignUp = await signUp.attemptEmailAddressVerification({
+        code: verificationCode,
+      });
+      
+      if (completeSignUp.status !== "complete") {
+        // Handle errors in the verification process
+        throw new Error("Error verifying email. Please try again.");
+      }
+      
+      // Setup user metadata with name
+      await completeSignUp.createdSessionId;
+      
       toast({
         title: "Account created",
         description: "Welcome! Your account has been created successfully.",
       });
-      navigate("/");
+      navigate("/bulletin");
     } catch (error) {
+      console.error("Verification error:", error);
       toast({
         title: "Verification failed",
-        description: "Invalid code. Please try again.",
+        description: error.message || "Invalid code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -74,19 +114,44 @@ const SignUp = () => {
 
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    
+    if (!signInLoaded) {
+      toast({
+        title: "Error",
+        description: "Authentication is still loading. Please try again.",
+        variant: "destructive",
+      });
+      return;
+    }
+    
     setIsLoading(true);
     
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      toast({
-        title: "Welcome back!",
-        description: "You have successfully signed in.",
+      // Start the sign-in process with email
+      const signInAttempt = await signIn.create({
+        identifier: email,
+        password,
       });
-      navigate("/");
+      
+      if (signInAttempt.status === "complete") {
+        toast({
+          title: "Welcome back!",
+          description: "You have successfully signed in.",
+        });
+        navigate("/bulletin");
+      } else {
+        // Handle 2FA or other auth flows if needed
+        console.error("Sign in is not complete:", signInAttempt);
+        toast({
+          title: "Additional verification required",
+          description: "Please complete the verification process.",
+        });
+      }
     } catch (error) {
+      console.error("Sign in error:", error);
       toast({
         title: "Error",
-        description: "Invalid credentials. Please try again.",
+        description: error.message || "Invalid credentials. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -118,7 +183,6 @@ const SignUp = () => {
                 value={verificationCode}
                 onChange={setVerificationCode}
                 className="gap-1 md:gap-2"
-                containerClassName={isMobile ? "justify-center" : "justify-center"}
               >
                 <InputOTPGroup>
                   <InputOTPSlot index={0} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
@@ -149,7 +213,26 @@ const SignUp = () => {
               </Button>
             </div>
             <p className="text-center text-sm text-muted-foreground pt-2">
-              Didn't receive a code? <button className="text-primary font-medium hover:underline" onClick={() => toast({ title: "Code resent", description: "Please check your email for a new code." })}>Resend</button>
+              Didn't receive a code? <button 
+                className="text-primary font-medium hover:underline" 
+                onClick={async () => {
+                  try {
+                    await signUp.prepareEmailAddressVerification({ strategy: "email_code" });
+                    toast({ 
+                      title: "Code resent", 
+                      description: "Please check your email for a new code." 
+                    });
+                  } catch (error) {
+                    toast({
+                      title: "Error",
+                      description: "Failed to resend code. Please try again.",
+                      variant: "destructive",
+                    });
+                  }
+                }}
+              >
+                Resend
+              </button>
             </p>
           </CardContent>
         </Card>
@@ -191,6 +274,8 @@ const SignUp = () => {
                       type="email" 
                       placeholder="name@example.com"
                       className="pl-9"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required 
                     />
                   </div>
@@ -203,6 +288,8 @@ const SignUp = () => {
                       id="password-signin" 
                       type="password"
                       className="pl-9"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required 
                     />
                   </div>
@@ -230,6 +317,8 @@ const SignUp = () => {
                       id="name" 
                       type="text"
                       className="pl-9"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
                       required 
                     />
                   </div>
@@ -242,6 +331,8 @@ const SignUp = () => {
                       id="email-signup" 
                       type="email"
                       className="pl-9"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
                       required 
                     />
                   </div>
@@ -254,6 +345,8 @@ const SignUp = () => {
                       id="password-signup" 
                       type="password"
                       className="pl-9"
+                      value={password}
+                      onChange={(e) => setPassword(e.target.value)}
                       required 
                     />
                   </div>
