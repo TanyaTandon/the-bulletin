@@ -169,7 +169,12 @@ const Index = () => {
     }
   };
 
-  const handleVerifySignUp = async (code) => {
+  const handleVerifySignUp = async (code: string) => {
+    console.log(code);
+    const trueCode = code.replace("·", "");
+    console.log(trueCode);
+    console.log(code.length);
+    if (code.includes("·")) return;
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
       return;
@@ -350,9 +355,11 @@ const Index = () => {
                     ) : (
                       <Button
                         onClick={
-                          signInStep === 0 ? handleSignIn : (event) => {
-                            if (code) handleVerifySignIn(code);
-                          }
+                          signInStep === 0
+                            ? handleSignIn
+                            : (event) => {
+                                if (code) handleVerifySignIn(code);
+                              }
                         }
                         size="lg"
                         className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
@@ -527,6 +534,15 @@ const Index = () => {
                         onChange={(code) => setCode(code)}
                         onCompleted={(code) => handleVerifySignUp(code)}
                       />
+                      <Button
+                        onClick={async () => {
+                          await signUp.preparePhoneNumberVerification({
+                            strategy: "phone_code",
+                          });
+                        }}
+                      >
+                        Try Again
+                      </Button>
                     </>
                   )}
                 </>
