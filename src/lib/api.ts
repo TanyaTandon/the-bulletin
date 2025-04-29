@@ -109,7 +109,7 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
     console.log("notes:", arrayToDict(bulletin.savedNotes));
     let returnBulletin: Bulletin[] = [];
 
-    let newUserData: User;
+    let newUserData: User[] = [];
     console.log("Creating new bulletin");
     // Create a new bulletin item with UUID
     const bulletinId = uuidv4();
@@ -278,14 +278,18 @@ export async function addFriendToSupabase({
         suggested_addresses: [friend.address],
         added_by: [user.phone_number],
       })
-      .then(async () => {
-        await supabase
+      .then(async (res) => {
+        const userUpdateResponse = await supabase
           .from("user_record")
           .update({
             recipients: [...user.recipients, friend.phone_number],
           })
-          .eq("phone_number", user.phone_number)
-          .then((res) => res);
+          .eq("phone_number", user.phone_number);
+          
+        return {
+          status: res.status,
+          data: res
+        };
       });
   } else if (fractionalUser == 0) {
     return await supabase
@@ -294,14 +298,18 @@ export async function addFriendToSupabase({
         suggested_name: [...fractionalData.suggested_name, friend.name],
         added_by: [...fractionalData.added_by, user.phone_number],
       })
-      .then(async () => {
-        await supabase
+      .then(async (res) => {
+        const userUpdateResponse = await supabase
           .from("user_record")
           .update({
             recipients: [...user.recipients, friend.phone_number],
           })
-          .eq("phone_number", user.phone_number)
-          .then((res) => res);
+          .eq("phone_number", user.phone_number);
+          
+        return {
+          status: res.status,
+          data: res
+        };
       });
   } else if (fractionalUser == 1) {
     return await supabase
@@ -310,6 +318,11 @@ export async function addFriendToSupabase({
         recipients: [...user.recipients, friend.phone_number],
       })
       .eq("phone_number", user.phone_number)
-      .then((res) => res);
+      .then((res) => {
+        return {
+          status: res.status,
+          data: res
+        };
+      });
   }
 }
