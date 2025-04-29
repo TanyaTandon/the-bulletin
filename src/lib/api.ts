@@ -106,11 +106,9 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
       }, {});
     }
 
-    console.log("notes:", arrayToDict(bulletin.savedNotes));
     let returnBulletin: Bulletin[] = [];
 
     let newUserData: User;
-    console.log("Creating new bulletin");
     // Create a new bulletin item with UUID
     const bulletinId = uuidv4();
     const { error: bulletinError } = await supabase
@@ -228,10 +226,11 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
     console.log("Updating bulletin with data:", updatedBulletin);
     console.log("Bulletin ID:", bulletin.id);
 
-    const { error: bulletinError } = await supabase
+    const { error: bulletinError, data: bulletinData } = await supabase
       .from("bulletins")
       .update(updatedBulletin)
-      .eq("id", bulletin.id);
+      .eq("id", bulletin.id)
+      .select();
 
     if (bulletinError) {
       console.error("Error updating bulletin:", bulletinError);
@@ -256,7 +255,7 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
       }
     }
 
-    return { success: true, bulletinId: bulletin.id };
+    return { success: true, bulletinId: bulletin.id, bulletinData };
   } catch (error) {
     console.error("Error in updateBulletin:", error);
     return { success: false, error };
@@ -285,15 +284,16 @@ export async function addFriendToSupabase({
             recipients: [...user.recipients, friend.phone_number],
           })
           .eq("phone_number", user.phone_number)
+          .select()
           .then((res) => res);
       });
   } else if (fractionalUser == 0) {
     return await supabase
       .from("fractional_user_record")
       .update({
-        suggested_name: [...fractionalData.suggested_name, friend.name],
         added_by: [...fractionalData.added_by, user.phone_number],
       })
+      .eq("id", friend.phone_number)
       .then(async () => {
         await supabase
           .from("user_record")
@@ -301,6 +301,7 @@ export async function addFriendToSupabase({
             recipients: [...user.recipients, friend.phone_number],
           })
           .eq("phone_number", user.phone_number)
+          .select()
           .then((res) => res);
       });
   } else if (fractionalUser == 1) {
@@ -310,6 +311,29 @@ export async function addFriendToSupabase({
         recipients: [...user.recipients, friend.phone_number],
       })
       .eq("phone_number", user.phone_number)
+      .select()
       .then((res) => res);
   }
+}
+
+export async function removeRecipient({
+  user,
+  recipient,
+}: {
+  user: User;
+  recipient: string;
+}) {
+  const { error: userError, data: userData } = await supabase
+    .from("user_record")
+    .update({
+      recipients: user.recipients.filter((item) => item !== recipient),
+    })
+    .eq("phone_number", user.phone_number)
+    .select();
+
+  if (userError) {
+    console.error("Error removing recipient:", userError);
+    throw userError;
+  }
+  return userData;
 }

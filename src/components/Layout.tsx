@@ -183,7 +183,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
               padding: "1em",
               display: "flex",
               alignItems: "center",
-              width: "52vw",
+              width: isMobile ? "97vw" : "52vw",
             },
           }}
           open

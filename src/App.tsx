@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, Navigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Navigate, useNavigate } from "react-router-dom";
 import { UserProvider } from "@/contexts/UserContext";
 import { Helmet } from "react-helmet";
 import Index from "./pages/Index";
@@ -15,6 +15,7 @@ import Test from "./pages/test";
 import { showToast } from "./main";
 import { ToastContext } from "./contexts/toastcontextTP";
 import { useEffect } from "react";
+import { useClerk } from "@clerk/clerk-react";
 
 // Configure Query Client with more reliable settings
 const queryClient = new QueryClient({

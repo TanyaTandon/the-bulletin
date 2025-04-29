@@ -19,6 +19,7 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
+import FriendModalContent from "@/components/FriendModalContent";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -160,6 +161,7 @@ const FilledBulletin: React.FC = () => {
                 </p>
                 <div className="flex flex-col items-center space-y-2"></div>
               </div>
+              <FriendModalContent full />
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">
@@ -172,6 +174,7 @@ const FilledBulletin: React.FC = () => {
               </Card>
             </div>
             <Button
+              className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium flex mr-auto ml-auto"
               onClick={() => navigate(`/bulletin/${user.bulletins?.[0]}`)}
             >
               Go see your bulletin →
@@ -215,7 +218,25 @@ const FilledBulletin: React.FC = () => {
         } else {
           return (
             <>
-              <Button onClick={() => navigate("/bulletin")}>
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <br />
+              <h1 className="text-2xl font-medium text-center">
+                You don't have a bulletin yet!
+              </h1>
+              <Button
+                className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium flex mr-auto ml-auto"
+                onClick={() => navigate("/bulletin")}
+              >
                 <Sparkles className="mr-2" />
                 Go create a bulletin! →
               </Button>

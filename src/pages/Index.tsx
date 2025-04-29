@@ -23,6 +23,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -33,6 +34,7 @@ const NumberedHeart = ({ number }: { number: number }) => (
 
 const Index = () => {
   const dispatch = useAppDispatch();
+  const isMobile = useIsMobile();
   const { isSignedIn } = useAuth();
   const navigate = useNavigate();
   const { isLoaded, signUp } = useSignUp();
@@ -335,11 +337,14 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <ReactInputVerificationCode
-                        length={6}
-                        onChange={(code) => setCode(code)}
-                        onCompleted={(code) => handleVerifySignIn(code)}
-                      />
+                      <span style={isMobile && { transform: "scale(0.6)" }}>
+                        <ReactInputVerificationCode
+                          autoFocus
+                          length={6}
+                          onChange={(code) => setCode(code)}
+                          onCompleted={(code) => handleVerifySignIn(code)}
+                        />
+                      </span>
                     </>
                   )}
                   <div className="flex justify-center w-full">
@@ -529,11 +534,14 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <ReactInputVerificationCode
-                        length={6}
-                        onChange={(code) => setCode(code)}
-                        onCompleted={(code) => handleVerifySignUp(code)}
-                      />
+                      <span style={isMobile && { transform: "scale(0.6)" }}>
+                        <ReactInputVerificationCode
+                          autoFocus
+                          length={6}
+                          onChange={(code) => setCode(code)}
+                          onCompleted={(code) => handleVerifySignUp(code)}
+                        />
+                      </span>
                       <Button
                         onClick={async () => {
                           await signUp.preparePhoneNumberVerification({
@@ -576,7 +584,7 @@ const Index = () => {
             <Button
               size="lg"
               onClick={() => {
-                if (user.bulletins) {
+                if (user.bulletins.length > 0) {
                   navigate(`/bulletin/${user.bulletins[0]}`);
                 } else {
                   navigate("/bulletin");

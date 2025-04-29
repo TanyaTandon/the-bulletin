@@ -23,8 +23,6 @@ import { setUser } from "@/redux/user";
 const Bulletin = () => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
-  const nextMonth = format(addMonths(new Date(), 1), "MMMM");
-  const currentMonth = format(new Date(), "MMMM");
   const isMobile = useIsMobile();
   const user = useAppSelector(staticGetUser);
   const [isSubmitting, setIsSubmitting] = useState(false);
@@ -54,7 +52,7 @@ const Bulletin = () => {
       }).then((response) => {
         console.log("Response:", response);
         if (response.newUserData) {
-          dispatch(setUser(response.newUserData[0]))
+          dispatch(setUser(response.newUserData[0]));
         }
         if (response.success) {
           navigate(`/bulletin/${response.bulletinId}`);

@@ -20,12 +20,10 @@ export const showToast = (message: string) => {
 };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  <React.StrictMode>
-    <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-      <Provider store={store}>
-        <App />
-        <div id="clerk-captcha" />
-      </Provider>
-    </ClerkProvider>
-  </React.StrictMode>
+  <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
+    <Provider store={store}>
+      <App />
+      <div id="clerk-captcha" />
+    </Provider>
+  </ClerkProvider>
 );
