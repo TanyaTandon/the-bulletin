@@ -337,3 +337,19 @@ export async function removeRecipient({
   }
   return userData;
 }
+
+export async function submitFeedback(feedback: {
+  user: string;
+  feedback: string;
+}) {
+  const { error: feedbackError } = await supabase
+    .from("user_feedback")
+    .insert(feedback);
+
+  if (feedbackError) {
+    console.error("Error submitting feedback:", feedbackError);
+    throw feedbackError;
+  }
+
+  return { success: true };
+}
