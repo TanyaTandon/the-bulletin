@@ -1,4 +1,3 @@
-
 import { PayloadAction, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Bulletin, supabase } from "@/lib/api.ts";
 
@@ -25,6 +24,7 @@ const initialState: UserState = {
 export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (phoneNumber: string, { dispatch }) => {
+    console.log("fetching user", phoneNumber);
     try {
       const { data: res, error } = await supabase
         .from("user_record")
@@ -33,8 +33,11 @@ export const fetchUser = createAsyncThunk(
 
       console.log(res);
 
-      dispatch(setUser(res[0]));
-      return res[0];
+      const userResponse: User = res[0];
+
+      dispatch(setUser(userResponse));
+
+      return userResponse;
     } catch (error) {
       alert("Error fetching user");
       console.log(error);

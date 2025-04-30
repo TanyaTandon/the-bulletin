@@ -15,6 +15,7 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { setUser } from "@/redux/user";
+import { useSelector } from "react-redux";
 
 enum FriendStatus {
   NOT_REGISTERED = -1,
@@ -124,7 +125,7 @@ const FriendInput: React.FC<{
     };
   }, [phoneNumber]);
 
-  const user = useAppSelector(staticGetUser);
+  const user = useSelector(staticGetUser);
 
   const renderIcon = useMemo(() => {
     if (loading) {
@@ -368,13 +369,14 @@ const FriendInput: React.FC<{
 
 const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
   const dispatch = useAppDispatch();
-  const user = useAppSelector(staticGetUser);
+  const user = useSelector(staticGetUser);
+  console.log(user);
   const [existingFriends, setExistingFriends] = useState<string[]>(
-    user.recipients ?? [null]
+    user?.recipients ?? [null]
   );
 
   const [friendInputs, setFriendInputs] = useState<string[]>(
-    user.recipients.length > 0 ? user.recipients : [null]
+    user?.recipients.length > 0 ? user.recipients : [null]
   );
 
   return (

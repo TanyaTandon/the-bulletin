@@ -6,7 +6,7 @@ import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/redux";
-import { fetchUser } from "@/redux/user";
+import { fetchUser, User } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "sonner";
 import { Label } from "@/components/ui/label";
@@ -16,7 +16,7 @@ import {
   MapPin,
   Building,
   Home,
-  User,
+  User as UserIcon,
   LoaderCircle,
   Heart,
 } from "lucide-react";
@@ -24,7 +24,6 @@ import { Card, CardContent } from "@/components/ui/card";
 import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
-
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -109,14 +108,16 @@ const Index = () => {
 
       if (result?.identifier) {
         const phone = result.identifier.split("+1")[1];
-        await dispatch(fetchUser(phone));
-        console.log(user);
-        if (user.bulletins.length > 0) {
-          navigate(`/bulletin/${user.bulletins[0]}`);
-        } else {
-          navigate("/bulletin");
-        }
-        toast.success("Welcome back! You're now signed in.");
+        await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
+          const userRes: User = userDispatchResponse.payload as User;
+
+          if (userRes.bulletins.length > 0) {
+            navigate(`/bulletin/${userRes.bulletins[0]}`);
+          } else {
+            navigate("/bulletin");
+          }
+          toast.success("Welcome back! You're now signed in.");
+        });
       }
     } catch (error) {
       console.error("Code verification error:", error);
@@ -397,7 +398,7 @@ const Index = () => {
                               Full Name
                             </Label>
                             <div className="relative">
-                              <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
                               <Input
                                 id="name"
                                 placeholder="Enter your name"

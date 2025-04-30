@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
@@ -7,7 +6,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import FriendRequests from "./FriendRequests";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
-import { useAppDispatch } from "@/redux";
+import { resetStore, useAppDispatch } from "@/redux";
+import { flushSync } from "react-dom";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -21,7 +21,11 @@ const Header: React.FC = () => {
   useEffect(() => {
     setIsAuthenticated(!!isSignedIn && !!user);
     // Add logging to debug authentication state
-    console.log("Auth state updated:", { isSignedIn, hasUser: !!user, isAuthenticated: !!isSignedIn && !!user });
+    console.log("Auth state updated:", {
+      isSignedIn,
+      hasUser: !!user,
+      isAuthenticated: !!isSignedIn && !!user,
+    });
   }, [isSignedIn, user]);
 
   const dispatch = useAppDispatch();
@@ -38,14 +42,18 @@ const Header: React.FC = () => {
         >
           the bulletin.
         </Link>
-        
+
         {/* Show buttons if either condition is true to ensure better reliability */}
         {(isSignedIn || isAuthenticated) && (
           <div className="flex items-center space-x-2">
-            <FriendRequests/>
+            <FriendRequests />
             <div className="flex items-center space-x-2">
-              <SignOutButton redirectUrl="/">
+              <SignOutButton>
                 <Button
+                  onClick={() => {
+                    console.log("signing out");
+                    resetStore();
+                  }}
                   variant="ghost"
                   size="icon"
                   className="text-red-600 hover:text-red-700 hover:bg-red-50"
