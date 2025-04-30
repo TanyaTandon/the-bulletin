@@ -30,6 +30,9 @@ const Bulletin = () => {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [blurb, setBlurb] = useState<string>("");
   const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
+  
+  // Custom placeholder for the blurb textarea
+  const customPlaceholder = "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
 
   const handleSubmitBulletin = async () => {
     if (!blurb && images.length === 0) {
@@ -106,6 +109,7 @@ const Bulletin = () => {
                 setBlurb={setBlurb}
                 images={images}
                 setImages={setImages}
+                placeholder={customPlaceholder}
               />
             </div>
 

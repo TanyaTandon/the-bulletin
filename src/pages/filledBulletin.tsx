@@ -25,6 +25,7 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import FriendModalContent from "@/components/FriendModalContent";
+import TypewriterText from "@/components/TypewriterText";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -36,6 +37,9 @@ const FilledBulletin: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
+  
+  // Custom placeholder for the blurb textarea
+  const customPlaceholder = "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
 
   console.log("URL Slug:", bulletinData, user);
 
@@ -216,6 +220,13 @@ const FilledBulletin: React.FC = () => {
         if (bulletinData) {
           return (
             <>
+              <div className="text-left min-h-[6em] mb-6">
+                <TypewriterText
+                  text={`<p>welcome to the bulletin!</p><p>we're happy you're here. ❤️</p><p>upload your pictures, text, and calendar dates below.</p><p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
+                  speed={isMobile ? 30 : 35}
+                  className="text-xl"
+                />
+              </div>
               <BlurbInput
                 savedNotes={bulletinData.savedNotes}
                 setSavedNotes={setSavedNotes}
@@ -223,6 +234,7 @@ const FilledBulletin: React.FC = () => {
                 setBlurb={setBlurb}
                 images={bulletinData.images}
                 setImages={setImages}
+                placeholder={customPlaceholder}
               />
               <Button
                 onClick={handleUpdateBulletin}
