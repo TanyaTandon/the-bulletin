@@ -1,3 +1,4 @@
+
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useEffect, useMemo, useState } from "react";
@@ -202,7 +203,7 @@ const FriendInput: React.FC<{
     } else if (addFriend) {
       return (
         <Plus
-          title="Add Friend"
+          aria-label="Add Friend"
           onClick={async () => {
             setLoading(true);
             await addFriendToSupabase({
@@ -251,7 +252,7 @@ const FriendInput: React.FC<{
         } else {
           return (
             <Plus
-              title="Add Friend"
+              aria-label="Add Friend"
               onClick={async () => {
                 await addFriendToSupabase({
                   friend: {

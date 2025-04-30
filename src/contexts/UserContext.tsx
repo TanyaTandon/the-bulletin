@@ -107,24 +107,22 @@ const initialFriendRequests: FriendRequest[] = [
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // const { user } = useClerkUser();
   const { isSignedIn, user } = useClerk();
-
   const dispatch = useAppDispatch();
 
   useEffect(() => {
     console.log(user);
     if (user) {
       dispatch(
-        fetchUser(user.primaryPhoneNumber.phoneNumber.split("+1")[1])
+        fetchUser(user.primaryPhoneNumber?.phoneNumber?.split("+1")[1] || "")
       ).then((response) => {
         console.log(response.payload);
-        if (response.payload.bulletins.length > 0) {
+        if (response.payload && 'bulletins' in response.payload && response.payload.bulletins.length > 0) {
           dispatch(fetchBulletins());
         }
       });
     }
-  }, [user]);
+  }, [user, dispatch]);
 
   const [personas, setPersonas] = useState<Persona[]>(initialPersonas);
   const [groups, setGroups] = useState<Group[]>(initialGroups);
