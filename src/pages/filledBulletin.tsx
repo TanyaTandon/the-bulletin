@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -131,7 +132,7 @@ const FilledBulletin: React.FC = () => {
       if (result.success) {
         toast.success("Bulletin updated successfully!");
         setTimeout(() => {
-          navigate("/");
+          navigate("/bulletin/filled");
         }, 1500);
       } else {
         toast.error("Failed to update bulletin");
