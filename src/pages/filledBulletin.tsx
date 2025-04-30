@@ -26,6 +26,7 @@ const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const [feedback, setFeedback] = useState<string>("");
 
   // Using useParams hook from react-router-dom to get URL parameters
   const { id } = useParams<{ id: string }>();
@@ -166,12 +167,25 @@ const FilledBulletin: React.FC = () => {
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">
-                    we'd love to hear anything and everything: comments,
-                    critiques, suggestions, requests?
+                    Feedback
                   </CardTitle>
                 </CardHeader>
-                <CardContent></CardContent>
-                <CardFooter></CardFooter>
+                <CardContent>
+                  <Textarea 
+                    value={feedback}
+                    onChange={(e) => setFeedback(e.target.value)}
+                    placeholder="we'd love to hear anything and everything: comments, critiques, suggestions, requests?"
+                    className="min-h-[120px]"
+                  />
+                </CardContent>
+                <CardFooter>
+                  <Button 
+                    onClick={() => toast.success("Feedback submitted. Thank you!")} 
+                    className="w-full"
+                  >
+                    Submit Feedback
+                  </Button>
+                </CardFooter>
               </Card>
             </div>
             <Button
