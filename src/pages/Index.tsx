@@ -337,7 +337,7 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <span style={isMobile ? { transform: "scale(0.6)" } : {}}>
+                      <span style={isMobile && { transform: "scale(0.6)" }}>
                         <ReactInputVerificationCode
                           autoFocus
                           length={6}
@@ -534,8 +534,9 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your code
                       </h1>
-                      <span style={isMobile ? { transform: "scale(0.6)" } : {}}>
+                      <span style={isMobile && { transform: "scale(0.6)" }}>
                         <ReactInputVerificationCode
+                          autoFocus
                           length={6}
                           onChange={(code) => setCode(code)}
                           onCompleted={(code) => handleVerifySignUp(code)}

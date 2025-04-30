@@ -130,8 +130,9 @@ const FilledBulletin: React.FC = () => {
       const result = await updateBulletin(user, bulletinData);
       if (result.success) {
         toast.success("Bulletin updated successfully!");
-        // Navigate to the /filled route after successfully updating
-        navigate("/bulletin/filled");
+        setTimeout(() => {
+          navigate("/");
+        }, 1500);
       } else {
         toast.error("Failed to update bulletin");
       }
@@ -217,7 +218,6 @@ const FilledBulletin: React.FC = () => {
         } else {
           return (
             <>
-              <br />
               <br />
               <br />
               <br />
