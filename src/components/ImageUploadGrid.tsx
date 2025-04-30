@@ -24,8 +24,8 @@ const ImageUploadGrid: React.FC<{
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
 
-    if (files.length + images.length > 9) {
-      toast.error("You can only upload up to 9 images", {
+    if (files.length + images.length > 4) {
+      toast.error("You can only upload up to 4 images", {
         description: "Please select fewer images.",
       });
       return;
@@ -88,15 +88,10 @@ const ImageUploadGrid: React.FC<{
         cols: 1,
         slots: 1,
       };
-    } else if (totalImages <= 4) {
+    } else {
       return {
         cols: 2,
         slots: 4,
-      };
-    } else {
-      return {
-        cols: 3,
-        slots: 9,
       };
     }
   };
@@ -105,14 +100,14 @@ const ImageUploadGrid: React.FC<{
 
   const getCardSize = () => {
     if (isMobile) {
-      return cols === 1 ? "w-full" : cols === 2 ? "w-36" : "w-24";
+      return cols === 1 ? "w-full" : "w-36";
     } else {
-      return cols === 1 ? "w-full" : cols === 2 ? "w-48" : "w-48";
+      return cols === 1 ? "w-full" : "w-48";
     }
   };
 
   const slotsToShow =
-    images.length === 0 ? 1 : Math.min(Math.max(slots, images.length + 1), 9);
+    images.length === 0 ? 1 : Math.min(Math.max(slots, images.length + 1), 4);
 
   return (
     <div className="mb-4 flex justify-center flex-col items-center">
@@ -123,7 +118,7 @@ const ImageUploadGrid: React.FC<{
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
-          upload pictures below. choose up to 9 pictures.
+          upload pictures below. choose up to 4 pictures.
         </h3>
         <Separator className="my-4 bg-gray-200" />
         <div
@@ -133,20 +128,16 @@ const ImageUploadGrid: React.FC<{
             width: isMobile
               ? cols === 1
                 ? "100%"
-                : cols === 2
-                ? "90%"
-                : "100%"
+                : "90%"
               : cols === 1
               ? "300px"
-              : cols === 2
-              ? "400px"
-              : "600px",
+              : "400px",
           }}
         >
           {[...Array(slotsToShow)].map((_, index) => {
             const image = images[index];
 
-            if (index >= 9) {
+            if (index >= 4) {
               return null;
             }
 

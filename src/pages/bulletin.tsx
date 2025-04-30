@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
@@ -33,6 +34,12 @@ const Bulletin = () => {
   const handleSubmitBulletin = async () => {
     if (!blurb && images.length === 0) {
       toast.error("Please add some content to your bulletin before submitting");
+      return;
+    }
+
+    // Validate the number of images
+    if (images.length > 4) {
+      toast.error("You can only upload up to 4 images");
       return;
     }
 

@@ -261,6 +261,7 @@ const FilledBulletin: React.FC = () => {
               <br />
               <br />
               <br />
+              <br />
               <h1 className="text-2xl font-medium text-center">
                 You don't have a bulletin yet!
               </h1>
