@@ -15,6 +15,12 @@ import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { setUser } from "@/redux/user";
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from "./ui/tooltip";
 
 enum FriendStatus {
   NOT_REGISTERED = -1,
@@ -199,35 +205,45 @@ const FriendInput: React.FC<{
       );
     } else if (addFriend) {
       return (
-        <Plus
-          title="Add Friend"
-          onClick={async () => {
-            setLoading(true);
-            await addFriendToSupabase({
-              friend: {
-                ...friendDetails,
-                phone_number: phoneNumber,
-              },
-              fractionalUser: friendStatus,
-              user,
-              fractionalData,
-            }).then((response) => {
-              setLoading(false);
-              toast.success("Friend added successfully");
-              setExistingFriends([...existingFriends, phoneNumber]);
-              dispatch(setUser(response[0]));
-              setFriendStatus(FriendStatus.EXISTS);
-            });
-          }}
-          style={{
-            cursor: "pointer",
-            width: 50,
-            height: "-webkit-fill-available",
-            padding: 8,
-            background: "lightgrey",
-            borderRadius: 4,
-          }}
-        />
+        <TooltipProvider>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <div>
+                <Plus
+                  onClick={async () => {
+                    setLoading(true);
+                    await addFriendToSupabase({
+                      friend: {
+                        ...friendDetails,
+                        phone_number: phoneNumber,
+                      },
+                      fractionalUser: friendStatus,
+                      user,
+                      fractionalData,
+                    }).then((response) => {
+                      setLoading(false);
+                      toast.success("Friend added successfully");
+                      setExistingFriends([...existingFriends, phoneNumber]);
+                      dispatch(setUser(response[0]));
+                      setFriendStatus(FriendStatus.EXISTS);
+                    });
+                  }}
+                  style={{
+                    cursor: "pointer",
+                    width: 50,
+                    height: "-webkit-fill-available",
+                    padding: 8,
+                    background: "lightgrey",
+                    borderRadius: 4,
+                  }}
+                />
+              </div>
+            </TooltipTrigger>
+            <TooltipContent>
+              <p>Add Friend</p>
+            </TooltipContent>
+          </Tooltip>
+        </TooltipProvider>
       );
     } else {
       if (friendStatus === FriendStatus.NOT_REGISTERED) {
@@ -248,33 +264,43 @@ const FriendInput: React.FC<{
           );
         } else {
           return (
-            <Plus
-              title="Add Friend"
-              onClick={async () => {
-                await addFriendToSupabase({
-                  friend: {
-                    ...friendDetails,
-                    phone_number: phoneNumber,
-                  },
-                  fractionalUser: friendStatus,
-                  user,
-                  fractionalData,
-                }).then((response) => {
-                  setLoading(false);
-                  toast.success("Friend added successfully");
-                  setExistingFriends([...existingFriends, phoneNumber]);
-                  dispatch(setUser(response[0]));
-                });
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                height: "-webkit-fill-available",
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
+            <TooltipProvider>
+              <Tooltip>
+                <TooltipTrigger asChild>
+                  <div>
+                    <Plus
+                      onClick={async () => {
+                        await addFriendToSupabase({
+                          friend: {
+                            ...friendDetails,
+                            phone_number: phoneNumber,
+                          },
+                          fractionalUser: friendStatus,
+                          user,
+                          fractionalData,
+                        }).then((response) => {
+                          setLoading(false);
+                          toast.success("Friend added successfully");
+                          setExistingFriends([...existingFriends, phoneNumber]);
+                          dispatch(setUser(response[0]));
+                        });
+                      }}
+                      style={{
+                        cursor: "pointer",
+                        width: 50,
+                        height: "-webkit-fill-available",
+                        padding: 8,
+                        background: "lightgrey",
+                        borderRadius: 4,
+                      }}
+                    />
+                  </div>
+                </TooltipTrigger>
+                <TooltipContent>
+                  <p>Add Friend</p>
+                </TooltipContent>
+              </Tooltip>
+            </TooltipProvider>
           );
         }
       } else if (friendStatus === FriendStatus.FRACTIONAL) {
@@ -403,8 +429,9 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
       </h1>
 
       <div className="flex flex-col gap-4">
-        {friendInputs.map((friend) => (
+        {friendInputs.map((friend, index) => (
           <FriendInput
+            key={index}
             setExistingFriends={setExistingFriends}
             existingFriends={existingFriends}
             friend={friend}
