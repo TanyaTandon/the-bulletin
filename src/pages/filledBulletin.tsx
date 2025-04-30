@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -26,7 +25,6 @@ import {
 } from "@/components/ui/card";
 import { Textarea } from "@/components/ui/textarea";
 import FriendModalContent from "@/components/FriendModalContent";
-import TypewriterText from "@/components/TypewriterText";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -173,7 +171,8 @@ const FilledBulletin: React.FC = () => {
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">
-                    we'd love to hear anything and everything: comments, critiques, suggestions, requests?
+                    we'd love to hear anything and everything: comments,
+                    critiques, suggestions, requests?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
@@ -217,13 +216,6 @@ const FilledBulletin: React.FC = () => {
         if (bulletinData) {
           return (
             <>
-              <div className="text-left min-h-[6em] mb-6">
-                <TypewriterText
-                  text={`<p>welcome to the bulletin!</p><p>we're happy you're here. ❤️</p><p>upload your pictures, text, and calendar dates below.</p><p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
-                  speed={isMobile ? 30 : 35}
-                  className="text-xl"
-                />
-              </div>
               <BlurbInput
                 savedNotes={bulletinData.savedNotes}
                 setSavedNotes={setSavedNotes}
