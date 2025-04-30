@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
@@ -11,7 +12,7 @@ import { Button } from "@/components/ui/button";
 
 import { toast } from "sonner";
 import { createNewBulletin } from "@/lib/api";
-import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
+import { Send, Calendar, Image, FileText, LoaderCircle, Home } from "lucide-react";
 import { useAuth, useSignUp } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@mui/material";
@@ -76,12 +77,31 @@ const Bulletin = () => {
     }
   };
 
+  // Navigate to home page
+  const navigateToHome = () => {
+    navigate("/filled");
+  };
+
   console.log("User:", savedNotes);
 
   return (
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-4 pt-0" : "container py-6"}`}>
         <div className="max-w-3xl mx-auto space-y-6">
+          {/* Updated header with "Update your bulletin" on left and Home icon on right */}
+          <div className="flex justify-between items-center mb-4">
+            <h1 className="text-xl font-semibold">Update your bulletin</h1>
+            <Button 
+              variant="ghost" 
+              size="icon" 
+              onClick={navigateToHome}
+              className="text-gray-700 hover:text-black hover:bg-gray-100"
+              aria-label="Go to home"
+            >
+              <Home className="h-5 w-5" />
+            </Button>
+          </div>
+
           <div className="text-left min-h-[6em]">
             <TypewriterText
               text={`<p>welcome to the bulletin!</p><p>we're happy you're here. ❤️</p><p>upload your pictures, text, and calendar dates below.</p><p>we will gather this content from all your friends, design it beautifully into your bulletin, and ship it to you on may 5th.</p>`}
