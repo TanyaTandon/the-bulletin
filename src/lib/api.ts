@@ -1,4 +1,3 @@
-
 import { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import { User } from "@/redux/user";
@@ -109,7 +108,7 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
 
     let returnBulletin: Bulletin[] = [];
 
-    let newUserData: User | null = null;
+    let newUserData: User;
     // Create a new bulletin item with UUID
     const bulletinId = uuidv4();
     const { error: bulletinError } = await supabase
@@ -136,10 +135,7 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
           .select("*");
 
         console.log("User data:", userData);
-        if (userData && userData.length > 0) {
-          newUserData = userData[0] as User;
-        }
-        
+        newUserData = userData;
         if (userError) {
           console.error("Error creating user:", userError);
           throw userError;
