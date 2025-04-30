@@ -318,7 +318,10 @@ const FriendInput: React.FC<{
 
   return (
     <>
-      <span className="flex items-center gap-2">
+      <span
+        style={{ display: "-webkit-box" }}
+        className="flex items-center gap-2"
+      >
         <Input
           className="disabled:opacity-100"
           disabled={existingFriends.includes(friend) && friendName != null}
@@ -404,7 +407,7 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
           : "Add friends"}
       </h1>
 
-      <div style={{display:"-webkit-box"}} className="flex flex-col gap-4">
+      <div className="flex flex-col gap-4">
         {friendInputs.map((friend) => (
           <FriendInput
             setExistingFriends={setExistingFriends}
