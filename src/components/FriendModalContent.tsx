@@ -201,36 +201,35 @@ const FriendInput: React.FC<{
       );
     } else if (addFriend) {
       return (
-        <div title="Add Friend">
-          <Plus
-            onClick={async () => {
-              setLoading(true);
-              await addFriendToSupabase({
-                friend: {
-                  ...friendDetails,
-                  phone_number: phoneNumber,
-                },
-                fractionalUser: friendStatus,
-                user,
-                fractionalData,
-              }).then((response) => {
-                setLoading(false);
-                toast.success("Friend added successfully");
-                setExistingFriends([...existingFriends, phoneNumber]);
-                dispatch(setUser(response[0]));
-                setFriendStatus(FriendStatus.EXISTS);
-              });
-            }}
-            style={{
-              cursor: "pointer",
-              width: 50,
-              height: "-webkit-fill-available",
-              padding: 8,
-              background: "lightgrey",
-              borderRadius: 4,
-            }}
-          />
-        </div>
+        <Plus
+          title="Add Friend"
+          onClick={async () => {
+            setLoading(true);
+            await addFriendToSupabase({
+              friend: {
+                ...friendDetails,
+                phone_number: phoneNumber,
+              },
+              fractionalUser: friendStatus,
+              user,
+              fractionalData,
+            }).then((response) => {
+              setLoading(false);
+              toast.success("Friend added successfully");
+              setExistingFriends([...existingFriends, phoneNumber]);
+              dispatch(setUser(response[0]));
+              setFriendStatus(FriendStatus.EXISTS);
+            });
+          }}
+          style={{
+            cursor: "pointer",
+            width: 50,
+            height: "-webkit-fill-available",
+            padding: 8,
+            background: "lightgrey",
+            borderRadius: 4,
+          }}
+        />
       );
     } else {
       if (friendStatus === FriendStatus.NOT_REGISTERED) {
@@ -251,34 +250,33 @@ const FriendInput: React.FC<{
           );
         } else {
           return (
-            <div title="Add Friend">
-              <Plus
-                onClick={async () => {
-                  await addFriendToSupabase({
-                    friend: {
-                      ...friendDetails,
-                      phone_number: phoneNumber,
-                    },
-                    fractionalUser: friendStatus,
-                    user,
-                    fractionalData,
-                  }).then((response) => {
-                    setLoading(false);
-                    toast.success("Friend added successfully");
-                    setExistingFriends([...existingFriends, phoneNumber]);
-                    dispatch(setUser(response[0]));
-                  });
-                }}
-                style={{
-                  cursor: "pointer",
-                  width: 50,
-                  height: "-webkit-fill-available",
-                  padding: 8,
-                  background: "lightgrey",
-                  borderRadius: 4,
-                }}
-              />
-            </div>
+            <Plus
+              title="Add Friend"
+              onClick={async () => {
+                await addFriendToSupabase({
+                  friend: {
+                    ...friendDetails,
+                    phone_number: phoneNumber,
+                  },
+                  fractionalUser: friendStatus,
+                  user,
+                  fractionalData,
+                }).then((response) => {
+                  setLoading(false);
+                  toast.success("Friend added successfully");
+                  setExistingFriends([...existingFriends, phoneNumber]);
+                  dispatch(setUser(response[0]));
+                });
+              }}
+              style={{
+                cursor: "pointer",
+                width: 50,
+                height: "-webkit-fill-available",
+                padding: 8,
+                background: "lightgrey",
+                borderRadius: 4,
+              }}
+            />
           );
         }
       } else if (friendStatus === FriendStatus.FRACTIONAL) {
