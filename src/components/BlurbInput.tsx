@@ -1,3 +1,4 @@
+
 import React, { useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Calendar } from "./ui/calendar";
@@ -14,14 +15,27 @@ export interface CalendarNote {
   note: string;
 }
 
-const BlurbInput: React.FC<{
+interface BlurbInputProps {
   savedNotes: CalendarNote[];
   setSavedNotes: React.Dispatch<React.SetStateAction<CalendarNote[]>>;
   blurb: string;
   setBlurb: React.Dispatch<React.SetStateAction<string>>;
   images: UploadedImage[];
   setImages: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
-}> = ({ savedNotes, setSavedNotes, blurb, setBlurb, images, setImages }) => {
+  placeholder?: string;
+}
+
+const MAX_CHARS = 365;
+
+const BlurbInput: React.FC<BlurbInputProps> = ({ 
+  savedNotes, 
+  setSavedNotes, 
+  blurb, 
+  setBlurb, 
+  images, 
+  setImages,
+  placeholder 
+}) => {
   const [date, setDate] = useState<Date | undefined>(new Date(2025, 4, 1));
   const [calendarNote, setCalendarNote] = useState("");
   const isMobile = useIsMobile();
@@ -34,6 +48,13 @@ const BlurbInput: React.FC<{
       console.log(savedNotes);
       setSavedNotes([...savedNotes, { date, note: calendarNote.trim() }]);
       setCalendarNote("");
+    }
+  };
+
+  const handleBlurbChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
+    const text = e.target.value;
+    if (text.length <= MAX_CHARS) {
+      setBlurb(text);
     }
   };
 
@@ -74,15 +95,24 @@ const BlurbInput: React.FC<{
           or whatever your heart desires.
         </h3>
         <Separator className="my-4 bg-gray-200" />
-        <Textarea
-          value={blurb}
-          onChange={(e) => setBlurb(e.target.value)}
-          placeholder="e.g. April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. I'm trying to build a cult of people who don't sleep with their phones in their rooms — and honestly, I'm kinda succeeding. I am terrified of all the FUN that May will bring!!"
-          className={`resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm ${
-            isMobile ? "min-h-[250px]" : "min-h-[200px]"
-          }`}
-          style={{ fontFamily: "Sometype Mono, monospace" }}
-        />
+        <div className="relative">
+          <Textarea
+            value={blurb}
+            onChange={handleBlurbChange}
+            placeholder={placeholder || "e.g. April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. I'm trying to build a cult of people who don't sleep with their phones in their rooms — and honestly, I'm kinda succeeding. I am terrified of all the FUN that May will bring!!"}
+            className={`resize-none w-full max-w-3xl border-violet-200 focus:border-violet-400 focus:ring-violet-400 text-sm ${
+              isMobile ? "min-h-[250px]" : "min-h-[200px]"
+            }`}
+            style={{ fontFamily: "Sometype Mono, monospace" }}
+            maxLength={MAX_CHARS}
+          />
+          <div 
+            className="text-xs text-gray-500 text-right mt-2"
+            style={{ fontFamily: "Sometype Mono, monospace" }}
+          >
+            {blurb.length}/{MAX_CHARS} characters
+          </div>
+        </div>
       </div>
 
       <div className="w-full bg-white rounded-lg shadow-sm p-6">
@@ -186,3 +216,4 @@ const BlurbInput: React.FC<{
 };
 
 export default BlurbInput;
+
