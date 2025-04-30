@@ -25,6 +25,7 @@ import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
 
+
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
     <Heart className="w-6 h-6 stroke-red-500 stroke-[1.5] fill-none" />
