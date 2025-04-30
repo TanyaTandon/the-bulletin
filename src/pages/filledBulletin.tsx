@@ -167,7 +167,7 @@ const FilledBulletin: React.FC = () => {
               <Card className="w-full">
                 <CardHeader>
                   <CardTitle className="text-lg font-medium">
-                    Feedback
+                    we'd love to hear anything and everything: comments, critiques, suggestions, requests?
                   </CardTitle>
                 </CardHeader>
                 <CardContent>
