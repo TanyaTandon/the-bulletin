@@ -16,6 +16,7 @@ import { Button } from "./ui/button";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { setUser } from "@/redux/user";
 import { useSelector } from "react-redux";
+import "../App.css";
 
 enum FriendStatus {
   NOT_REGISTERED = -1,
@@ -319,8 +320,7 @@ const FriendInput: React.FC<{
   return (
     <>
       <span
-        style={{ display: "-webkit-box" }}
-        className="flex items-center gap-2"
+        className="flex items-center gap-2 browserHelper"
       >
         <Input
           className="disabled:opacity-100"

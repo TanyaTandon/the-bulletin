@@ -40,3 +40,10 @@
 .read-the-docs {
   color: #888;
 }
+
+@supports (hanging-punctuation: first) and (font: -apple-system-body) and
+  (-webkit-appearance: none) {
+  .browserHelper {
+    display: -webkit-box !important;
+  }
+}
