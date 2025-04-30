@@ -404,7 +404,7 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
           : "Add friends"}
       </h1>
 
-      <div className="flex flex-col gap-4">
+      <div style={{display:"-webkit-box"}} className="flex flex-col gap-4">
         {friendInputs.map((friend) => (
           <FriendInput
             setExistingFriends={setExistingFriends}
