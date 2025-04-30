@@ -1,3 +1,4 @@
+
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -212,7 +213,7 @@ const FilledBulletin: React.FC = () => {
               className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium flex mr-auto ml-auto"
               onClick={() => navigate(`/bulletin/${user.bulletins?.[0]}`)}
             >
-              Go see your bulletin →
+              Edit your bulletin →
             </Button>
           </>
         );

@@ -1,3 +1,4 @@
+
 import { useAppDispatch } from "@/redux";
 import { fetchBulletins, fetchUser } from "@/redux/user";
 import React, {
@@ -119,7 +120,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
         fetchUser(user.primaryPhoneNumber.phoneNumber.split("+1")[1])
       ).then((response) => {
         console.log(response.payload);
-        if (response.payload.bulletins.length > 0) {
+        if (response.payload && typeof response.payload === 'object' && 'bulletins' in response.payload && Array.isArray(response.payload.bulletins) && response.payload.bulletins.length > 0) {
           dispatch(fetchBulletins());
         }
       });
