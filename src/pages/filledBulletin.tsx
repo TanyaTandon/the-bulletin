@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -213,7 +212,7 @@ const FilledBulletin: React.FC = () => {
               className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium flex mr-auto ml-auto"
               onClick={() => navigate(`/bulletin/${user.bulletins?.[0]}`)}
             >
-              Edit your bulletin →
+              edit your bulletin →
             </Button>
           </>
         );
@@ -249,11 +248,11 @@ const FilledBulletin: React.FC = () => {
                 disabled={isUpdating}
               >
                 {isUpdating ? (
-                  "Updating..."
+                  "updating..."
                 ) : (
                   <>
                     <Sparkles className="mr-2" />
-                    Update your Bulletin
+                    update your bulletin
                   </>
                 )}
               </Button>
@@ -276,14 +275,14 @@ const FilledBulletin: React.FC = () => {
               <br />
               <br />
               <h1 className="text-2xl font-medium text-center">
-                You don't have a bulletin yet!
+                you don't have a bulletin yet!
               </h1>
               <Button
                 className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium flex mr-auto ml-auto"
                 onClick={() => navigate("/bulletin")}
               >
                 <Sparkles className="mr-2" />
-                Go create a bulletin! →
+                go create a bulletin! →
               </Button>
             </>
           );
