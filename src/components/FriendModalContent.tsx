@@ -196,7 +196,6 @@ const FriendInput: React.FC<{
         <Ellipsis
           style={{
             width: 40,
-            height: "-webkit-fill-available",
           }}
         />
       );
@@ -422,7 +421,7 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
             setFriendInputs={setFriendInputs}
           />
         ))}
-        {friendInputs.length !== 6 && (
+        {friendInputs.length !== 8 && (
           <Button
             onClick={() => {
               setFriendInputs([...friendInputs, null]);

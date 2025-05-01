@@ -41,15 +41,3 @@
   color: #888;
 }
 
-@supports (hanging-punctuation: first) and (font: -apple-system-body) and
-  (-webkit-appearance: none) {
-  .browserHelper {
-    display: -webkit-box !important;
-  }
-}
-
-@media not all and (min-resolution: 0.001dpcm) {
-  .browserHelper {
-    display: -webkit-box !important;
-  }
-}
