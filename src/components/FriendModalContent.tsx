@@ -1,3 +1,4 @@
+
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useEffect, useMemo, useState } from "react";
@@ -201,35 +202,36 @@ const FriendInput: React.FC<{
       );
     } else if (addFriend) {
       return (
-        <Plus
-          title="Add Friend"
-          onClick={async () => {
-            setLoading(true);
-            await addFriendToSupabase({
-              friend: {
-                ...friendDetails,
-                phone_number: phoneNumber,
-              },
-              fractionalUser: friendStatus,
-              user,
-              fractionalData,
-            }).then((response) => {
-              setLoading(false);
-              toast.success("Friend added successfully");
-              setExistingFriends([...existingFriends, phoneNumber]);
-              dispatch(setUser(response[0]));
-              setFriendStatus(FriendStatus.EXISTS);
-            });
-          }}
-          style={{
-            cursor: "pointer",
-            width: 50,
-            height: "-webkit-fill-available",
-            padding: 8,
-            background: "lightgrey",
-            borderRadius: 4,
-          }}
-        />
+        <div title="Add Friend">
+          <Plus
+            onClick={async () => {
+              setLoading(true);
+              await addFriendToSupabase({
+                friend: {
+                  ...friendDetails,
+                  phone_number: phoneNumber,
+                },
+                fractionalUser: friendStatus,
+                user,
+                fractionalData,
+              }).then((response) => {
+                setLoading(false);
+                toast.success("Friend added successfully");
+                setExistingFriends([...existingFriends, phoneNumber]);
+                dispatch(setUser(response[0]));
+                setFriendStatus(FriendStatus.EXISTS);
+              });
+            }}
+            style={{
+              cursor: "pointer",
+              width: 50,
+              height: "-webkit-fill-available",
+              padding: 8,
+              background: "lightgrey",
+              borderRadius: 4,
+            }}
+          />
+        </div>
       );
     } else {
       if (friendStatus === FriendStatus.NOT_REGISTERED) {
@@ -250,33 +252,34 @@ const FriendInput: React.FC<{
           );
         } else {
           return (
-            <Plus
-              title="Add Friend"
-              onClick={async () => {
-                await addFriendToSupabase({
-                  friend: {
-                    ...friendDetails,
-                    phone_number: phoneNumber,
-                  },
-                  fractionalUser: friendStatus,
-                  user,
-                  fractionalData,
-                }).then((response) => {
-                  setLoading(false);
-                  toast.success("Friend added successfully");
-                  setExistingFriends([...existingFriends, phoneNumber]);
-                  dispatch(setUser(response[0]));
-                });
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                height: "-webkit-fill-available",
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
+            <div title="Add Friend">
+              <Plus
+                onClick={async () => {
+                  await addFriendToSupabase({
+                    friend: {
+                      ...friendDetails,
+                      phone_number: phoneNumber,
+                    },
+                    fractionalUser: friendStatus,
+                    user,
+                    fractionalData,
+                  }).then((response) => {
+                    setLoading(false);
+                    toast.success("Friend added successfully");
+                    setExistingFriends([...existingFriends, phoneNumber]);
+                    dispatch(setUser(response[0]));
+                  });
+                }}
+                style={{
+                  cursor: "pointer",
+                  width: 50,
+                  height: "-webkit-fill-available",
+                  padding: 8,
+                  background: "lightgrey",
+                  borderRadius: 4,
+                }}
+              />
+            </div>
           );
         }
       } else if (friendStatus === FriendStatus.FRACTIONAL) {
@@ -406,11 +409,18 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
         }
       >
         {full
-          ? "Add your friends!"
+          ? "add your friends!"
           : user.recipients.length > 0
-          ? "Friends"
-          : "Add friends"}
+          ? "friends"
+          : "add friends"}
       </h1>
+      
+      {full && (
+        <p className="text-sm text-muted-foreground text-center mb-2">
+          you can add up to 6 bulletin users and 2 non-users to receive your bulletin.
+          for users signed up on bulletin, simply add their number. for users not signed up on bulletin yet, add their number, name and address.
+        </p>
+      )}
 
       <div className="flex flex-col gap-4">
         {friendInputs.map((friend) => (
@@ -427,7 +437,7 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
               setFriendInputs([...friendInputs, null]);
             }}
           >
-            Add Recipient
+            add recipient
           </Button>
         )}
       </div>

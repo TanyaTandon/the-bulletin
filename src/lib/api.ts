@@ -268,52 +268,22 @@ export async function addFriendToSupabase({
   user,
   fractionalData,
 }) {
-  if (fractionalUser == -1) {
-    return await supabase
-      .from("fractional_user_record")
-      .insert({
-        id: friend.phone_number,
-        suggested_name: [friend.name],
-        suggested_addresses: [friend.address],
-        added_by: [user.phone_number],
-      })
-      .then(async () => {
-        await supabase
-          .from("user_record")
-          .update({
-            recipients: [...user.recipients, friend.phone_number],
-          })
-          .eq("phone_number", user.phone_number)
-          .select()
-          .then((res) => res);
-      });
-  } else if (fractionalUser == 0) {
-    return await supabase
-      .from("fractional_user_record")
-      .update({
-        added_by: [...fractionalData.added_by, user.phone_number],
-      })
-      .eq("id", friend.phone_number)
-      .then(async () => {
-        await supabase
-          .from("user_record")
-          .update({
-            recipients: [...user.recipients, friend.phone_number],
-          })
-          .eq("phone_number", user.phone_number)
-          .select()
-          .then((res) => res);
-      });
-  } else if (fractionalUser == 1) {
-    return await supabase
-      .from("user_record")
-      .update({
-        recipients: [...user.recipients, friend.phone_number],
-      })
-      .eq("phone_number", user.phone_number)
-      .select()
-      .then((res) => res);
+  const { data, error } = await supabase
+    .rpc("add_friend", {
+      recipient_id: friend.phone_number,
+      user_id: user.phone_number,
+      recipient_name: friend.name,
+      recipient_address: friend.address,
+      fractional_user: fractionalUser,
+    })
+    .select("*");
+
+  if (error) {
+    console.error(error);
+    return null;
   }
+
+  return data as User[]; // Type assertion to User[] to fix the error
 }
 
 export async function removeRecipient({
