@@ -283,7 +283,7 @@ export async function addFriendToSupabase({
     return null;
   }
 
-  return data as User[]; // Type assertion to User[] to fix the error
+  return data as User[]; // Type assertion to User[]
 }
 
 export async function removeRecipient({

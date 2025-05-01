@@ -1,4 +1,3 @@
-
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useEffect, useMemo, useState } from "react";
@@ -418,7 +417,6 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
       {full && (
         <p className="text-sm text-muted-foreground text-center mb-2">
           you can add up to 6 bulletin users and 2 non-users to receive your bulletin.
-          for users signed up on bulletin, simply add their number. for users not signed up on bulletin yet, add their number, name and address.
         </p>
       )}
 
