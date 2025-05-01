@@ -317,9 +317,6 @@ const FriendInput: React.FC<{
   return (
     <>
       <span
-        style={{
-          display: isMobile ? "-webkit-box" : "",
-        }}
         className="flex items-center gap-2 browserHelper"
       >
         <Input
