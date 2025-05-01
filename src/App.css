@@ -47,3 +47,9 @@
     display: -webkit-box !important;
   }
 }
+
+@media not all and (min-resolution: 0.001dpcm) {
+  .browserHelper {
+    display: -webkit-box !important;
+  }
+}
