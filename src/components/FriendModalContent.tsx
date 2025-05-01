@@ -1,428 +1,300 @@
-
+import React, { useState, useEffect } from "react";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
-import React, { useEffect, useMemo, useState } from "react";
-import { Input } from "./ui/input";
-import {
-  Check,
-  Ellipsis,
-  Loader2,
-  PencilLine,
-  Plus,
-  Trash,
-} from "lucide-react";
-import { addFriendToSupabase, removeRecipient, supabase } from "@/lib/api";
-import { toast } from "sonner";
-import { Button } from "./ui/button";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
-import { setUser } from "@/redux/user";
-import { useSelector } from "react-redux";
-import "../App.css";
-import { useIsMobile } from "@/hooks/use-mobile";
+import { addFriendToSupabase, removeRecipient } from "@/lib/api";
+import { useToast } from "@/hooks/use-toast";
+import { Input } from "./ui/input";
+import { Label } from "./ui/label";
+import { Button } from "./ui/button";
+import { PlusCircle, X, Trash2, Loader2 } from "lucide-react";
+import { fetchUser } from "@/redux/user";
 
-enum FriendStatus {
-  NOT_REGISTERED = -1,
-  FRACTIONAL = 0,
-  EXISTS = 1,
-}
-
-const FriendInput: React.FC<{
-  friend: string;
-  existingFriends: string[];
-  setFriendInputs: React.Dispatch<React.SetStateAction<string[]>>;
-  setExistingFriends: React.Dispatch<React.SetStateAction<string[]>>;
-}> = ({ friend, existingFriends, setFriendInputs, setExistingFriends }) => {
+const FriendModalContent = () => {
   const dispatch = useAppDispatch();
+  const user = useAppSelector(staticGetUser);
+  const { toast } = useToast();
+  const [fractionUsers, setFractionUsers] = useState([]);
+  const [users, setUsers] = useState([]);
 
-  const [loading, setLoading] = useState<boolean>(false);
-  const [phoneNumber, setPhoneNumber] = useState(friend ?? "");
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-  const [friendName, setFriendName] = useState<string | null>(null);
-  const [hover, setHover] = useState<boolean>(false);
-
-  const [friendDetails, setFriendDetails] = useState<{
-    name: string;
-    address: string;
-  } | null>({ name: null, address: null });
-
-  const [friendStatus, setFriendStatus] = useState<FriendStatus | null>(null);
-  const [fractionalData, setFractionalData] = useState(null);
-  const [addDetails, setAddDetails] = useState<boolean>(false);
-  const [addFriend, setAddFriend] = useState<boolean>(false);
+  const [isLoading, setIsLoading] = useState(false);
+  const [friend, setFriend] = useState({
+    name: "",
+    phone_number: "",
+    address: "",
+  });
 
   useEffect(() => {
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    if (phoneNumber) {
-      const newTimer = setTimeout(async () => {
-        console.log("Calling API with phone number:", phoneNumber);
-
-        if (phoneNumber.length === 10) {
-          if (phoneNumber === user.phone_number) {
-            toast.info(`Sweetie... \n\n you're already your own best friend!`);
-            return;
-          }
-          setLoading(true);
-          await supabase
-            .from("user_record")
-            .select("*")
-            .eq("phone_number", phoneNumber)
-            .then(async (response) => {
-              if (response.data.length === 0) {
-                await supabase
-                  .from("fractional_user_record")
-                  .select("*")
-                  .eq("id", phoneNumber)
-                  .then((fractionalResponse) => {
-                    if (fractionalResponse.data.length === 0) {
-                      setLoading(false);
-                      toast.info(
-                        "You're the first to send your friend a bulletin! \n \n They're lucky 😉"
-                      );
-                      setAddDetails(true);
-                      setFriendStatus(FriendStatus.NOT_REGISTERED);
-                    } else {
-                      if (existingFriends.includes(phoneNumber)) {
-                        toast.info("User found with that phone number");
-                      } else {
-                        toast.info(
-                          "Your friend has been added by others! \n \n How popular!"
-                        );
-                      }
-                      setFriendName(
-                        fractionalResponse.data[0].suggested_name[0]
-                      );
-                      setLoading(false);
-                      setFriendStatus(FriendStatus.FRACTIONAL);
-                      setFractionalData(fractionalResponse.data[0]);
-                      setTimeout(() => {
-                        setAddFriend(true);
-                      }, 2000);
-                    }
-                  });
-              } else {
-                setLoading(false);
-                setFriendName(response.data[0].firstName);
-                console.log(response.data);
-                toast.info("User found with that phone number");
-                setFriendStatus(FriendStatus.EXISTS);
-                setTimeout(() => {
-                  setAddFriend(true);
-                }, 2000);
-              }
-            });
-        } else {
-          toast.info("Please enter a valid phone number");
+    const fetchFractionUsers = async () => {
+      const { data, error } = await fetch(
+        "https://voiuicuaujbhkkljtjfw.supabase.co/rest/v1/fractional_user_record",
+        {
+          headers: {
+            apikey:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvaXVpY3VhdWpiaGtrbGp0amZ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDQxNzYwMSwiZXhwIjoyMDU5OTkzNjAxfQ.6OC835cAwInmVOpG2yJknezG1RUQnOMT0tAlewWFv5E",
+          },
         }
-      }, 1500);
+      ).then((res) => res.json());
 
-      setTimer(newTimer);
-    }
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
+      if (error) {
+        console.error("Error fetching fraction users:", error);
+      } else {
+        console.log("Fraction users:", data);
+        setFractionUsers(data);
       }
     };
-  }, [phoneNumber]);
 
-  const user = useSelector(staticGetUser);
-
-  const renderIcon = useMemo(() => {
-    if (loading) {
-      return (
-        <Loader2
-          style={{
-            width: 50,
-          }}
-        />
-      );
-    }
-    if (existingFriends.includes(friend)) {
-      return (
-        <>
-          {hover == false ? (
-            <Check
-              onMouseOver={() => {
-                setHover(true);
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
-          ) : (
-            <Trash
-              onClick={async () => {
-                await removeRecipient({
-                  user,
-                  recipient: friend,
-                }).then((response) => {
-                  if (response) {
-                    setExistingFriends(
-                      existingFriends.filter((item) => item !== friend)
-                    );
-                    setFriendInputs((prev) =>
-                      prev.filter((item) => item !== friend)
-                    );
-                    dispatch(setUser(response[0]));
-                    toast.success("Friend removed successfully");
-                  }
-                });
-              }}
-              onMouseOut={() => {
-                setHover(false);
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
-          )}
-        </>
-      );
-    } else if (phoneNumber?.length !== 10) {
-      return (
-        <Ellipsis
-          style={{
-            width: 40,
-          }}
-        />
-      );
-    } else if (addFriend) {
-      return (
-        <Plus
-          onClick={async () => {
-            setLoading(true);
-            await addFriendToSupabase({
-              friend: {
-                ...friendDetails,
-                phone_number: phoneNumber,
-              },
-              fractionalUser: friendStatus,
-              user,
-              fractionalData,
-            }).then((response) => {
-              setLoading(false);
-              toast.success("Friend added successfully");
-              setExistingFriends([...existingFriends, phoneNumber]);
-              dispatch(setUser(response[0]));
-              setFriendStatus(FriendStatus.EXISTS);
-            });
-          }}
-          style={{
-            cursor: "pointer",
-            width: 50,
-            padding: 8,
-            background: "lightgrey",
-            borderRadius: 4,
-          }}
-        />
-      );
-    } else {
-      if (friendStatus === FriendStatus.NOT_REGISTERED) {
-        if (
-          friendDetails.name == null ||
-          (friendDetails.address == null && friendDetails.address?.length > 12)
-        ) {
-          return (
-            <PencilLine
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                borderRadius: 4,
-              }}
-            />
-          );
-        } else {
-          return (
-            <Plus
-              onClick={async () => {
-                await addFriendToSupabase({
-                  friend: {
-                    ...friendDetails,
-                    phone_number: phoneNumber,
-                  },
-                  fractionalUser: friendStatus,
-                  user,
-                  fractionalData,
-                }).then((response) => {
-                  setLoading(false);
-                  toast.success("Friend added successfully");
-                  setExistingFriends([...existingFriends, phoneNumber]);
-                  dispatch(setUser(response[0]));
-                });
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
-          );
+    const fetchUsers = async () => {
+      const { data, error } = await fetch(
+        "https://voiuicuaujbhkkljtjfw.supabase.co/rest/v1/user_record",
+        {
+          headers: {
+            apikey:
+              "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvaXVpY3VhdWpiaGtrbGp0amZ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDQxNzYwMSwiZXhwIjoyMDU5OTkzNjAxfQ.6OC835cAwInmVOpG2yJknezG1RUQnOMT0tAlewWFv5E",
+          },
         }
-      } else if (friendStatus === FriendStatus.FRACTIONAL) {
-        return (
-          <Check
-            style={{
-              width: 50,
-              padding: 8,
-            }}
-          />
-        );
-      } else if (friendStatus === FriendStatus.EXISTS) {
-        return (
-          <Check
-            style={{
-              width: 50,
-              padding: 8,
-            }}
-          />
-        );
+      ).then((res) => res.json());
+
+      if (error) {
+        console.error("Error fetching users:", error);
+      } else {
+        console.log("Users:", data);
+        setUsers(data);
       }
+    };
+
+    fetchFractionUsers();
+    fetchUsers();
+  }, []);
+
+  const handleAddFriend = async () => {
+    setIsLoading(true);
+
+    // Check if phone number is provided
+    if (!friend.phone_number) {
+      toast({
+        title: "Phone number required",
+        description: "Please enter your friend's phone number.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
     }
-    return null;
-  }, [
-    loading,
-    existingFriends,
-    friend,
-    phoneNumber,
-    addFriend,
-    friendDetails,
-    friendStatus,
-    user,
-    fractionalData,
-    setExistingFriends,
-    hover,
-    setHover,
-  ]);
 
-  const isMobile = useIsMobile()
+    // Check if we've already added this person
+    if (user?.recipients?.includes(friend.phone_number)) {
+      toast({
+        title: "Friend already added",
+        description: "This person is already in your recipients list.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if user already has 8 recipients
+    if (user?.recipients?.length >= 8) {
+      toast({
+        title: "Recipient limit reached",
+        description: "You can only add up to 8 recipients.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    // Check if non-user requires name and address
+    const isExistingUser = users.find(
+      (u) => u.phone_number === friend.phone_number
+    );
+    const isFractionalUser = fractionUsers.find(
+      (u) => u.id === friend.phone_number
+    );
+
+    if (!isExistingUser && !isFractionalUser && (!friend.name || !friend.address)) {
+      toast({
+        title: "Missing information",
+        description: "Please provide name and address for non-bulletin users.",
+        variant: "destructive",
+      });
+      setIsLoading(false);
+      return;
+    }
+
+    let fractionalUser = -1;
+    let fractionalData = null;
+
+    if (isExistingUser) {
+      fractionalUser = 1;
+    } else if (isFractionalUser) {
+      fractionalUser = 0;
+      fractionalData = isFractionalUser;
+    }
+
+    try {
+      const userData = await addFriendToSupabase({
+        friend,
+        fractionalUser,
+        user,
+        fractionalData,
+      });
+
+      await dispatch(fetchUser(user.phone_number));
+
+      toast({
+        title: "Friend added",
+        description: "Your friend has been added to your recipients list.",
+      });
+
+      // Reset form
+      setFriend({
+        name: "",
+        phone_number: "",
+        address: "",
+      });
+    } catch (error) {
+      console.error("Error adding friend:", error);
+      toast({
+        title: "Error",
+        description: "Failed to add friend. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setIsLoading(false);
+    }
+  };
+
+  const handleRemoveRecipient = async (recipient) => {
+    try {
+      await removeRecipient({
+        user,
+        recipient,
+      });
+
+      await dispatch(fetchUser(user.phone_number));
+
+      toast({
+        title: "Recipient removed",
+        description: "The recipient has been removed from your list.",
+      });
+    } catch (error) {
+      console.error("Error removing recipient:", error);
+      toast({
+        title: "Error",
+        description: "Failed to remove recipient. Please try again.",
+        variant: "destructive",
+      });
+    }
+  };
 
   return (
-    <>
-      <span
-        className="flex items-center gap-2 browserHelper"
-      >
-        <Input
-          className="disabled:opacity-100"
-          disabled={existingFriends.includes(friend) && friendName != null}
-          type="tel"
-          placeholder="Enter phone number"
-          value={phoneNumber}
-          onChange={(e) => {
-            setPhoneNumber(e.target.value);
-          }}
-        />
-        {friendName != null && (
-          <Input
-            className="disabled:opacity-100"
-            disabled={true}
-            type="text"
-            value={friendName}
-          />
-        )}
-        {addDetails && (
-          <>
-            <Input
-              onChange={(e) => {
-                setFriendDetails({ ...friendDetails, name: e.target.value });
-              }}
-              type="text"
-              placeholder="Enter name"
-              value={friendDetails.name}
-            />
-          </>
-        )}
-        {renderIcon}
-      </span>
-      {friendStatus === FriendStatus.NOT_REGISTERED && (
-        <>
-          <Input
-            value={friendDetails.address}
-            onChange={(e) => {
-              setFriendDetails({ ...friendDetails, address: e.target.value });
-            }}
-            type="text"
-            placeholder="123 Test Ave, San Francisco, CA 94101"
-          />
-        </>
-      )}
-    </>
-  );
-};
-
-const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
-  const dispatch = useAppDispatch();
-  const user = useSelector(staticGetUser);
-  console.log(user);
-  const [existingFriends, setExistingFriends] = useState<string[]>(
-    user?.recipients ?? [null]
-  );
-
-  const [friendInputs, setFriendInputs] = useState<string[]>(
-    user?.recipients.length > 0 ? user.recipients : [null]
-  );
-
-  return (
-    <div
-      className={full ? "flex flex-col gap-4 w-full" : "flex flex-col gap-4"}
-    >
+    <div className="w-full p-4 relative">
       <button
-        onClick={() => {
-          dispatch(setShowFriendsModal(false));
-        }}
-        className="absolute right-2 top-0 text-xl font-medium cursor-pointer hover:opacity-70 transition-opacity"
+        onClick={() => dispatch(setShowFriendsModal(false))}
+        className="absolute right-2 top-0 cursor-pointer"
         aria-label="Close"
       >
-        ×
+        <X className="h-6 w-6" />
       </button>
-      <h1
-        className={
-          full ? "text-2xl font-medium text-center" : "text-xl font-medium"
-        }
-      >
-        {full
-          ? "Add your friends!"
-          : user.recipients.length > 0
-          ? "Friends"
-          : "Add friends"}
-      </h1>
-      
-      {full && (
-        <p className="text-sm text-center text-gray-500 mb-2">
-          You can add up to 6 bulletin users and 2 non-users to receive your bulletin.
-        </p>
-      )}
 
-      <div className="flex flex-col gap-4">
-        {friendInputs.map((friend) => (
-          <FriendInput
-            setExistingFriends={setExistingFriends}
-            existingFriends={existingFriends}
-            friend={friend}
-            setFriendInputs={setFriendInputs}
-          />
-        ))}
-        {friendInputs.length !== 8 && (
+      <div className="flex flex-col space-y-6">
+        <div className="text-center">
+          <h2 className="text-2xl font-bold mb-1">Add your friends!</h2>
+          <p className="text-sm text-muted-foreground">
+            You can add up to 6 bulletin users and 2 non-users to receive your bulletin.
+          </p>
+        </div>
+
+        <div className="space-y-4">
+          <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <Label htmlFor="phone">Phone Number*</Label>
+              <Input
+                id="phone"
+                placeholder="Enter phone number"
+                value={friend.phone_number}
+                onChange={(e) =>
+                  setFriend({ ...friend, phone_number: e.target.value })
+                }
+              />
+            </div>
+            <div className="space-y-2">
+              <Label htmlFor="name">Name</Label>
+              <Input
+                id="name"
+                placeholder="Enter name"
+                value={friend.name}
+                onChange={(e) => setFriend({ ...friend, name: e.target.value })}
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="address">Address</Label>
+            <Input
+              id="address"
+              placeholder="Enter full address"
+              value={friend.address}
+              onChange={(e) => setFriend({ ...friend, address: e.target.value })}
+            />
+          </div>
+
           <Button
-            onClick={() => {
-              setFriendInputs([...friendInputs, null]);
-            }}
+            onClick={handleAddFriend}
+            className="w-full"
+            disabled={isLoading || !friend.phone_number}
           >
-            Add Recipient
+            {isLoading ? (
+              <>
+                <Loader2 className="mr-2 h-4 w-4 animate-spin" /> Adding...
+              </>
+            ) : (
+              <>
+                <PlusCircle className="mr-2 h-4 w-4" /> Add Friend
+              </>
+            )}
           </Button>
+        </div>
+
+        {user?.recipients?.length > 0 && (
+          <div className="space-y-3">
+            <h3 className="text-lg font-medium">Your Recipients</h3>
+            <div className="space-y-2">
+              {user.recipients.map((recipient, index) => {
+                const recipientUser = users.find(
+                  (u) => u.phone_number === recipient
+                );
+                const fractionalUser = fractionUsers.find(
+                  (u) => u.id === recipient
+                );
+
+                const displayName = recipientUser
+                  ? recipientUser.firstName
+                  : fractionalUser
+                  ? fractionalUser.suggested_name[0]
+                  : recipient;
+
+                return (
+                  <div
+                    key={index}
+                    className="flex items-center justify-between p-3 bg-gray-50 rounded-md border"
+                  >
+                    <div>
+                      <p className="font-medium">{displayName}</p>
+                      <p className="text-sm text-gray-500">{recipient}</p>
+                    </div>
+                    <Button
+                      variant="ghost"
+                      size="icon"
+                      onClick={() => handleRemoveRecipient(recipient)}
+                    >
+                      <Trash2 className="h-4 w-4 text-red-500" />
+                    </Button>
+                  </div>
+                );
+              })}
+            </div>
+          </div>
         )}
       </div>
     </div>

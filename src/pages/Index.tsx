@@ -32,6 +32,30 @@ const NumberedHeart = ({ number }: { number: number }) => (
   </span>
 );
 
+// Function to format phone numbers to E.164 format
+const formatPhoneNumber = (phoneNumber: string): string => {
+  // Remove all non-digit characters
+  const digitsOnly = phoneNumber.replace(/\D/g, '');
+  
+  // Check if the number already has a country code (starts with +)
+  if (phoneNumber.startsWith('+')) {
+    return phoneNumber;
+  }
+  
+  // For US numbers, ensure 10 digits and add +1
+  if (digitsOnly.length === 10) {
+    return `+1${digitsOnly}`;
+  }
+  
+  // If it's 11 digits and starts with 1 (US country code)
+  if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
+    return `+${digitsOnly}`;
+  }
+  
+  // Otherwise just add + if not present
+  return digitsOnly.length > 0 ? `+${digitsOnly}` : digitsOnly;
+};
+
 const Index = () => {
   const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
@@ -55,29 +79,46 @@ const Index = () => {
   const [zipCode, setZipCode] = useState<string>("");
 
   const validatePhoneNumber = (phone: string) => {
-    return phone && phone.trim() !== "";
+    if (!phone || phone.trim() === "") {
+      toast.error("Please enter a valid phone number");
+      return false;
+    }
+    
+    // Simple validation to check if it's at least 10 digits
+    const digitsOnly = phone.replace(/\D/g, '');
+    if (digitsOnly.length < 10) {
+      toast.error("Phone number must have at least 10 digits");
+      return false;
+    }
+    
+    return true;
   };
 
   const handleSignIn = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
-      toast.error("Please enter a valid phone number");
       return;
     }
 
     setIsProcessing(true);
     try {
+      const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
+      
       await signIn.create({
         strategy: "phone_code",
-        identifier: phoneNumber,
+        identifier: formattedPhoneNumber,
       });
 
       setSignInStep(1);
       toast.success("We've sent you a verification code!");
     } catch (error) {
       console.error("Sign in error:", error);
-      toast.error(
-        "We couldn't send the code. Please check your phone number and try again."
-      );
+      if (error.message && error.message.includes("rate limit")) {
+        toast.error("Too many attempts. Please wait a few minutes and try again.");
+      } else {
+        toast.error(
+          "We couldn't send the code. Please check your phone number and try again."
+        );
+      }
     } finally {
       setIsProcessing(false);
     }
@@ -131,11 +172,11 @@ const Index = () => {
 
   const handleSignUp = async () => {
     if (!validatePhoneNumber(phoneNumber)) {
-      toast.error("Please enter a valid phone number");
       return;
     }
-    if (phoneNumber.length !== 10) {
-      toast.error("Please enter a 10 digit phone number");
+    
+    if (phoneNumber.length !== 10 && !phoneNumber.startsWith('+')) {
+      toast.error("Please enter a valid 10-digit phone number");
       return;
     }
 
@@ -151,8 +192,11 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
+      const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
+      console.log("Formatted phone number:", formattedPhoneNumber);
+      
       await signUp.create({
-        phoneNumber: phoneNumber,
+        phoneNumber: formattedPhoneNumber,
       });
 
       await signUp.preparePhoneNumberVerification({
@@ -163,14 +207,16 @@ const Index = () => {
       setSignInStep(1);
       toast.success("Great! We've sent a verification code to your phone.");
     } catch (error) {
-      console.error("Sign up error:", error.message);
-      console.error(JSON.stringify(error.e));
-      if (error.message.includes("phone_number must be a valid phone number")) {
-        toast.error("Please enter a valid phone number");
-      } else if (error.message.includes("That phone number is taken")) {
-        toast.error(error.message);
+      console.error("Sign up error:", error);
+      
+      if (error.message && error.message.includes("rate limit")) {
+        toast.error("Too many attempts. Please wait a few minutes and try again.");
+      } else if (error.message && error.message.includes("phone_number must be a valid phone number")) {
+        toast.error("Please enter a valid phone number with country code (e.g. +1 for US)");
+      } else if (error.message && error.message.includes("That phone number is taken")) {
+        toast.error("This phone number is already registered. Please sign in instead.");
       } else {
-        toast.error(error.message);
+        toast.error(error.message || "An error occurred. Please try again.");
       }
     } finally {
       setIsProcessing(false);
@@ -179,9 +225,6 @@ const Index = () => {
 
   const handleVerifySignUp = async (code: string) => {
     console.log(code);
-    const trueCode = code.replace("·", "");
-    console.log(trueCode);
-    console.log(code.length);
     if (code.includes("·")) return;
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
@@ -199,8 +242,8 @@ const Index = () => {
         await createNewUser({
           name: name,
           created_user_id: result.createdUserId,
-          id: phoneNumber,
-          phoneNumber: phoneNumber,
+          id: phoneNumber.replace(/\D/g, ''),
+          phoneNumber: phoneNumber.replace(/\D/g, ''),
           fullAddress: fullAddress,
         }).then((res) => {
           if (res.success) {
@@ -327,9 +370,12 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your phone number
                       </h1>
+                      <p className="text-sm text-muted-foreground mb-4">
+                        Please include your country code (e.g., +1 for US)
+                      </p>
                       <Input
                         value={phoneNumber}
-                        placeholder="Enter your Phone Number"
+                        placeholder="Enter your Phone Number (e.g. +1234567890)"
                         type="tel"
                         onChange={(e) => {
                           setPhoneNumber(e.target.value);
@@ -427,7 +473,7 @@ const Index = () => {
                               <Input
                                 id="phone"
                                 type="tel"
-                                placeholder="Enter your phone number"
+                                placeholder="Enter your phone number (e.g. +1234567890)"
                                 value={phoneNumber}
                                 onChange={(e) => setPhoneNumber(e.target.value)}
                                 className="pl-9 h-12"
@@ -435,6 +481,9 @@ const Index = () => {
                                 required
                               />
                             </div>
+                            <p className="text-xs text-muted-foreground mt-1">
+                              Include your country code (e.g., +1 for US)
+                            </p>
                           </div>
 
                           <div className="space-y-2">
@@ -547,14 +596,33 @@ const Index = () => {
                           onCompleted={(code) => handleVerifySignUp(code)}
                         />
                       </span>
+                      <p className="text-sm text-muted-foreground mt-2 mb-4">
+                        Didn't receive a code? Make sure you entered the correct phone number.
+                      </p>
                       <Button
                         onClick={async () => {
-                          await signUp.preparePhoneNumberVerification({
-                            strategy: "phone_code",
-                          });
+                          try {
+                            setIsProcessing(true);
+                            await signUp.preparePhoneNumberVerification({
+                              strategy: "phone_code",
+                            });
+                            toast.success("Verification code resent! Please check your phone.");
+                          } catch (error) {
+                            console.error("Error resending code:", error);
+                            toast.error("Couldn't resend the code. Please try again later.");
+                          } finally {
+                            setIsProcessing(false);
+                          }
                         }}
+                        disabled={isProcessing}
                       >
-                        Try Again
+                        {isProcessing ? (
+                          <span className="flex items-center gap-2">
+                            Sending... <LoaderCircle className="animate-spin" />
+                          </span>
+                        ) : (
+                          "Resend Code"
+                        )}
                       </Button>
                     </>
                   )}
