@@ -317,9 +317,6 @@ export async function addFriendToSupabase({
       
     return userData.data as User[];
   }
-  
-  // Return empty array as fallback to fix TypeScript error
-  return [] as User[];
 }
 
 export async function removeRecipient({

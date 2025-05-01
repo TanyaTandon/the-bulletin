@@ -9,39 +9,23 @@ import { Button } from "./ui/button";
 import { toast } from "react-toastify";
 import { selectShowFriendsModal } from "@/redux/nonpersistent/controllers/selectors";
 import { useAppSelector } from "@/redux";
+import {
+  Accordion,
+  AccordionContent,
+  AccordionItem,
+  AccordionTrigger,
+} from "./ui/accordion";
 import FriendModalContent from "./FriendModalContent";
 
 interface LayoutProps {
   children: React.ReactNode;
 }
 
-// Function to format phone numbers to E.164 format
-const formatPhoneNumber = (phoneNumber: string): string => {
-  // Remove all non-digit characters
-  const digitsOnly = phoneNumber.replace(/\D/g, '');
-  
-  // Check if the number already has a country code (starts with +)
-  if (phoneNumber.startsWith('+')) {
-    return phoneNumber;
-  }
-  
-  // For US numbers, ensure 10 digits and add +1
-  if (digitsOnly.length === 10) {
-    return `+1${digitsOnly}`;
-  }
-  
-  // If it's 11 digits and starts with 1 (US country code)
-  if (digitsOnly.length === 11 && digitsOnly.startsWith('1')) {
-    return `+${digitsOnly}`;
-  }
-  
-  // Otherwise just add + if not present
-  return digitsOnly.length > 0 ? `+${digitsOnly}` : digitsOnly;
-};
-
 const Layout: React.FC<LayoutProps> = ({ children }) => {
   const isMobile = useIsMobile();
+
   const showFriendsModal = useAppSelector(selectShowFriendsModal);
+
   const { isSignedIn } = useClerk();
 
   const [open, setOpen] = useState(false);
@@ -62,11 +46,8 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
-      const formattedPhoneNumber = formatPhoneNumber(phoneNumber);
-      console.log("Submitting with formatted number:", formattedPhoneNumber);
-      
       await signUp.create({
-        phoneNumber: formattedPhoneNumber,
+        phoneNumber: phoneNumber,
       });
 
       await signUp.preparePhoneNumberVerification({
@@ -78,14 +59,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
       toast.success("Verification code sent to your phone");
     } catch (error) {
       console.error("Error sending verification code:", error);
-      
-      if (error.message && error.message.includes("rate limit")) {
-        toast.error("Too many attempts. Please wait a few minutes and try again.");
-      } else if (error.message && error.message.includes("phone_number must be a valid phone number")) {
-        toast.error("Please enter a valid phone number with country code (e.g. +1 for US)");
-      } else {
-        toast.error("Failed to send verification code. Please try again.");
-      }
+      toast.error("Failed to send verification code. Please try again.");
     } finally {
       setIsLoading(false);
     }
@@ -152,14 +126,10 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 }}
               >
                 <p>Enter your Phone Number</p>
-                <p className="text-sm text-muted-foreground">
-                  Include your country code (e.g., +1 for US)
-                </p>
                 <Input
                   onChange={(e) => {
                     setPhoneNumber(e.target.value);
                   }}
-                  placeholder="e.g. +1234567890"
                   disabled={isLoading}
                 />
                 <Button onClick={handleSubmitPhoneNumber} disabled={isLoading}>
@@ -199,25 +169,6 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
                 />
                 <Button onClick={handleVerifyCode} disabled={isLoading}>
                   {isLoading ? "Verifying..." : "Submit"}
-                </Button>
-                <Button 
-                  variant="outline"
-                  onClick={async () => {
-                    try {
-                      setIsLoading(true);
-                      await signUp.preparePhoneNumberVerification({
-                        strategy: "phone_code",
-                      });
-                      toast.success("Verification code resent!");
-                    } catch (error) {
-                      toast.error("Couldn't resend code. Please try again later.");
-                    } finally {
-                      setIsLoading(false);
-                    }
-                  }}
-                  disabled={isLoading}
-                >
-                  Resend Code
                 </Button>
               </section>
             </>
