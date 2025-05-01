@@ -136,7 +136,6 @@ const FriendInput: React.FC<{
         <Loader2
           style={{
             width: 50,
-            height: "-webkit-fill-available",
           }}
         />
       );
@@ -152,7 +151,6 @@ const FriendInput: React.FC<{
               style={{
                 cursor: "pointer",
                 width: 50,
-                height: "-webkit-fill-available",
                 padding: 8,
                 background: "lightgrey",
                 borderRadius: 4,
@@ -183,7 +181,6 @@ const FriendInput: React.FC<{
               style={{
                 cursor: "pointer",
                 width: 50,
-                height: "-webkit-fill-available",
                 padding: 8,
                 background: "lightgrey",
                 borderRadius: 4,
@@ -280,7 +277,6 @@ const FriendInput: React.FC<{
           <Check
             style={{
               width: 50,
-              height: "-webkit-fill-available",
               padding: 8,
             }}
           />
