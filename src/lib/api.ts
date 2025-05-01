@@ -278,14 +278,15 @@ export async function addFriendToSupabase({
         added_by: [user.phone_number],
       })
       .then(async () => {
-        await supabase
+        const userData = await supabase
           .from("user_record")
           .update({
             recipients: [...user.recipients, friend.phone_number],
           })
           .eq("phone_number", user.phone_number)
-          .select()
-          .then((res) => res);
+          .select();
+        
+        return userData.data as User[];
       });
   } else if (fractionalUser == 0) {
     return await supabase
@@ -295,24 +296,26 @@ export async function addFriendToSupabase({
       })
       .eq("id", friend.phone_number)
       .then(async () => {
-        await supabase
+        const userData = await supabase
           .from("user_record")
           .update({
             recipients: [...user.recipients, friend.phone_number],
           })
           .eq("phone_number", user.phone_number)
-          .select()
-          .then((res) => res);
+          .select();
+          
+        return userData.data as User[];
       });
   } else if (fractionalUser == 1) {
-    return await supabase
+    const userData = await supabase
       .from("user_record")
       .update({
         recipients: [...user.recipients, friend.phone_number],
       })
       .eq("phone_number", user.phone_number)
-      .select()
-      .then((res) => res);
+      .select();
+      
+    return userData.data as User[];
   }
 }
 
