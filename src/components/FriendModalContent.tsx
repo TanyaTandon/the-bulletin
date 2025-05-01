@@ -17,6 +17,7 @@ import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { setUser } from "@/redux/user";
 import { useSelector } from "react-redux";
 import "../App.css";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 enum FriendStatus {
   NOT_REGISTERED = -1,
@@ -317,9 +318,14 @@ const FriendInput: React.FC<{
     setHover,
   ]);
 
+  const isMobile = useIsMobile()
+
   return (
     <>
       <span
+        style={{
+          display: isMobile ? "-webkit-box" : "",
+        }}
         className="flex items-center gap-2 browserHelper"
       >
         <Input
