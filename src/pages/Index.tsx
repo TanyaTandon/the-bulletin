@@ -134,6 +134,10 @@ const Index = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
+    if (phoneNumber.length !== 10) {
+      toast.error("Please enter a 10 digit phone number");
+      return;
+    }
 
     if (!name || name.trim() === "") {
       toast.error("Please enter your name");
