@@ -24,6 +24,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
+import sendError from "@/hooks/use-sendError";
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -170,6 +171,13 @@ const Index = () => {
       } else if (error.message.includes("That phone number is taken")) {
         toast.error(error.message);
       } else {
+        sendError(phoneNumber, "handleSignUp", error, {
+          name,
+          streetAddress,
+          city,
+          state,
+          zipCode,
+        });
         toast.error(error.message);
       }
     } finally {
@@ -209,11 +217,25 @@ const Index = () => {
               "Welcome to the bulletin! Your account is ready to go."
             );
           } else {
+            sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
+              name,
+              streetAddress,
+              city,
+              state,
+              zipCode,
+            });
             toast.error("Something went wrong. Please try again.");
           }
         });
       }
     } catch (error) {
+      sendError(phoneNumber, "handleSignUp", error, {
+        name,
+        streetAddress,
+        city,
+        state,
+        zipCode,
+      });
       console.error("Code verification error:", error);
       toast.error(
         "That code didn't work. Double-check and try again, or request a new one."

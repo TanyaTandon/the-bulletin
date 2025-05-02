@@ -1,5 +1,6 @@
 import { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
+import sendError from "@/hooks/use-sendError";
 import { User } from "@/redux/user";
 import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
@@ -86,6 +87,7 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
 
       if (uploadError) {
         console.error("Error uploading image:", uploadError);
+        sendError(user.phone_number, "createNewBulletin", uploadError, "image");
         continue;
       }
 
@@ -121,29 +123,50 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
         saved_notes: arrayToDict(bulletin.savedNotes),
       })
       .then(async (item) => {
-        if (item.data) {
-          returnBulletin = [item.data[0]];
-        }
+        try {
+          if (item.data) {
+            returnBulletin = [item.data[0]];
+          }
 
-        const { data: userData, error: userError } = await supabase
-          .from("user_record")
-          .update({
-            images: [...images.map((item) => item.id), ...user.images],
-            bulletins: [bulletinId, ...user.bulletins],
-          })
-          .eq("phone_number", user.phone_number)
-          .select("*");
+          const { data: userData, error: userError } = await supabase
+            .from("user_record")
+            .update({
+              images: [...images.map((item) => item.id), ...user.images],
+              bulletins: [bulletinId, ...user.bulletins],
+            })
+            .eq("phone_number", user.phone_number)
+            .select("*");
 
-        console.log("User data:", userData);
-        newUserData = userData;
-        if (userError) {
-          console.error("Error creating user:", userError);
-          throw userError;
+          console.log("User data:", userData);
+          newUserData = userData as unknown as User;
+          if (userError) {
+            console.error("Error creating user:", userError);
+            sendError(user.phone_number, "createNewBulletin", userError, {
+              id: bulletinId,
+              blurb: bulletin.blurb,
+              images: images.map((item) => item.id),
+            });
+            throw userError;
+          }
+          return item;
+        } catch (error) {
+          sendError(user.phone_number, "createNewBulletin", error, {
+            id: bulletinId,
+            blurb: bulletin.blurb,
+            images: images.map((item) => item.id),
+          });
+          console.error("Error creating user:", error);
         }
-        return item;
       });
 
     if (bulletinError) {
+      sendError(user.phone_number, "insertBulletin", bulletinError, {
+        id: bulletinId,
+        blurb: bulletin.blurb,
+        images: images.map((item) => item.id),
+        owner: user.phone_number,
+        saved_notes: arrayToDict(bulletin.savedNotes),
+      });
       console.error("Error creating bulletin:", bulletinError);
       throw bulletinError;
     }
@@ -285,7 +308,7 @@ export async function addFriendToSupabase({
           })
           .eq("phone_number", user.phone_number)
           .select();
-        
+
         return userData.data as User[];
       });
   } else if (fractionalUser == 0) {
@@ -303,7 +326,7 @@ export async function addFriendToSupabase({
           })
           .eq("phone_number", user.phone_number)
           .select();
-          
+
         return userData.data as User[];
       });
   } else if (fractionalUser == 1) {
@@ -314,7 +337,7 @@ export async function addFriendToSupabase({
       })
       .eq("phone_number", user.phone_number)
       .select();
-      
+
     return userData.data as User[];
   }
 }

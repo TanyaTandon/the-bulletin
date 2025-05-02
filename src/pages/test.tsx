@@ -3,6 +3,7 @@ import { useAppDispatch } from "@/redux/";
 import React from "react";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { toast } from "react-toastify";
+import sendError from "@/hooks/use-sendError";
 
 const Test: React.FC = () => {
   const dispatch = useAppDispatch();
@@ -12,7 +13,9 @@ const Test: React.FC = () => {
         <ReactInputVerificationCode />
         <button
           onClick={async () => {
-            await dispatch(fetchBulletins());
+            sendError("testUser", "handleSignUp", "test", {
+              test:"works"
+            });
           }}
         >
           Click me
