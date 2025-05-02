@@ -10,10 +10,6 @@ import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Heart } from "lucide-react";
 import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useClerk, useSignUp, useSignIn } from "@clerk/clerk-react";
-import sendError from "@/hooks/use-sendError";
-import { createNewUser } from "@/lib/api";
-import { v4 as uuidv4 } from "uuid";
 
 const SignUp = () => {
   const navigate = useNavigate();
@@ -21,74 +17,25 @@ const SignUp = () => {
   const [isLoading, setIsLoading] = useState(false);
   const [showVerification, setShowVerification] = useState(false);
   const [verificationCode, setVerificationCode] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [email, setEmail] = useState("");
-  const [password, setPassword] = useState("");
-  const [phoneNumber, setPhoneNumber] = useState("");
-  const [address, setAddress] = useState("");
   const isMobile = useIsMobile();
-  
-  const { isLoaded: isSignUpLoaded, signUp, setActive } = useSignUp();
-  const { isLoaded: isSignInLoaded, signIn } = useSignIn();
-  const { session } = useClerk();
 
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
     
-    if (!isSignUpLoaded) {
-      toast({
-        title: "Error",
-        description: "Authentication system not loaded. Please try again.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    if (!fullName || !email || !password || !phoneNumber || !address) {
-      toast({
-        title: "Missing information",
-        description: "Please fill in all fields to create your account.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-    
     try {
-      // Format phone number to standard E.164 format for better compatibility
-      let formattedPhoneNumber = phoneNumber;
-      if (!phoneNumber.startsWith('+')) {
-        formattedPhoneNumber = '+1' + phoneNumber.replace(/\D/g, '');
-      }
-
-      // Try to create the user with Clerk
-      await signUp.create({
-        emailAddress: email,
-        password,
-        phoneNumber: formattedPhoneNumber,
-      });
-
-      // Prepare phone verification
-      await signUp.preparePhoneNumberVerification();
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
       
-      // Show verification step
+      // Instead of immediately navigating, show verification step
       setShowVerification(true);
       toast({
         title: "Verification required",
-        description: "Please enter the code sent to your phone.",
+        description: "Please enter the code sent to your email.",
       });
     } catch (error) {
-      console.error("SignUp error:", error);
-      sendError(phoneNumber, "handleSignUp", error as any, {
-        email,
-        fullName,
-        phoneNumber,
-      });
       toast({
         title: "Error",
-        description: "Something went wrong during signup. Please try again.",
+        description: "Something went wrong. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -108,64 +55,16 @@ const SignUp = () => {
     
     setIsLoading(true);
     try {
-      // Attempt phone verification with Clerk
-      const completeSignUp = await signUp.attemptPhoneNumberVerification({
-        code: verificationCode,
-      });
-      
-      if (completeSignUp.status !== "complete") {
-        toast({
-          title: "Verification pending",
-          description: "Please complete the verification process.",
-          variant: "destructive",
-        });
-        setIsLoading(false);
-        return;
-      }
-
-      // Set the user as active in Clerk
-      await setActive({ session: completeSignUp.createdSessionId });
-      
-      // Create user record in your database
-      const userId = uuidv4();
-      const result = await createNewUser({
-        name: fullName,
-        id: userId,
-        created_user_id: userId,
-        phoneNumber: phoneNumber.startsWith('+') ? phoneNumber : '+1' + phoneNumber.replace(/\D/g, ''),
-        fullAddress: address
-      });
-      
-      if (!result.success) {
-        console.error("Failed to create user in database:", result.error);
-        sendError(phoneNumber, "createUser", "Failed to create user in database", {
-          userId,
-          fullName,
-          phoneNumber,
-        });
-        toast({
-          title: "Account partially created",
-          description: "There was an issue setting up your profile. Please contact support.",
-          variant: "destructive",
-        });
-        // Still redirect as auth is completed
-        navigate("/");
-        return;
-      }
-
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate verification API call
       toast({
         title: "Account created",
         description: "Welcome! Your account has been created successfully.",
       });
       navigate("/");
     } catch (error) {
-      console.error("Verification error:", error);
-      sendError(phoneNumber, "handleVerifyCode", error as any, {
-        phoneNumber,
-      });
       toast({
         title: "Verification failed",
-        description: "Invalid code or network issue. Please try again.",
+        description: "Invalid code. Please try again.",
         variant: "destructive",
       });
     } finally {
@@ -177,53 +76,14 @@ const SignUp = () => {
     event.preventDefault();
     setIsLoading(true);
     
-    if (!isSignInLoaded) {
-      toast({
-        title: "Error",
-        description: "Authentication system not loaded. Please try again.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-
-    const emailField = (event.currentTarget.elements.namedItem('email-signin') as HTMLInputElement)?.value;
-    const passwordField = (event.currentTarget.elements.namedItem('password-signin') as HTMLInputElement)?.value;
-
-    if (!emailField || !passwordField) {
-      toast({
-        title: "Missing information",
-        description: "Please provide both email and password.",
-        variant: "destructive",
-      });
-      setIsLoading(false);
-      return;
-    }
-    
     try {
-      const result = await signIn.create({
-        identifier: emailField,
-        password: passwordField,
+      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      toast({
+        title: "Welcome back!",
+        description: "You have successfully signed in.",
       });
-      
-      if (result.status === "complete") {
-        await setActive({ session: result.createdSessionId });
-        toast({
-          title: "Welcome back!",
-          description: "You have successfully signed in.",
-        });
-        navigate("/");
-      } else {
-        toast({
-          title: "Additional verification required",
-          description: "Please complete the verification process.",
-        });
-      }
+      navigate("/");
     } catch (error) {
-      console.error("SignIn error:", error);
-      sendError("unknown", "handleSignIn", error as any, {
-        email: emailField,
-      });
       toast({
         title: "Error",
         description: "Invalid credentials. Please try again.",
@@ -249,7 +109,7 @@ const SignUp = () => {
         <Card className="w-full">
           <CardHeader className="text-center">
             <CardTitle className="text-2xl font-semibold">Verification</CardTitle>
-            <CardDescription>Enter the 6-digit code sent to your phone</CardDescription>
+            <CardDescription>Enter the 6-digit code sent to your email</CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-6">
             <div className="w-full flex justify-center px-2">
@@ -289,28 +149,7 @@ const SignUp = () => {
               </Button>
             </div>
             <p className="text-center text-sm text-muted-foreground pt-2">
-              Didn't receive a code? <button 
-                className="text-primary font-medium hover:underline" 
-                onClick={async () => {
-                  try {
-                    await signUp.preparePhoneNumberVerification();
-                    toast({ 
-                      title: "Code resent", 
-                      description: "Please check your phone for a new code." 
-                    });
-                  } catch (error) {
-                    console.error("Failed to resend code:", error);
-                    sendError(phoneNumber, "resendCode", error as any, { phoneNumber });
-                    toast({ 
-                      title: "Failed to resend", 
-                      description: "Please try again or contact support." 
-                    });
-                  }
-                }}
-                disabled={isLoading}
-              >
-                Resend
-              </button>
+              Didn't receive a code? <button className="text-primary font-medium hover:underline" onClick={() => toast({ title: "Code resent", description: "Please check your email for a new code." })}>Resend</button>
             </p>
           </CardContent>
         </Card>
@@ -391,8 +230,6 @@ const SignUp = () => {
                       id="name" 
                       type="text"
                       className="pl-9"
-                      value={fullName}
-                      onChange={(e) => setFullName(e.target.value)}
                       required 
                     />
                   </div>
@@ -405,8 +242,6 @@ const SignUp = () => {
                       id="email-signup" 
                       type="email"
                       className="pl-9"
-                      value={email}
-                      onChange={(e) => setEmail(e.target.value)}
                       required 
                     />
                   </div>
@@ -419,34 +254,6 @@ const SignUp = () => {
                       id="password-signup" 
                       type="password"
                       className="pl-9"
-                      value={password}
-                      onChange={(e) => setPassword(e.target.value)}
-                      required 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="phone-signup">Phone Number</Label>
-                  <div className="relative">
-                    <Input 
-                      id="phone-signup" 
-                      type="tel"
-                      placeholder="+1 (555) 123-4567"
-                      value={phoneNumber}
-                      onChange={(e) => setPhoneNumber(e.target.value)}
-                      required 
-                    />
-                  </div>
-                </div>
-                <div className="space-y-2">
-                  <Label htmlFor="address-signup">Address</Label>
-                  <div className="relative">
-                    <Input 
-                      id="address-signup" 
-                      type="text"
-                      placeholder="Your full mailing address"
-                      value={address}
-                      onChange={(e) => setAddress(e.target.value)}
                       required 
                     />
                   </div>
