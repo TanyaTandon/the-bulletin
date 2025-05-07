@@ -1,7 +1,7 @@
-import React, { useState } from "react";
+import React, { useCallback, useState } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
-import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
+// import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
 import { Input } from "@/components/ui/input";
@@ -25,6 +25,7 @@ import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
 import sendError from "@/hooks/use-sendError";
+import { useStytch } from "@stytch/react";
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -36,11 +37,11 @@ const NumberedHeart = ({ number }: { number: number }) => (
 const Index = () => {
   const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
-  const { isSignedIn } = useAuth();
+  // const { isSignedIn } = useAuth();
   const navigate = useNavigate();
-  const { isLoaded, signUp } = useSignUp();
-  const { signIn } = useSignIn();
-  const { setActive } = useClerk();
+  // const { isLoaded, signUp } = useSignUp();
+  // const { signIn } = useSignIn();
+  // const { setActive } = useClerk();
   const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [signInState, setSignInState] = useState<boolean>(true);
@@ -67,10 +68,10 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
-      await signIn.create({
-        strategy: "phone_code",
-        identifier: phoneNumber,
-      });
+      // await signIn.create({
+      //   strategy: "phone_code",
+      //   identifier: phoneNumber,
+      // });
 
       setSignInStep(1);
       toast.success("We've sent you a verification code!");
@@ -88,38 +89,34 @@ const Index = () => {
     if (code.includes("·")) return;
     setIsProcessing(true);
     try {
-      const result = await signIn
-        .attemptFirstFactor({
-          strategy: "phone_code",
-          code: code,
-        })
-        .then(async (result) => {
-          if (result.status === "complete") {
-            // The verification was successful and the user is now signed up
-            // Create a session to sign in the user
-
-            // Set this session as active, which will update isSignedIn to true
-            await setActive({ session: result.createdSessionId });
-
-            // Now isSignedIn will be true
-            console.log("User is signed in:", isSignedIn);
-          }
-          return result;
-        });
-
-      if (result?.identifier) {
-        const phone = result.identifier.split("+1")[1];
-        await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
-          const userRes: User = userDispatchResponse.payload as User;
-
-          if (userRes.bulletins.length > 0) {
-            navigate(`/bulletin/${userRes.bulletins[0]}`);
-          } else {
-            navigate("/bulletin");
-          }
-          toast.success("Welcome back! You're now signed in.");
-        });
-      }
+      // const result = await signIn
+      //   .attemptFirstFactor({
+      //     strategy: "phone_code",
+      //     code: code,
+      //   })
+      //   .then(async (result) => {
+      //     if (result.status === "complete") {
+      //       // The verification was successful and the user is now signed up
+      //       // Create a session to sign in the user
+      //       // Set this session as active, which will update isSignedIn to true
+      //       // await setActive({ session: result.createdSessionId });
+      //       // Now isSignedIn will be true
+      //       // console.log("User is signed in:", isSignedIn);
+      //     }
+      //     return result;
+      //   });
+      // if (result?.identifier) {
+      //   const phone = result.identifier.split("+1")[1];
+      //   await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
+      //     const userRes: User = userDispatchResponse.payload as User;
+      //     if (userRes.bulletins.length > 0) {
+      //       navigate(`/bulletin/${userRes.bulletins[0]}`);
+      //     } else {
+      //       navigate("/bulletin");
+      //     }
+      //     toast.success("Welcome back! You're now signed in.");
+      //   });
+      // }
     } catch (error) {
       console.error("Code verification error:", error);
       toast.error(
@@ -135,10 +132,10 @@ const Index = () => {
       toast.error("Please enter a valid phone number");
       return;
     }
-    if (phoneNumber.length !== 10) {
-      toast.error("Please enter a 10 digit phone number");
-      return;
-    }
+    // if (phoneNumber.length !== 10) {
+    //   toast.error("Please enter a 10 digit phone number");
+    //   return;
+    // }
 
     if (!name || name.trim() === "") {
       toast.error("Please enter your name");
@@ -152,14 +149,17 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
-      await signUp.create({
-        phoneNumber: phoneNumber,
-      });
+      // await signUp.create({
+      //   phoneNumber: phoneNumber,
+      // });
 
-      await signUp.preparePhoneNumberVerification({
-        strategy: "phone_code",
+      // await signUp.preparePhoneNumberVerification({
+      //   strategy: "phone_code",
+      // });
+      const response = await stytch.otps.sms.loginOrCreate(phoneNumber, {
+        expiration_minutes: 5,
       });
-
+      console.log(response);
       setReceviedCode(true);
       setSignInStep(1);
       toast.success("Great! We've sent a verification code to your phone.");
@@ -198,36 +198,35 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
-      const result = await signUp.attemptPhoneNumberVerification({
-        code: code,
-      });
-
-      if (result?.createdUserId) {
-        const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
-        await createNewUser({
-          name: name,
-          created_user_id: result.createdUserId,
-          id: phoneNumber,
-          phoneNumber: phoneNumber,
-          fullAddress: fullAddress,
-        }).then((res) => {
-          if (res.success) {
-            navigate("/bulletin");
-            toast.success(
-              "Welcome to the bulletin! Your account is ready to go."
-            );
-          } else {
-            sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
-              name,
-              streetAddress,
-              city,
-              state,
-              zipCode,
-            });
-            toast.error("Something went wrong. Please try again.");
-          }
-        });
-      }
+      // const result = await signUp.attemptPhoneNumberVerification({
+      //   code: code,
+      // });
+      // if (result?.createdUserId) {
+      //   const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
+      //   await createNewUser({
+      //     name: name,
+      //     created_user_id: result.createdUserId,
+      //     id: phoneNumber,
+      //     phoneNumber: phoneNumber,
+      //     fullAddress: fullAddress,
+      //   }).then((res) => {
+      //     if (res.success) {
+      //       navigate("/bulletin");
+      //       toast.success(
+      //         "Welcome to the bulletin! Your account is ready to go."
+      //       );
+      //     } else {
+      //       sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
+      //         name,
+      //         streetAddress,
+      //         city,
+      //         state,
+      //         zipCode,
+      //       });
+      //       toast.error("Something went wrong. Please try again.");
+      //     }
+      //   });
+      // }
     } catch (error) {
       sendError(phoneNumber, "handleSignUp", error, {
         name,
@@ -245,6 +244,14 @@ const Index = () => {
     }
   };
 
+  const stytch = useStytch();
+
+  const sendPasscode = useCallback(() => {
+    stytch.otps.sms.loginOrCreate("+13466289041", {
+      expiration_minutes: 5,
+    });
+  }, [stytch]);
+
   const user = useAppSelector(staticGetUser);
 
   const handleCloseModal = () => {
@@ -259,6 +266,8 @@ const Index = () => {
     setZipCode("");
     setReceviedCode(false);
   };
+
+  const def = false;
 
   return (
     <Layout>
@@ -571,9 +580,9 @@ const Index = () => {
                       </span>
                       <Button
                         onClick={async () => {
-                          await signUp.preparePhoneNumberVerification({
-                            strategy: "phone_code",
-                          });
+                          // await signUp.preparePhoneNumberVerification({
+                          //   strategy: "phone_code",
+                          // });
                         }}
                       >
                         Try Again
@@ -584,7 +593,7 @@ const Index = () => {
               )}
             </Dialog>
           )}
-          {!isSignedIn ? (
+          {!def ? (
             <>
               <Button
                 size="lg"

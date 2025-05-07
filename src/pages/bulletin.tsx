@@ -13,7 +13,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createNewBulletin } from "@/lib/api";
 import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
-import { useAuth, useSignUp } from "@clerk/clerk-react";
+// import { useAuth, useSignUp } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@mui/material";
 

@@ -15,7 +15,7 @@ import Test from "./pages/test";
 import { showToast } from "./main";
 import { ToastContext } from "./contexts/toastcontextTP";
 import { useEffect } from "react";
-import { useClerk } from "@clerk/clerk-react";
+
 
 // Configure Query Client with more reliable settings
 const queryClient = new QueryClient({

@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { useSignUp, useClerk } from "@clerk/clerk-react";
+// import { useSignUp, useClerk } from "@clerk/clerk-react";
 import { Dialog } from "@mui/material";
 import { Input } from "./ui/input";
 import { Button } from "./ui/button";
@@ -26,7 +26,7 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const showFriendsModal = useAppSelector(selectShowFriendsModal);
 
-  const { isSignedIn } = useClerk();
+  // const { isSignedIn } = useClerk();
 
   const [open, setOpen] = useState(false);
   const [vCode, setVCode] = useState("");
@@ -34,9 +34,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
   const [step, setStep] = useState(0);
   const [receviedCode, setReceviedCode] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { isLoaded, signUp } = useSignUp();
+  // const { isLoaded, signUp } = useSignUp();
 
-  console.log(isSignedIn);
+
 
   const handleSubmitPhoneNumber = async () => {
     if (!phoneNumber || phoneNumber.trim() === "") {
@@ -46,13 +46,13 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
-      await signUp.create({
-        phoneNumber: phoneNumber,
-      });
+      // await signUp.create({
+      //   phoneNumber: phoneNumber,
+      // });
 
-      await signUp.preparePhoneNumberVerification({
-        strategy: "phone_code",
-      });
+      // await signUp.preparePhoneNumberVerification({
+      //   strategy: "phone_code",
+      // });
 
       setReceviedCode(true);
       setStep(1);
@@ -73,9 +73,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
     setIsLoading(true);
     try {
-      await signUp.attemptPhoneNumberVerification({
-        code: vCode,
-      });
+      // await signUp.attemptPhoneNumberVerification({
+      //   code: vCode,
+      // });
 
       toast.success("Code verified successfully");
       setOpen(false);

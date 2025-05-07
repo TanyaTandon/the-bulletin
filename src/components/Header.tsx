@@ -3,7 +3,7 @@ import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
+// import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import FriendRequests from "./FriendRequests";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { resetStore, useAppDispatch } from "@/redux";
@@ -13,20 +13,19 @@ const Header: React.FC = () => {
   const navigate = useNavigate();
   const location = useLocation();
   const isMobile = useIsMobile();
-  const { isSignedIn } = useAuth();
-  const { user } = useUser();
+  // const { isSignedIn } = useAuth();
+  // const { user } = useUser();
   const [isAuthenticated, setIsAuthenticated] = useState<boolean>(false);
 
-  // Use both Clerk's isSignedIn and the user object to determine authentication status
-  useEffect(() => {
-    setIsAuthenticated(!!isSignedIn && !!user);
-    // Add logging to debug authentication state
-    console.log("Auth state updated:", {
-      isSignedIn,
-      hasUser: !!user,
-      isAuthenticated: !!isSignedIn && !!user,
-    });
-  }, [isSignedIn, user]);
+  // useEffect(() => {
+  //   setIsAuthenticated(!!isSignedIn && !!user);
+  //   // Add logging to debug authentication state
+  //   // console.log("Auth state updated:", {
+  //   //   isSignedIn,
+  //   //   hasUser: !!user,
+  //   //   isAuthenticated: !!isSignedIn && !!user,
+  //   // });
+  // }, [isSignedIn, user]);
 
   const dispatch = useAppDispatch();
 
@@ -44,7 +43,7 @@ const Header: React.FC = () => {
         </Link>
 
         {/* Show buttons if either condition is true to ensure better reliability */}
-        {(isSignedIn || isAuthenticated) && (
+        {/* {false && (
           <div className="flex items-center space-x-2">
             <FriendRequests />
             <div className="flex items-center space-x-2">
@@ -65,7 +64,7 @@ const Header: React.FC = () => {
               </SignOutButton>
             </div>
           </div>
-        )}
+        )} */}
       </div>
     </header>
   );

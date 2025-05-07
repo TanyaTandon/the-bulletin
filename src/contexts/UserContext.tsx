@@ -8,7 +8,7 @@ import React, {
   ReactNode,
   useEffect,
 } from "react";
-import { useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
+// import { useClerk, useUser as useClerkUser } from "@clerk/clerk-react";
 
 export type ContentType = "picture" | "note" | "writing" | "calendar";
 
@@ -109,23 +109,23 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
   // const { user } = useClerkUser();
-  const { isSignedIn, user } = useClerk();
+  // const { isSignedIn, user } = useClerk();
 
   const dispatch = useAppDispatch();
 
-  useEffect(() => {
-    console.log(user);
-    if (user) {
-      dispatch(
-        fetchUser(user.primaryPhoneNumber.phoneNumber.split("+1")[1])
-      ).then((response) => {
-        console.log(response.payload);
-        if (response.payload && typeof response.payload === 'object' && 'bulletins' in response.payload && Array.isArray(response.payload.bulletins) && response.payload.bulletins.length > 0) {
-          dispatch(fetchBulletins());
-        }
-      });
-    }
-  }, [user]);
+  // useEffect(() => {
+    // console.log(user);
+    // if (user) {
+    //   dispatch(
+    //     fetchUser(user.primaryPhoneNumber.phoneNumber.split("+1")[1])
+    //   ).then((response) => {
+    //     console.log(response.payload);
+    //     if (response.payload && typeof response.payload === 'object' && 'bulletins' in response.payload && Array.isArray(response.payload.bulletins) && response.payload.bulletins.length > 0) {
+    //       dispatch(fetchBulletins());
+    //     }
+    //   });
+    // }
+  // }, [user]);
 
   const [personas, setPersonas] = useState<Persona[]>(initialPersonas);
   const [groups, setGroups] = useState<Group[]>(initialGroups);
