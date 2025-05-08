@@ -29,6 +29,7 @@ export type Bulletin = {
 export type NewBulletinItem = {
   user: User;
   bulletin: Bulletin;
+  anon?: boolean;
 };
 
 export async function createNewUser({
@@ -63,7 +64,11 @@ export async function createNewUser({
   }
 }
 
-export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
+export async function createNewBulletin({
+  user,
+  bulletin,
+  anon,
+}: NewBulletinItem) {
   try {
     const images = bulletin.images;
     // Upload images to the bucket and collect their URLs
@@ -123,39 +128,41 @@ export async function createNewBulletin({ user, bulletin }: NewBulletinItem) {
         saved_notes: arrayToDict(bulletin.savedNotes),
       })
       .then(async (item) => {
-        try {
-          if (item.data) {
-            returnBulletin = [item.data[0]];
-          }
+        if (!anon) {
+          try {
+            if (item.data) {
+              returnBulletin = [item.data[0]];
+            }
 
-          const { data: userData, error: userError } = await supabase
-            .from("user_record")
-            .update({
-              images: [...images.map((item) => item.id), ...user.images],
-              bulletins: [bulletinId, ...user.bulletins],
-            })
-            .eq("phone_number", user.phone_number)
-            .select("*");
+            const { data: userData, error: userError } = await supabase
+              .from("user_record")
+              .update({
+                images: [...images.map((item) => item.id), ...user.images],
+                bulletins: [bulletinId, ...user.bulletins],
+              })
+              .eq("phone_number", user.phone_number)
+              .select("*");
 
-          console.log("User data:", userData);
-          newUserData = userData as unknown as User;
-          if (userError) {
-            console.error("Error creating user:", userError);
-            sendError(user.phone_number, "createNewBulletin", userError, {
+            console.log("User data:", userData);
+            newUserData = userData as unknown as User;
+            if (userError) {
+              console.error("Error creating user:", userError);
+              sendError(user.phone_number, "createNewBulletin", userError, {
+                id: bulletinId,
+                blurb: bulletin.blurb,
+                images: images.map((item) => item.id),
+              });
+              throw userError;
+            }
+            return item;
+          } catch (error) {
+            sendError(user.phone_number, "createNewBulletin", error, {
               id: bulletinId,
               blurb: bulletin.blurb,
               images: images.map((item) => item.id),
             });
-            throw userError;
+            console.error("Error creating user:", error);
           }
-          return item;
-        } catch (error) {
-          sendError(user.phone_number, "createNewBulletin", error, {
-            id: bulletinId,
-            blurb: bulletin.blurb,
-            images: images.map((item) => item.id),
-          });
-          console.error("Error creating user:", error);
         }
       });
 

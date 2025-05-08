@@ -1,4 +1,3 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { format, addMonths } from "date-fns";
@@ -20,8 +19,9 @@ import { Dialog } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
+import { anonhandleSubmitBulletin } from "@/lib/utils";
 
-const Bulletin = () => {
+const Bulletin: React.FC<{ anon?: boolean }> = ({ anon }) => {
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
@@ -30,9 +30,10 @@ const Bulletin = () => {
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [blurb, setBlurb] = useState<string>("");
   const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([]);
-  
+
   // Custom placeholder for the blurb textarea
-  const customPlaceholder = "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
+  const customPlaceholder =
+    "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
 
   const handleSubmitBulletin = async () => {
     if (!blurb && images.length === 0) {
@@ -88,6 +89,8 @@ const Bulletin = () => {
 
   console.log("User:", savedNotes);
 
+  const [tempPhoneNumber, setTempPhoneNumber] = useState<string | null>(null);
+
   return (
     <Layout>
       <div className={`mx-auto ${isMobile ? "px-4 pt-0" : "container py-6"}`}>
@@ -102,6 +105,12 @@ const Bulletin = () => {
 
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
+              <Input
+                type="text"
+                placeholder="Enter your phone number"
+                value={tempPhoneNumber}
+                onChange={(e) => setTempPhoneNumber(e.target.value)}
+              />
               <BlurbInput
                 savedNotes={savedNotes}
                 setSavedNotes={setSavedNotes}
@@ -115,7 +124,24 @@ const Bulletin = () => {
 
             <div className="flex flex-col items-center space-y-8">
               <Button
-                onClick={handleSubmitBulletin}
+                onClick={
+                  anon
+                    ? () => {
+                        anonhandleSubmitBulletin(
+                          tempPhoneNumber,
+                          images,
+                          blurb,
+                          savedNotes,
+                          setIsSubmitting,
+                          navigate,
+                          dispatch,
+                          setImages,
+                          setBlurb,
+                          setSavedNotes
+                        );
+                      }
+                    : handleSubmitBulletin
+                }
                 size="lg"
                 className="w-full max-w-md bg-gradient-to-r from-violet-500 to-violet-600 hover:from-violet-600 hover:to-violet-700 text-white shadow-md"
                 disabled={isSubmitting}
