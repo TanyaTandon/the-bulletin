@@ -58,15 +58,15 @@ const FilledBulletin: React.FC = () => {
         console.log(data[0].saved_notes);
         console.log(
           Object.keys(data[0].saved_notes).map((item, index) => ({
-            date: new Date(data[0].saved_notes[item].date),
-            note: data[0].saved_notes[item].note,
+            date: item,
+            note: data[0].saved_notes[item],
           }))
         );
         const setData = {
           ...data[0],
-          savedNotes: Object.keys(data[0].saved_notes).map((item, index) => ({
-            date: new Date(data[0].saved_notes[item].date),
-            note: data[0].saved_notes[item].note,
+          savedNotes: Object.keys(data[0].saved_notes).map((item) => ({
+            date: new Date(item),
+            note: data[0].saved_notes[item],
           })),
           images: data[0].images.map((item) => ({
             id: item,
