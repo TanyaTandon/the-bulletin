@@ -1,4 +1,3 @@
-
 import React, { useEffect, useState } from "react";
 import Layout from "@/components/Layout";
 import { useIsMobile } from "@/hooks/use-mobile";
@@ -27,6 +26,7 @@ import {
 import { Textarea } from "@/components/ui/textarea";
 import FriendModalContent from "@/components/FriendModalContent";
 import TypewriterText from "@/components/TypewriterText";
+import axios from "axios";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -38,9 +38,10 @@ const FilledBulletin: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const [bulletinData, setBulletin] = useState<Bulletin | null>(null);
   const [isUpdating, setIsUpdating] = useState<boolean>(false);
-  
+
   // Custom placeholder for the blurb textarea
-  const customPlaceholder = "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
+  const customPlaceholder =
+    "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
 
   console.log("URL Slug:", bulletinData, user);
 
@@ -57,15 +58,15 @@ const FilledBulletin: React.FC = () => {
         console.log(data[0].saved_notes);
         console.log(
           Object.keys(data[0].saved_notes).map((item, index) => ({
-            date: item,
-            note: data[0].saved_notes[item],
+            date: new Date(data[0].saved_notes[item].date),
+            note: data[0].saved_notes[item].note,
           }))
         );
         const setData = {
           ...data[0],
-          savedNotes: Object.keys(data[0].saved_notes).map((item) => ({
-            date: new Date(item),
-            note: data[0].saved_notes[item],
+          savedNotes: Object.keys(data[0].saved_notes).map((item, index) => ({
+            date: new Date(data[0].saved_notes[item].date),
+            note: data[0].saved_notes[item].note,
           })),
           images: data[0].images.map((item) => ({
             id: item,
@@ -137,9 +138,75 @@ const FilledBulletin: React.FC = () => {
     if (!user || !bulletinData) return;
 
     setIsUpdating(true);
+
     try {
-      const result = await updateBulletin(user, bulletinData);
-      if (result.success) {
+      // Create a FormData object to properly handle file uploads
+      const formData = new FormData();
+
+      let dup = structuredClone(bulletinData);
+      dup.saved_notes = dup.savedNotes;
+      delete dup.savedNotes;
+      // Add the non-file data
+      formData.append("user", JSON.stringify(user));
+      formData.append("bulletinData", JSON.stringify(dup));
+
+      // Process and append each image if bulletinData.images exists
+      if (bulletinData.images && bulletinData.images.length > 0) {
+        const processedImages = [];
+
+        for (let i = 0; i < bulletinData.images.length; i++) {
+          const image = bulletinData.images[i];
+
+          // Check if the image URL is a local blob URL (not an S3 URL)
+          if (image.url && image.url.startsWith("blob:")) {
+            // Fetch the blob data from the local URL
+            const fetchBlob = await fetch(image.url, {
+              method: "GET",
+              headers: {
+                Accept: "image/png",
+              },
+            });
+
+            const blob = await fetchBlob.blob();
+
+            // Create a filename for the image
+            const filename = `image_${i}_${Date.now()}.png`;
+
+            // Append the actual file to FormData
+            formData.append(`images`, blob, filename);
+
+            // Keep track of image metadata
+            processedImages.push({
+              id: image.id,
+              filename: filename,
+            });
+          } else {
+            // This is an S3 URL, so just add the metadata
+            processedImages.push({
+              id: image.id,
+              url: image.url,
+              isExisting: true,
+            });
+          }
+        }
+
+        // Add image metadata as a JSON string
+        formData.append("imageMetadata", JSON.stringify(processedImages));
+      }
+
+      // Use FormData with axios
+      console.log(formData);
+      const result = await axios.post(
+        "https://lvwebhookrepo-production.up.railway.app/bulletinEditing",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
+        }
+      );
+
+      if (result.data.success) {
         toast.success("Bulletin updated successfully!");
         setTimeout(() => {
           navigate("/bulletin/filled");
