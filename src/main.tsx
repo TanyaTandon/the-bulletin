@@ -10,7 +10,7 @@ import { store } from "./redux/index.ts";
 
 // Import your Publishable Key
 const PUBLISHABLE_KEY =
-  "pk_live_Y2xlcmsudGhlYnVsbGV0aW4uYXBwJA";
+  "pk_test_aW5jbHVkZWQtYmVuZ2FsLTMxLmNsZXJrLmFjY291bnRzLmRldiQ";
 
 if (!PUBLISHABLE_KEY) {
   throw new Error("Missing Publishable Key");

@@ -12,7 +12,7 @@ import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
 import { createNewBulletin } from "@/lib/api";
 import { Send, Calendar, Image, FileText, LoaderCircle } from "lucide-react";
-import { useAuth, useSignUp } from "@clerk/clerk-react";
+// import { useAuth, useSignUp } from "@clerk/clerk-react";
 import { Input } from "@/components/ui/input";
 import { Dialog } from "@mui/material";
 
@@ -20,6 +20,7 @@ import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
 import { anonhandleSubmitBulletin } from "@/lib/utils";
+import axios from "axios";
 
 const Bulletin: React.FC<{ anon?: boolean }> = ({ anon }) => {
   const dispatch = useAppDispatch();
@@ -52,33 +53,75 @@ const Bulletin: React.FC<{ anon?: boolean }> = ({ anon }) => {
     try {
       toast.loading("Saving your bulletin...");
 
-      await createNewBulletin({
-        user: user,
-        bulletin: {
-          images: images,
-          blurb: blurb,
-          savedNotes: savedNotes,
-          owner: user?.phone_number || "",
-        },
-      }).then((response) => {
-        console.log("Response:", response);
-        if (response.newUserData) {
-          dispatch(setUser(response.newUserData[0]));
+      // Create a FormData object to properly handle file uploads
+      const formData = new FormData();
+
+      // Add the non-file data
+      formData.append("user", JSON.stringify(user));
+      formData.append("blurb", blurb);
+      formData.append("savedNotes", JSON.stringify(savedNotes));
+      formData.append("owner", user?.phone_number || "");
+
+      // Process and append each image
+      const processedImages = [];
+
+      for (let i = 0; i < images.length; i++) {
+        const image = images[i];
+        console.log("Processing image", image);
+
+        const fetchBlob = await fetch(image.url, {
+          method: "GET",
+          headers: {
+            Accept: "image/png",
+          },
+        });
+
+        const blob = await fetchBlob.blob();
+        console.log("Blob created:", blob);
+
+        // Create a filename for the image
+        const filename = `image_${i}_${Date.now()}.png`;
+
+        // Append the actual file to FormData
+        formData.append(`images`, blob, filename);
+
+        // Keep track of image metadata
+        processedImages.push({
+          id: image.id,
+          filename: filename,
+        });
+      }
+
+      // Add image metadata as a JSON string
+      formData.append("imageMetadata", JSON.stringify(processedImages));
+
+      // Use FormData with axios
+      const response = await axios.post(
+        "https://lvwebhookrepo-production.up.railway.app/bulletinCreation",
+        formData,
+        {
+          headers: {
+            "Content-Type": "multipart/form-data",
+          },
         }
-        if (response.success) {
-          navigate(`/bulletin/${response.bulletinId}`);
-        } else {
-          toast.error("We couldn't save your bulletin. Please try again.");
-        }
-      });
+      );
+
+      console.log("Response:", response);
+
+      if (response.data.newUserData) {
+        dispatch(setUser(response.data.newUserData[0]));
+      }
+
+      if (response.data.success) {
+        navigate(`/bulletin/${response.data.bulletinId}`);
+      } else {
+        toast.error("We couldn't save your bulletin. Please try again.");
+      }
 
       toast.dismiss();
-
       setImages([]);
       setBlurb("");
       setSavedNotes([]);
-
-      navigate("/bulletin/filled");
     } catch (error) {
       console.error("Error saving bulletin:", error);
       toast.error("We couldn't save your bulletin. Please try again.");
@@ -87,7 +130,7 @@ const Bulletin: React.FC<{ anon?: boolean }> = ({ anon }) => {
     }
   };
 
-  console.log("User:", savedNotes);
+  console.log("User:", images);
 
   const [tempPhoneNumber, setTempPhoneNumber] = useState<string | null>(null);
 
