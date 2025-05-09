@@ -143,8 +143,10 @@ const FilledBulletin: React.FC = () => {
       // Create a FormData object to properly handle file uploads
       const formData = new FormData();
 
-      let dup = structuredClone(bulletinData);
+      const dup = structuredClone(bulletinData);
+      // @ts-ignore
       dup.saved_notes = dup.savedNotes;
+      // @ts-ignore
       delete dup.savedNotes;
       // Add the non-file data
       formData.append("user", JSON.stringify(user));

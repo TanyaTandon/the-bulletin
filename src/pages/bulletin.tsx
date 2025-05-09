@@ -27,6 +27,7 @@ const Bulletin: React.FC<{ anon?: boolean }> = ({ anon }) => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const user = useAppSelector(staticGetUser);
+  console.log("user", user);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [blurb, setBlurb] = useState<string>("");
@@ -148,12 +149,14 @@ const Bulletin: React.FC<{ anon?: boolean }> = ({ anon }) => {
 
           <div className="space-y-6">
             <div className="bg-white rounded-lg shadow-sm p-6">
-              <Input
-                type="text"
-                placeholder="Enter your phone number"
-                value={tempPhoneNumber}
-                onChange={(e) => setTempPhoneNumber(e.target.value)}
-              />
+              {anon && (
+                <Input
+                  type="text"
+                  placeholder="Enter your phone number"
+                  value={tempPhoneNumber}
+                  onChange={(e) => setTempPhoneNumber(e.target.value)}
+                />
+              )}
               <BlurbInput
                 savedNotes={savedNotes}
                 setSavedNotes={setSavedNotes}
