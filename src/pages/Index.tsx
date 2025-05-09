@@ -25,7 +25,7 @@ import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
 import sendError from "@/hooks/use-sendError";
-import { useStytch } from "@stytch/react";
+import { useStytch, useStytchUser } from "@stytch/react";
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -37,11 +37,7 @@ const NumberedHeart = ({ number }: { number: number }) => (
 const Index = () => {
   const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
-  // const { isSignedIn } = useAuth();
   const navigate = useNavigate();
-  // const { isLoaded, signUp } = useSignUp();
-  // const { signIn } = useSignIn();
-  // const { setActive } = useClerk();
   const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [signInState, setSignInState] = useState<boolean>(true);
@@ -55,6 +51,14 @@ const Index = () => {
   const [city, setCity] = useState<string>("");
   const [state, setState] = useState<string>("");
   const [zipCode, setZipCode] = useState<string>("");
+
+  type AuthResponse = {
+    request_id: string;
+    status_code: number;
+    method_id: string;
+  };
+
+  const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null);
 
   const validatePhoneNumber = (phone: string) => {
     return phone && phone.trim() !== "";
@@ -159,7 +163,7 @@ const Index = () => {
       const response = await stytch.otps.sms.loginOrCreate(phoneNumber, {
         expiration_minutes: 5,
       });
-      console.log(response);
+      setAuthResponse(response);
       setReceviedCode(true);
       setSignInStep(1);
       toast.success("Great! We've sent a verification code to your phone.");
@@ -198,6 +202,10 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
+      await stytch.otps.authenticate(trueCode, authResponse?.method_id, {
+        session_duration_minutes: 527040, // Maximum: 366 d
+      });
+
       // const result = await signUp.attemptPhoneNumberVerification({
       //   code: code,
       // });
@@ -245,6 +253,10 @@ const Index = () => {
   };
 
   const stytch = useStytch();
+
+  const { user: stytchUser } = useStytchUser();
+
+  console.log(stytchUser);
 
   const sendPasscode = useCallback(() => {
     stytch.otps.sms.loginOrCreate("+13466289041", {
