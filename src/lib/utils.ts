@@ -4,7 +4,7 @@ import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
 import { createNewBulletin } from "./api";
 import { CalendarNote } from "@/components/BlurbInput";
-import { setUser } from "@/redux/user";
+import { setUser, User } from "@/redux/user";
 import { NavigateFunction } from "react-router";
 import { Dispatch } from "@reduxjs/toolkit";
 export function cn(...inputs: ClassValue[]) {
@@ -40,7 +40,7 @@ export const anonhandleSubmitBulletin = async (
     toast.loading("Saving your bulletin...");
 
     await createNewBulletin({
-      user: { phone_number: phoneNumber, images: [], bulletins: [] },
+      user: { phone_number: phoneNumber, images: [], bulletins: [] } as User,
       bulletin: {
         images: images,
         blurb: blurb,

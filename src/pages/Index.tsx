@@ -1,7 +1,13 @@
-import React, { useState } from "react";
+import React, {
+  Component,
+  LegacyRef,
+  useCallback,
+  useRef,
+  useState,
+} from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
-import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
+// import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
 import { Input } from "@/components/ui/input";
@@ -25,6 +31,13 @@ import { staticGetUser } from "@/redux/user/selectors";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
 import sendError from "@/hooks/use-sendError";
+import { useStytch, useStytchUser } from "@stytch/react";
+import "react-phone-number-input/style.css";
+import PhoneInput, {
+  DefaultInputComponentProps,
+  Props,
+  State,
+} from "react-phone-number-input";
 
 const NumberedHeart = ({ number }: { number: number }) => (
   <span className="inline-flex relative items-center justify-center align-middle mr-2">
@@ -36,11 +49,10 @@ const NumberedHeart = ({ number }: { number: number }) => (
 const Index = () => {
   const dispatch = useAppDispatch();
   const isMobile = useIsMobile();
-  const { isSignedIn } = useAuth();
   const navigate = useNavigate();
-  const { isLoaded, signUp } = useSignUp();
-  const { signIn } = useSignIn();
-  const { setActive } = useClerk();
+
+  const phoneInputRef = useRef<any>(null);
+
   const [openAuthModal, setOpenAuthModal] = useState<boolean>(false);
   const [isProcessing, setIsProcessing] = useState<boolean>(false);
   const [signInState, setSignInState] = useState<boolean>(true);
@@ -55,6 +67,14 @@ const Index = () => {
   const [state, setState] = useState<string>("");
   const [zipCode, setZipCode] = useState<string>("");
 
+  type AuthResponse = {
+    request_id: string;
+    status_code: number;
+    method_id: string;
+  };
+
+  const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null);
+
   const validatePhoneNumber = (phone: string) => {
     return phone && phone.trim() !== "";
   };
@@ -67,13 +87,20 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
-      await signIn.create({
-        strategy: "phone_code",
-        identifier: phoneNumber,
-      });
-
-      setSignInStep(1);
-      toast.success("We've sent you a verification code!");
+      await stytch.otps.sms
+        .loginOrCreate(phoneNumber, {
+          expiration_minutes: 5,
+        })
+        .then(async (res) => {
+          if (res.status_code == 200) {
+            setAuthResponse(res);
+            setReceviedCode(true);
+            setSignInStep(1);
+            toast.success("We've sent you a verification code!");
+          } else {
+            toast.error("Something went wrong. Please try again.");
+          }
+        });
     } catch (error) {
       console.error("Sign in error:", error);
       toast.error(
@@ -88,38 +115,27 @@ const Index = () => {
     if (code.includes("·")) return;
     setIsProcessing(true);
     try {
-      const result = await signIn
-        .attemptFirstFactor({
-          strategy: "phone_code",
-          code: code,
+      await stytch.otps
+        .authenticate(code, authResponse?.method_id, {
+          session_duration_minutes: 5270, // Maximum: 366 d
         })
         .then(async (result) => {
-          if (result.status === "complete") {
-            // The verification was successful and the user is now signed up
-            // Create a session to sign in the user
+          if (result.status_code === 200) {
+            const phone = result.user.phone_numbers[0].phone_number;
+            await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
+              const userRes: User = userDispatchResponse.payload as User;
+              console.log(userRes);
+              if (userRes.bulletins.length > 0) {
+                navigate(`/bulletin/${userRes.bulletins[0]}`);
+              } else {
+                navigate("/bulletin");
+              }
+              toast.success("Welcome back! You're now signed in.");
+            });
 
-            // Set this session as active, which will update isSignedIn to true
-            await setActive({ session: result.createdSessionId });
-
-            // Now isSignedIn will be true
-            console.log("User is signed in:", isSignedIn);
           }
           return result;
         });
-
-      if (result?.identifier) {
-        const phone = result.identifier.split("+1")[1];
-        await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
-          const userRes: User = userDispatchResponse.payload as User;
-
-          if (userRes.bulletins.length > 0) {
-            navigate(`/bulletin/${userRes.bulletins[0]}`);
-          } else {
-            navigate("/bulletin");
-          }
-          toast.success("Welcome back! You're now signed in.");
-        });
-      }
     } catch (error) {
       console.error("Code verification error:", error);
       toast.error(
@@ -131,15 +147,6 @@ const Index = () => {
   };
 
   const handleSignUp = async () => {
-    if (!validatePhoneNumber(phoneNumber)) {
-      toast.error("Please enter a valid phone number");
-      return;
-    }
-    if (phoneNumber.length !== 10) {
-      toast.error("Please enter a 10 digit phone number");
-      return;
-    }
-
     if (!name || name.trim() === "") {
       toast.error("Please enter your name");
       return;
@@ -152,17 +159,28 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
-      await signUp.create({
-        phoneNumber: phoneNumber,
+      const response = await stytch.otps.sms.loginOrCreate(phoneNumber, {
+        expiration_minutes: 5,
       });
+      console.log(response);
+      if (response.status_code == 200) {
+        setAuthResponse(response);
+        setReceviedCode(true);
+        setSignInStep(1);
+        toast.success("Great! We've sent a verification code to your phone.");
+      } else {
+        toast.error("Something went wrong. Please try again.");
 
-      await signUp.preparePhoneNumberVerification({
-        strategy: "phone_code",
-      });
-
-      setReceviedCode(true);
-      setSignInStep(1);
-      toast.success("Great! We've sent a verification code to your phone.");
+        sendError(
+          phoneNumber,
+          "handleSignUp",
+          JSON.stringify(response),
+          JSON.stringify({
+            rawPhoneNumber: phoneNumber,
+            decoratedPhoneNumber: "+1" + phoneNumber,
+          })
+        );
+      }
     } catch (error) {
       console.error("Sign up error:", error.message);
       console.error(JSON.stringify(error.e));
@@ -188,8 +206,6 @@ const Index = () => {
   const handleVerifySignUp = async (code: string) => {
     console.log(code);
     const trueCode = code.replace("·", "");
-    console.log(trueCode);
-    console.log(code.length);
     if (code.includes("·")) return;
     if (!code || code.trim() === "") {
       toast.error("Please enter the verification code");
@@ -198,36 +214,40 @@ const Index = () => {
 
     setIsProcessing(true);
     try {
-      const result = await signUp.attemptPhoneNumberVerification({
-        code: code,
-      });
+      await stytch.otps
+        .authenticate(trueCode, authResponse?.method_id, {
+          session_duration_minutes: 5270, // Maximum: 366 d
+        })
+        .then(async (res) => {
+          if (res.status_code == 200) {
+            const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
+            await createNewUser({
+              name: name,
+              created_user_id: res.user_id,
+              id: phoneNumber,
+              phoneNumber: phoneNumber,
+              fullAddress: fullAddress,
+            }).then(async (res) => {
+              await dispatch(fetchUser(phoneNumber));
 
-      if (result?.createdUserId) {
-        const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
-        await createNewUser({
-          name: name,
-          created_user_id: result.createdUserId,
-          id: phoneNumber,
-          phoneNumber: phoneNumber,
-          fullAddress: fullAddress,
-        }).then((res) => {
-          if (res.success) {
-            navigate("/bulletin");
-            toast.success(
-              "Welcome to the bulletin! Your account is ready to go."
-            );
-          } else {
-            sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
-              name,
-              streetAddress,
-              city,
-              state,
-              zipCode,
+              if (res.success) {
+                navigate("/bulletin");
+                toast.success(
+                  "Welcome to the bulletin! Your account is ready to go."
+                );
+              } else {
+                sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
+                  name,
+                  streetAddress,
+                  city,
+                  state,
+                  zipCode,
+                });
+                toast.error("Something went wrong. Please try again.");
+              }
             });
-            toast.error("Something went wrong. Please try again.");
           }
         });
-      }
     } catch (error) {
       sendError(phoneNumber, "handleSignUp", error, {
         name,
@@ -245,6 +265,8 @@ const Index = () => {
     }
   };
 
+  const stytch = useStytch();
+
   const user = useAppSelector(staticGetUser);
 
   const handleCloseModal = () => {
@@ -259,6 +281,8 @@ const Index = () => {
     setZipCode("");
     setReceviedCode(false);
   };
+
+  const def = false;
 
   return (
     <Layout>
@@ -349,16 +373,27 @@ const Index = () => {
                       <h1 className="text-xl font-semibold mb-2">
                         Enter your phone number
                       </h1>
-                      <Input
-                        value={phoneNumber}
-                        placeholder="Enter your Phone Number"
-                        type="tel"
-                        onChange={(e) => {
-                          setPhoneNumber(e.target.value);
+                      <div
+                        className="relative w-full"
+                        style={{
+                          border: "1px lightgray solid",
+                          borderRadius: "0.5rem",
+                          padding: "0.5rem",
                         }}
-                        disabled={isProcessing}
-                        className="mb-4 w-full"
-                      />
+                      >
+                        <PhoneInput
+                          focusInputOnCountrySelection
+                          ref={phoneInputRef}
+                          defaultCountry="US"
+                          value={phoneNumber}
+                          type="tel"
+                          onChange={(e) => {
+                            setPhoneNumber(e);
+                          }}
+                          disabled={isProcessing}
+                          className="w-full"
+                        />
+                      </div>
                     </>
                   ) : (
                     <>
@@ -401,7 +436,7 @@ const Index = () => {
                         {isProcessing
                           ? "Processing..."
                           : signInStep === 0
-                          ? "Submit"
+                          ? "Sign In"
                           : "Verify"}
                       </Button>
                     )}
@@ -424,7 +459,7 @@ const Index = () => {
                               Full Name
                             </Label>
                             <div className="relative">
-                              <UserIcon className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <UserIcon className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                               <Input
                                 id="name"
                                 placeholder="Enter your name"
@@ -444,15 +479,21 @@ const Index = () => {
                             >
                               Phone Number
                             </Label>
-                            <div className="relative">
-                              <Phone className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                              <Input
+                            <div
+                              className="relative"
+                              style={{
+                                border: "1px grey solid",
+                                borderRadius: "0.5rem",
+                                padding: "0.5rem",
+                              }}
+                            >
+                              <PhoneInput
+                                defaultCountry="US"
                                 id="phone"
                                 type="tel"
                                 placeholder="Enter your phone number"
                                 value={phoneNumber}
-                                onChange={(e) => setPhoneNumber(e.target.value)}
-                                className="pl-9 h-12"
+                                onChange={(e) => setPhoneNumber(e)}
                                 disabled={isProcessing}
                                 required
                               />
@@ -467,7 +508,7 @@ const Index = () => {
                               Street Address
                             </Label>
                             <div className="relative">
-                              <Home className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Home className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                               <Input
                                 id="street"
                                 placeholder="Enter street address"
@@ -490,7 +531,7 @@ const Index = () => {
                               City
                             </Label>
                             <div className="relative">
-                              <Building className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                              <Building className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                               <Input
                                 id="city"
                                 placeholder="Enter city"
@@ -512,7 +553,7 @@ const Index = () => {
                                 State
                               </Label>
                               <div className="relative">
-                                <MapPin className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <MapPin className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                                 <Input
                                   id="state"
                                   placeholder="Enter state"
@@ -533,7 +574,7 @@ const Index = () => {
                                 ZIP Code
                               </Label>
                               <div className="relative">
-                                <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                                <Mail className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
                                 <Input
                                   id="zipcode"
                                   placeholder="Enter ZIP code"
@@ -571,9 +612,9 @@ const Index = () => {
                       </span>
                       <Button
                         onClick={async () => {
-                          await signUp.preparePhoneNumberVerification({
-                            strategy: "phone_code",
-                          });
+                          // await signUp.preparePhoneNumberVerification({
+                          //   strategy: "phone_code",
+                          // });
                         }}
                       >
                         Try Again
@@ -584,7 +625,7 @@ const Index = () => {
               )}
             </Dialog>
           )}
-          {!isSignedIn ? (
+          {!def ? (
             <>
               <Button
                 size="lg"

@@ -1,14 +1,23 @@
-
 import React, { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import { useToast } from "@/hooks/use-toast";
 import { Mail, Lock, User, Heart } from "lucide-react";
-import { InputOTP, InputOTPGroup, InputOTPSlot } from "@/components/ui/input-otp";
+import {
+  InputOTP,
+  InputOTPGroup,
+  InputOTPSlot,
+} from "@/components/ui/input-otp";
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const SignUp = () => {
@@ -22,10 +31,10 @@ const SignUp = () => {
   const handleSignUp = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
-      
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
+
       // Instead of immediately navigating, show verification step
       setShowVerification(true);
       toast({
@@ -52,10 +61,10 @@ const SignUp = () => {
       });
       return;
     }
-    
+
     setIsLoading(true);
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate verification API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate verification API call
       toast({
         title: "Account created",
         description: "Welcome! Your account has been created successfully.",
@@ -75,9 +84,9 @@ const SignUp = () => {
   const handleSignIn = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     setIsLoading(true);
-    
+
     try {
-      await new Promise(resolve => setTimeout(resolve, 1000)); // Simulate API call
+      await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
       toast({
         title: "Welcome back!",
         description: "You have successfully signed in.",
@@ -98,7 +107,10 @@ const SignUp = () => {
     return (
       <div className="container flex h-screen w-screen flex-col items-center justify-center px-4 max-w-md mx-auto">
         <div className="mb-8 text-center">
-          <h1 className="text-4xl font-bold text-black lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+          <h1
+            className="text-4xl font-bold text-black lowercase"
+            style={{ fontFamily: "Sometype Mono, monospace" }}
+          >
             the bulletin.
           </h1>
           <div className="flex items-center justify-center mt-2 text-black">
@@ -108,8 +120,12 @@ const SignUp = () => {
         </div>
         <Card className="w-full">
           <CardHeader className="text-center">
-            <CardTitle className="text-2xl font-semibold">Verification</CardTitle>
-            <CardDescription>Enter the 6-digit code sent to your email</CardDescription>
+            <CardTitle className="text-2xl font-semibold">
+              Verification
+            </CardTitle>
+            <CardDescription>
+              Enter the 6-digit code sent to your email
+            </CardDescription>
           </CardHeader>
           <CardContent className="flex flex-col items-center space-y-6">
             <div className="w-full flex justify-center px-2">
@@ -118,30 +134,74 @@ const SignUp = () => {
                 value={verificationCode}
                 onChange={setVerificationCode}
                 className="gap-1 md:gap-2"
-                containerClassName={isMobile ? "justify-center" : "justify-center"}
+                containerClassName={
+                  isMobile ? "justify-center" : "justify-center"
+                }
               >
                 <InputOTPGroup>
-                  <InputOTPSlot index={0} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
-                  <InputOTPSlot index={1} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
-                  <InputOTPSlot index={2} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
-                  <InputOTPSlot index={3} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
-                  <InputOTPSlot index={4} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
-                  <InputOTPSlot index={5} className={isMobile ? "h-10 w-10 md:h-12 md:w-12 text-lg" : "h-12 w-12 text-lg"} />
+                  <InputOTPSlot
+                    index={0}
+                    className={
+                      isMobile
+                        ? "h-10 w-10 md:h-12 md:w-12 text-lg"
+                        : "h-12 w-12 text-lg"
+                    }
+                  />
+                  <InputOTPSlot
+                    index={1}
+                    className={
+                      isMobile
+                        ? "h-10 w-10 md:h-12 md:w-12 text-lg"
+                        : "h-12 w-12 text-lg"
+                    }
+                  />
+                  <InputOTPSlot
+                    index={2}
+                    className={
+                      isMobile
+                        ? "h-10 w-10 md:h-12 md:w-12 text-lg"
+                        : "h-12 w-12 text-lg"
+                    }
+                  />
+                  <InputOTPSlot
+                    index={3}
+                    className={
+                      isMobile
+                        ? "h-10 w-10 md:h-12 md:w-12 text-lg"
+                        : "h-12 w-12 text-lg"
+                    }
+                  />
+                  <InputOTPSlot
+                    index={4}
+                    className={
+                      isMobile
+                        ? "h-10 w-10 md:h-12 md:w-12 text-lg"
+                        : "h-12 w-12 text-lg"
+                    }
+                  />
+                  <InputOTPSlot
+                    index={5}
+                    className={
+                      isMobile
+                        ? "h-10 w-10 md:h-12 md:w-12 text-lg"
+                        : "h-12 w-12 text-lg"
+                    }
+                  />
                 </InputOTPGroup>
               </InputOTP>
             </div>
 
             <div className="space-y-4 w-full">
-              <Button 
-                onClick={handleVerifyCode} 
-                className="w-full" 
+              <Button
+                onClick={handleVerifyCode}
+                className="w-full"
                 disabled={isLoading || verificationCode.length !== 6}
               >
                 {isLoading ? "Verifying..." : "Verify"}
               </Button>
-              <Button 
-                variant="outline" 
-                className="w-full" 
+              <Button
+                variant="outline"
+                className="w-full"
                 onClick={() => setShowVerification(false)}
                 disabled={isLoading}
               >
@@ -149,7 +209,18 @@ const SignUp = () => {
               </Button>
             </div>
             <p className="text-center text-sm text-muted-foreground pt-2">
-              Didn't receive a code? <button className="text-primary font-medium hover:underline" onClick={() => toast({ title: "Code resent", description: "Please check your email for a new code." })}>Resend</button>
+              Didn't receive a code?{" "}
+              <button
+                className="text-primary font-medium hover:underline"
+                onClick={() =>
+                  toast({
+                    title: "Code resent",
+                    description: "Please check your email for a new code.",
+                  })
+                }
+              >
+                Resend
+              </button>
             </p>
           </CardContent>
         </Card>
@@ -160,7 +231,10 @@ const SignUp = () => {
   return (
     <div className="container flex h-screen w-screen flex-col items-center justify-center px-4">
       <div className="mb-8 text-center">
-        <h1 className="text-4xl font-bold text-black lowercase" style={{ fontFamily: 'Sometype Mono, monospace' }}>
+        <h1
+          className="text-4xl font-bold text-black lowercase"
+          style={{ fontFamily: "Sometype Mono, monospace" }}
+        >
           the bulletin.
         </h1>
         <div className="flex items-center justify-center mt-2 text-black">
@@ -171,7 +245,9 @@ const SignUp = () => {
       <Card className="w-full max-w-md">
         <CardHeader className="text-center">
           <CardTitle className="text-2xl font-semibold">Welcome</CardTitle>
-          <CardDescription>Sign in to your account or create a new one</CardDescription>
+          <CardDescription>
+            Sign in to your account or create a new one
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <Tabs defaultValue="signin" className="w-full">
@@ -179,19 +255,19 @@ const SignUp = () => {
               <TabsTrigger value="signin">Sign In</TabsTrigger>
               <TabsTrigger value="signup">Sign Up</TabsTrigger>
             </TabsList>
-            
+
             <TabsContent value="signin">
               <form onSubmit={handleSignIn} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="email-signin">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="email-signin" 
-                      type="email" 
+                    <Input
+                      id="email-signin"
+                      type="email"
                       placeholder="name@example.com"
                       className="pl-9"
-                      required 
+                      required
                     />
                   </div>
                 </div>
@@ -199,11 +275,11 @@ const SignUp = () => {
                   <Label htmlFor="password-signin">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="password-signin" 
+                    <Input
+                      id="password-signin"
                       type="password"
                       className="pl-9"
-                      required 
+                      required
                     />
                   </div>
                 </div>
@@ -211,38 +287,36 @@ const SignUp = () => {
                   {isLoading ? "Signing in..." : "Sign In"}
                 </Button>
               </form>
-              <div className="text-center mt-4 text-sm" style={{ color: '#D6BCFA' }}>
-                No ads. No scroll. 
+              <div
+                className="text-center mt-4 text-sm"
+                style={{ color: "#D6BCFA" }}
+              >
+                No ads. No scroll.
                 <br />
-                Just love. Just updates from your friends, 
+                Just love. Just updates from your friends,
                 <br />
                 printed for you, and delivered to your door, monthly
               </div>
             </TabsContent>
-            
+
             <TabsContent value="signup">
               <form onSubmit={handleSignUp} className="space-y-4">
                 <div className="space-y-2">
                   <Label htmlFor="name">Full Name</Label>
                   <div className="relative">
                     <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="name" 
-                      type="text"
-                      className="pl-9"
-                      required 
-                    />
+                    <Input id="name" type="text" className="pl-9" required />
                   </div>
                 </div>
                 <div className="space-y-2">
                   <Label htmlFor="email-signup">Email</Label>
                   <div className="relative">
                     <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="email-signup" 
+                    <Input
+                      id="email-signup"
                       type="email"
                       className="pl-9"
-                      required 
+                      required
                     />
                   </div>
                 </div>
@@ -250,11 +324,11 @@ const SignUp = () => {
                   <Label htmlFor="password-signup">Password</Label>
                   <div className="relative">
                     <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-                    <Input 
-                      id="password-signup" 
+                    <Input
+                      id="password-signup"
                       type="password"
                       className="pl-9"
-                      required 
+                      required
                     />
                   </div>
                 </div>

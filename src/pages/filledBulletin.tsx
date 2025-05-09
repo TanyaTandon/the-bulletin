@@ -53,20 +53,12 @@ const FilledBulletin: React.FC = () => {
 
   useEffect(() => {
     if (bulletin && bulletinData === null) {
-      console.log(bulletin);
       getBulletin(bulletin).then((data) => {
-        console.log(data[0].saved_notes);
-        console.log(
-          Object.keys(data[0].saved_notes).map((item, index) => ({
-            date: item,
-            note: data[0].saved_notes[item],
-          }))
-        );
         const setData = {
           ...data[0],
           savedNotes: Object.keys(data[0].saved_notes).map((item) => ({
             date: new Date(item),
-            note: data[0].saved_notes[item],
+            note: data[0].saved_notes[item].note,
           })),
           images: data[0].images.map((item) => ({
             id: item,
@@ -143,8 +135,10 @@ const FilledBulletin: React.FC = () => {
       // Create a FormData object to properly handle file uploads
       const formData = new FormData();
 
-      let dup = structuredClone(bulletinData);
+      const dup = structuredClone(bulletinData);
+      // @ts-ignore
       dup.saved_notes = dup.savedNotes;
+      // @ts-ignore
       delete dup.savedNotes;
       // Add the non-file data
       formData.append("user", JSON.stringify(user));
