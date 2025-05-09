@@ -124,6 +124,7 @@ const Index = () => {
             const phone = result.user.phone_numbers[0].phone_number;
             await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
               const userRes: User = userDispatchResponse.payload as User;
+              console.log(userRes);
               if (userRes.bulletins.length > 0) {
                 navigate(`/bulletin/${userRes.bulletins[0]}`);
               } else {
@@ -131,12 +132,7 @@ const Index = () => {
               }
               toast.success("Welcome back! You're now signed in.");
             });
-            // The verification was successful and the user is now signed up
-            // Create a session to sign in the user
-            // Set this session as active, which will update isSignedIn to true
-            // await setActive({ session: result.createdSessionId });
-            // Now isSignedIn will be true
-            // console.log("User is signed in:", isSignedIn);
+
           }
           return result;
         });

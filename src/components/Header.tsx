@@ -5,9 +5,8 @@ import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 // import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import FriendRequests from "./FriendRequests";
-import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
-import { resetStore, useAppDispatch } from "@/redux";
-import { useStytch, useStytchUser, useStytchSession } from "@stytch/react";
+import { resetStore } from "@/redux";
+import { useStytch, useStytchSession } from "@stytch/react";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();

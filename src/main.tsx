@@ -3,7 +3,6 @@ import ReactDOM from "react-dom/client";
 import App from "./App.tsx";
 import "./index.css";
 import { toast } from "react-toastify";
-import { ToastContext } from "./contexts/toastcontextTP.ts";
 import { StytchProvider } from "@stytch/react";
 import { createStytchUIClient } from "@stytch/react/ui";
 import { Provider } from "react-redux";
@@ -25,11 +24,10 @@ export const showToast = (message: string) => {
 };
 
 ReactDOM.createRoot(document.getElementById("root")!).render(
-  // <ClerkProvider publishableKey={PUBLISHABLE_KEY} afterSignOutUrl="/">
-  <StytchProvider stytch={stytch}>
-    <Provider store={store}>
+  <Provider store={store}>
+    <StytchProvider stytch={stytch}>
       <App />
       <div id="clerk-captcha" />
-    </Provider>
-  </StytchProvider>
+    </StytchProvider>
+  </Provider>
 );
