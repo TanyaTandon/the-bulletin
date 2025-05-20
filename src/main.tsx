@@ -7,7 +7,7 @@ import { StytchProvider } from "@stytch/react";
 import { createStytchUIClient } from "@stytch/react/ui";
 import { Provider } from "react-redux";
 import { store } from "./redux/index.ts";
-// import { ClerkProvider } from "@clerk/clerk-react";
+
 
 // Import your Publishable Key
 const stytch = createStytchUIClient(

@@ -7,7 +7,6 @@ import React, {
 } from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
-// import { useAuth, useClerk, useSignIn, useSignUp } from "@clerk/clerk-react";
 import { useNavigate } from "react-router-dom";
 import { Dialog } from "@mui/material";
 import { Input } from "@/components/ui/input";

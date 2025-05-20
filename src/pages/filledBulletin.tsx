@@ -27,6 +27,7 @@ import { Textarea } from "@/components/ui/textarea";
 import FriendModalContent from "@/components/FriendModalContent";
 import TypewriterText from "@/components/TypewriterText";
 import axios from "axios";
+import FeedbackCard from "@/components/FeedbackContent";
 
 const FilledBulletin: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -234,41 +235,7 @@ const FilledBulletin: React.FC = () => {
                 <div className="flex flex-col items-center space-y-2"></div>
               </div>
               <FriendModalContent full />
-              <Card className="w-full">
-                <CardHeader>
-                  <CardTitle className="text-lg font-medium">
-                    we'd love to hear anything and everything: comments,
-                    critiques, suggestions, requests?
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <Textarea
-                    value={feedback}
-                    onChange={(e) => setFeedback(e.target.value)}
-                    placeholder="we'd love to hear anything and everything: comments, critiques, suggestions, requests?"
-                    className="min-h-[120px]"
-                  />
-                </CardContent>
-                <CardFooter>
-                  <Button
-                    onClick={async () => {
-                      await submitFeedback({
-                        feedback: feedback,
-                        user: user.phone_number,
-                      }).then((res) => {
-                        if (res.success) {
-                          toast.success("Feedback submitted. Thank you!");
-                        } else {
-                          toast.error("Failed to submit feedback");
-                        }
-                      });
-                    }}
-                    className="w-full"
-                  >
-                    Submit Feedback
-                  </Button>
-                </CardFooter>
-              </Card>
+              <FeedbackCard feedback={feedback} setFeedback={setFeedback} />
             </div>
             <Button
               className="bg-gradient-to-r from-accent to-primary hover:opacity-90 font-medium flex mr-auto ml-auto"
