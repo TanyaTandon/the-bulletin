@@ -1,4 +1,4 @@
-import React from "react";
+import React, { useState } from "react";
 import { Card, CardFooter, CardContent, CardTitle } from "./ui/card";
 import { Button, CardHeader } from "@mui/material";
 import { Textarea } from "./ui/textarea";
@@ -6,6 +6,7 @@ import { toast } from "sonner";
 import { staticGetUser } from "@/redux/user/selectors";
 import { useAppSelector } from "@/redux";
 import { submitFeedback } from "@/lib/api";
+import { Input } from "./ui/input";
 
 const FeedbackCard: React.FC<{
   feedback: string;
@@ -14,6 +15,8 @@ const FeedbackCard: React.FC<{
   closure?: () => void;
 }> = ({ feedback, setFeedback, inline, closure }) => {
   const user = useAppSelector(staticGetUser);
+
+  const [name, setName] = useState<string | null>(null);
 
   return (
     <Card
@@ -27,6 +30,14 @@ const FeedbackCard: React.FC<{
         </CardTitle>
       </CardHeader>
       <CardContent>
+        <Input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          className="w-full"
+          placeholder="Enter your name"
+        />
+        <br />
+        <br />
         <Textarea
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
@@ -38,8 +49,8 @@ const FeedbackCard: React.FC<{
         <Button
           onClick={async () => {
             await submitFeedback({
-              feedback: feedback,
-              user: user.phone_number,
+              feedback: name ? `${name}: ${feedback}` : feedback,
+              user: user?.phone_number ?? name ?? "",
             }).then((res) => {
               if (res.success) {
                 closure?.();
