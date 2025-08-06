@@ -1,0 +1,13 @@
+name: Start Engine on Schedule
+
+on:
+  schedule:
+    # Every Monday at 00:00 UTC — 4th week of the month
+    - cron: '0 0 22-28 * 1'
+
+jobs:
+  trigger-engine:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Make GET request to start engine
+        run: curl -X GET "https://lvwebhookrepo-production.up.railway.app"
