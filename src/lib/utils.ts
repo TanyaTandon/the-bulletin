@@ -11,6 +11,10 @@ export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
 
+export function ecn(...inputs: ClassValue[]) {
+  return cn(inputs);
+}
+
 export const anonhandleSubmitBulletin = async (
   phoneNumber: string,
   images: UploadedImage[],

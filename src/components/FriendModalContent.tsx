@@ -1,7 +1,6 @@
-
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Input } from "./ui/input";
 import {
   Check,
@@ -19,6 +18,9 @@ import { setUser } from "@/redux/user";
 import { useSelector } from "react-redux";
 import "../App.css";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useToast } from "@/hooks/use-toast";
+import { Divider } from "@mui/material";
+import { Separator } from "./ui/separator";
 
 enum FriendStatus {
   NOT_REGISTERED = -1,
@@ -308,13 +310,11 @@ const FriendInput: React.FC<{
     setHover,
   ]);
 
-  const isMobile = useIsMobile()
+  const isMobile = useIsMobile();
 
   return (
     <>
-      <span
-        className="flex items-center gap-2 browserHelper"
-      >
+      <span className="flex items-center gap-2 browserHelper">
         <Input
           className="disabled:opacity-100"
           disabled={existingFriends.includes(friend) && friendName != null}
@@ -364,67 +364,100 @@ const FriendInput: React.FC<{
 };
 
 const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
-  const dispatch = useAppDispatch();
+  const { toast } = useToast();
+
   const user = useSelector(staticGetUser);
   console.log(user);
-  const [existingFriends, setExistingFriends] = useState<string[]>(
-    user?.recipients ?? [null]
-  );
+  const uniqueLink = `${window.location.origin}/register/${user.id}?name=${user.firstName}`;
 
-  const [friendInputs, setFriendInputs] = useState<string[]>(
-    user?.recipients.length > 0 ? user.recipients : [null]
-  );
+  const handleCopyLink = useCallback(() => {
+    navigator.clipboard.writeText(uniqueLink);
+    toast({
+      title: "Link copied!",
+      description:
+        "Share this with your friends to invite them to the bulletin",
+    });
+  }, [uniqueLink, toast]);
+
+  const [step, setStep] = useState<number>(0);
+
+  function switchStep(step: number) {
+    switch (step) {
+      case 0:
+        return (
+          <>
+            <h1 className="text-2xl font-medium text-center">
+              Here you can add friends to your bulletin.
+            </h1>
+            <h3 className="text-sm text-center">
+              Copy the link below and send it to your friends
+            </h3>
+            <Button
+              onClick={() => {
+                handleCopyLink();
+              }}
+            >
+              Add Friend
+            </Button>
+            <Divider />
+            <h3 className="text-sm text-center">
+              or if you'd just like them to be added to your bulletin, you can
+              add them manually.
+            </h3>
+            <Button
+              onClick={() => {
+                setStep(1);
+              }}
+              variant="outline"
+            >
+              Add Recipient
+            </Button>
+          </>
+        );
+      case 1:
+        return (
+          <>
+            <button
+              className="absolute top-5 left-5"
+              onClick={() => {
+                setStep(0);
+              }}
+            >
+              ←
+            </button>
+            <h1 className="text-2xl font-medium text-center">Add Recipient</h1>
+            <h3 className="text-sm text-center">
+              recipient's will recieve their bulletin in the mail without
+              lifting a finger, however you can only have two each month
+            </h3>
+            <Separator />
+            <h3 className="text-sm text-center">
+              You can add up to {2} left for this month
+            </h3>
+            <section className="flex gap-2">
+              <Input placeholder="Recipient Last Name" />
+              <Input placeholder="Recipient First Name" />
+            </section>
+            <Input placeholder="Recipient phone number" />
+            <Input placeholder="Recipient address" />
+            <section className="flex gap-2">
+              <Input placeholder="Recipient city" />
+              <Input placeholder="Recipient state" />
+            </section>
+            <Input placeholder="Recipient zip code" />
+            <Separator />
+            <Button>Add Recipient</Button>
+          </>
+        );
+    }
+  }
 
   return (
     <div
+      data-tg-title="friend modal"
       className={full ? "flex flex-col gap-4 w-full" : "flex flex-col gap-4"}
     >
-      <button
-        onClick={() => {
-          dispatch(setShowFriendsModal(false));
-        }}
-        className="absolute right-2 top-0 text-xl font-medium cursor-pointer hover:opacity-70 transition-opacity"
-        aria-label="Close"
-      >
-        ×
-      </button>
-      <h1
-        className={
-          full ? "text-2xl font-medium text-center" : "text-xl font-medium"
-        }
-      >
-        {full
-          ? "Add your friends!"
-          : user.recipients.length > 0
-          ? "Friends"
-          : "Add friends"}
-      </h1>
-      
-      {full && (
-        <p className="text-sm text-center text-gray-500 mb-2">
-          You can add up to 6 bulletin users and 2 non-users to receive your bulletin.
-        </p>
-      )}
-
-      <div className="flex flex-col gap-4">
-        {friendInputs.map((friend) => (
-          <FriendInput
-            setExistingFriends={setExistingFriends}
-            existingFriends={existingFriends}
-            friend={friend}
-            setFriendInputs={setFriendInputs}
-          />
-        ))}
-        {friendInputs.length !== 8 && (
-          <Button
-            onClick={() => {
-              setFriendInputs([...friendInputs, null]);
-            }}
-          >
-            Add Recipient
-          </Button>
-        )}
-      </div>
+      {switchStep(step)}
     </div>
   );
 };

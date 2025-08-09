@@ -24,6 +24,7 @@ export type Bulletin = {
   images: UploadedImage[];
   owner: string;
   savedNotes: CalendarNote[];
+  template: string;
 };
 
 export type NewBulletinItem = {
@@ -126,6 +127,7 @@ export async function createNewBulletin({
         images: images.map((item) => item.id),
         owner: user.phone_number,
         saved_notes: arrayToDict(bulletin.savedNotes),
+        template: bulletin.template,
       })
       .then(async (item) => {
         if (!anon) {
@@ -385,4 +387,42 @@ export async function submitFeedback(feedback: {
   }
 
   return { success: true };
+}
+
+export async function connectWithFriendRequest({
+  user,
+  friendId,
+}: {
+  user: User;
+  friendId: string;
+}) {
+  try {
+    await supabase
+      .rpc("append_to_connections", {
+        user_id: user.id,
+        new_connection: friendId,
+      })
+      .then(async () => {
+        await supabase.rpc("append_to_connections", {
+          user_id: friendId,
+          new_connection: user.id,
+        });
+      });
+  } catch (error) {
+    console.error("Error in connectWithFriendRequest:", error);
+    return { success: false, error };
+  }
+}
+
+export async function getForeignUserImages(id: string) {
+  const { data, error } = await supabase
+    .from("user_record")
+    .select("images")
+    .eq("id", id);
+
+  if (error) {
+    console.error("Error getting foreign user images:", error);
+    throw error;
+  }
+  return data;
 }

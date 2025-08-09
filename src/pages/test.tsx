@@ -14,7 +14,7 @@ const Test: React.FC = () => {
         <button
           onClick={async () => {
             sendError("testUser", "handleSignUp", "test", {
-              test:"works"
+              test: "works",
             });
           }}
         >

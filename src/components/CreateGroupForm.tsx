@@ -1,7 +1,13 @@
-
 import React, { useState } from "react";
-import { useUser } from "@/contexts/UserContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUser } from "@/providers/contexts/UserContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -20,7 +26,7 @@ const CreateGroupForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast({
         title: "Name Required",
@@ -39,7 +45,7 @@ const CreateGroupForm: React.FC = () => {
       return;
     }
 
-    const groupMembers = personas.filter(persona => 
+    const groupMembers = personas.filter((persona) =>
       selectedPersonas.includes(persona.id)
     );
 
@@ -58,9 +64,9 @@ const CreateGroupForm: React.FC = () => {
   };
 
   const togglePersona = (personaId: string) => {
-    setSelectedPersonas(prev => 
+    setSelectedPersonas((prev) =>
       prev.includes(personaId)
-        ? prev.filter(id => id !== personaId)
+        ? prev.filter((id) => id !== personaId)
         : [...prev, personaId]
     );
   };
@@ -99,14 +105,16 @@ const CreateGroupForm: React.FC = () => {
           <div className="space-y-3">
             <Label>Select Personas for this Group</Label>
             <div className="space-y-2">
-              {personas.map(persona => (
+              {personas.map((persona) => (
                 <div key={persona.id} className="flex items-center space-x-2">
-                  <Checkbox 
+                  <Checkbox
                     id={`persona-${persona.id}`}
                     checked={selectedPersonas.includes(persona.id)}
                     onCheckedChange={() => togglePersona(persona.id)}
                   />
-                  <Label htmlFor={`persona-${persona.id}`}>{persona.name}</Label>
+                  <Label htmlFor={`persona-${persona.id}`}>
+                    {persona.name}
+                  </Label>
                 </div>
               ))}
             </div>

@@ -1,4 +1,3 @@
-
 import { useAppDispatch } from "@/redux";
 import { fetchBulletins, fetchUser } from "@/redux/user";
 import React, {
@@ -108,25 +107,6 @@ const initialFriendRequests: FriendRequest[] = [
 export const UserProvider: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
-  // const { user } = useClerkUser();
-  // const { isSignedIn, user } = useClerk();
-
-  const dispatch = useAppDispatch();
-
-  // useEffect(() => {
-    // console.log(user);
-    // if (user) {
-    //   dispatch(
-    //     fetchUser(user.primaryPhoneNumber.phoneNumber.split("+1")[1])
-    //   ).then((response) => {
-    //     console.log(response.payload);
-    //     if (response.payload && typeof response.payload === 'object' && 'bulletins' in response.payload && Array.isArray(response.payload.bulletins) && response.payload.bulletins.length > 0) {
-    //       dispatch(fetchBulletins());
-    //     }
-    //   });
-    // }
-  // }, [user]);
-
   const [personas, setPersonas] = useState<Persona[]>(initialPersonas);
   const [groups, setGroups] = useState<Group[]>(initialGroups);
   const [contents, setContents] = useState<Content[]>(initialContents);
@@ -246,6 +226,7 @@ export const UserProvider: React.FC<{ children: ReactNode }> = ({
       setFriends([...friends, ...newFriends]);
     }
   };
+
 
   return (
     <UserContext.Provider

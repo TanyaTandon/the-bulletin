@@ -1,6 +1,13 @@
 import React, { useState } from "react";
-import { useUser, ContentType } from "@/contexts/UserContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUser, ContentType } from "@/providers/contexts/UserContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -10,7 +17,11 @@ import { useToast } from "@/components/ui/use-toast";
 import { FileText, Image, Users, Calendar, Heart, Filter } from "lucide-react";
 import { RadioGroup, RadioGroupItem } from "@/components/ui/radio-group";
 import { Calendar as CalendarComponent } from "@/components/ui/calendar";
-import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from "@/components/ui/popover";
 import { format } from "date-fns";
 import { Checkbox } from "@/components/ui/checkbox";
 
@@ -26,18 +37,22 @@ const CreateContentForm: React.FC = () => {
   const [calendarNote, setCalendarNote] = useState("");
   const [selectedFriends, setSelectedFriends] = useState<string[]>([]);
   const [showFriendsList, setShowFriendsList] = useState(false);
-  
+
   const calendarDates = contents
-    .filter(item => item.type === "calendar")
-    .map(item => {
-      const [dateString] = item.content.split('|');
+    .filter((item) => item.type === "calendar")
+    .map((item) => {
+      const [dateString] = item.content.split("|");
       return new Date(dateString);
     });
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
-    if (!content.trim() && contentType !== "picture" && contentType !== "calendar") {
+
+    if (
+      !content.trim() &&
+      contentType !== "picture" &&
+      contentType !== "calendar"
+    ) {
       toast({
         title: "Content Required",
         description: "Please add some content.",
@@ -51,9 +66,10 @@ const CreateContentForm: React.FC = () => {
       if (imagePreview.length > 4) {
         toast({
           title: "Too many images",
-          description: "Please select a maximum of 4 images. Only the first 4 will be used.",
+          description:
+            "Please select a maximum of 4 images. Only the first 4 will be used.",
         });
-        finalContent = imagePreview.slice(0, 4).join('|');
+        finalContent = imagePreview.slice(0, 4).join("|");
       } else if (imagePreview.length === 0) {
         toast({
           title: "No Images Selected",
@@ -62,17 +78,23 @@ const CreateContentForm: React.FC = () => {
         });
         return;
       } else {
-        finalContent = imagePreview.join('|');
+        finalContent = imagePreview.join("|");
       }
     } else if (contentType === "calendar") {
-      finalContent = date ? `${date.toISOString()}|note:${calendarNote}` : new Date().toISOString();
+      finalContent = date
+        ? `${date.toISOString()}|note:${calendarNote}`
+        : new Date().toISOString();
     } else {
       finalContent = content.trim();
     }
 
     addContent({
       type: contentType,
-      title: title.trim() || (contentType === "calendar" ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}` : "Untitled"),
+      title:
+        title.trim() ||
+        (contentType === "calendar"
+          ? `Event on ${date ? format(date, "MMMM d, yyyy") : "today"}`
+          : "Untitled"),
       content: finalContent,
       createdBy: {
         personaId: "p1",
@@ -96,22 +118,23 @@ const CreateContentForm: React.FC = () => {
     const files = e.target.files;
     if (files && files.length > 0) {
       const fileArray = Array.from(files);
-      
+
       if (fileArray.length > 4) {
         toast({
           title: "Too many images",
-          description: "Please select a maximum of 4 images. Only the first 4 will be processed.",
+          description:
+            "Please select a maximum of 4 images. Only the first 4 will be processed.",
         });
       }
-      
+
       const imagesToProcess = fileArray.slice(0, 4);
-      
+
       setImagePreview([]);
-      
-      imagesToProcess.forEach(file => {
+
+      imagesToProcess.forEach((file) => {
         const reader = new FileReader();
         reader.onloadend = () => {
-          setImagePreview(prev => [...prev, reader.result as string]);
+          setImagePreview((prev) => [...prev, reader.result as string]);
         };
         reader.readAsDataURL(file);
       });
@@ -119,18 +142,19 @@ const CreateContentForm: React.FC = () => {
   };
 
   const handleFriendSelection = (personaId: string) => {
-    setSelectedFriends(current => 
+    setSelectedFriends((current) =>
       current.includes(personaId)
-        ? current.filter(id => id !== personaId)
+        ? current.filter((id) => id !== personaId)
         : [...current, personaId]
     );
   };
 
   const isDateWithHeart = (date: Date) => {
-    return calendarDates.some(calDate => 
-      calDate.getDate() === date.getDate() && 
-      calDate.getMonth() === date.getMonth() && 
-      calDate.getFullYear() === date.getFullYear()
+    return calendarDates.some(
+      (calDate) =>
+        calDate.getDate() === date.getDate() &&
+        calDate.getMonth() === date.getMonth() &&
+        calDate.getFullYear() === date.getFullYear()
     );
   };
 
@@ -157,27 +181,36 @@ const CreateContentForm: React.FC = () => {
             >
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="everyone" id="everyone" />
-                <Label htmlFor="everyone" className="cursor-pointer">Everyone</Label>
+                <Label htmlFor="everyone" className="cursor-pointer">
+                  Everyone
+                </Label>
               </div>
               <div className="flex items-center space-x-2">
                 <RadioGroupItem value="selected" id="selected" />
-                <Label htmlFor="selected" className="cursor-pointer">Selected Friends</Label>
+                <Label htmlFor="selected" className="cursor-pointer">
+                  Selected Friends
+                </Label>
               </div>
             </RadioGroup>
-            
+
             {shareOption === "selected" && (
               <div className="mt-2">
-                <Popover open={showFriendsList} onOpenChange={setShowFriendsList}>
+                <Popover
+                  open={showFriendsList}
+                  onOpenChange={setShowFriendsList}
+                >
                   <PopoverTrigger asChild>
-                    <Button 
-                      variant="outline" 
+                    <Button
+                      variant="outline"
                       className="w-full flex items-center justify-between"
                       onClick={() => setShowFriendsList(!showFriendsList)}
                     >
                       <span>
-                        {selectedFriends.length > 0 
-                          ? `${selectedFriends.length} friend${selectedFriends.length > 1 ? 's' : ''} selected`
-                          : 'Select friends to share with'}
+                        {selectedFriends.length > 0
+                          ? `${selectedFriends.length} friend${
+                              selectedFriends.length > 1 ? "s" : ""
+                            } selected`
+                          : "Select friends to share with"}
                       </span>
                       <Filter className="h-4 w-4 ml-2" />
                     </Button>
@@ -185,30 +218,41 @@ const CreateContentForm: React.FC = () => {
                   <PopoverContent className="w-full p-4">
                     <div className="mb-2 pb-2 border-b">
                       <h4 className="font-medium">Select Friends</h4>
-                      <p className="text-xs text-muted-foreground">Choose who you want to share with</p>
+                      <p className="text-xs text-muted-foreground">
+                        Choose who you want to share with
+                      </p>
                     </div>
                     <div className="space-y-2 max-h-48 overflow-y-auto">
-                      {personas.filter(p => p.id !== "p1").map(persona => (
-                        <div key={persona.id} className="flex items-center space-x-2 p-1 hover:bg-muted rounded">
-                          <Checkbox 
-                            id={`friend-${persona.id}`}
-                            checked={selectedFriends.includes(persona.id)}
-                            onCheckedChange={() => handleFriendSelection(persona.id)}
-                          />
-                          <Label 
-                            htmlFor={`friend-${persona.id}`}
-                            className="flex-1 cursor-pointer"
+                      {personas
+                        .filter((p) => p.id !== "p1")
+                        .map((persona) => (
+                          <div
+                            key={persona.id}
+                            className="flex items-center space-x-2 p-1 hover:bg-muted rounded"
                           >
-                            {persona.name}
-                          </Label>
-                        </div>
-                      ))}
+                            <Checkbox
+                              id={`friend-${persona.id}`}
+                              checked={selectedFriends.includes(persona.id)}
+                              onCheckedChange={() =>
+                                handleFriendSelection(persona.id)
+                              }
+                            />
+                            <Label
+                              htmlFor={`friend-${persona.id}`}
+                              className="flex-1 cursor-pointer"
+                            >
+                              {persona.name}
+                            </Label>
+                          </div>
+                        ))}
                     </div>
                     {selectedFriends.length > 0 && (
                       <div className="mt-3 pt-2 border-t flex justify-between items-center">
-                        <span className="text-sm">{selectedFriends.length} selected</span>
-                        <Button 
-                          variant="ghost" 
+                        <span className="text-sm">
+                          {selectedFriends.length} selected
+                        </span>
+                        <Button
+                          variant="ghost"
                           size="sm"
                           onClick={() => setSelectedFriends([])}
                         >
@@ -224,7 +268,8 @@ const CreateContentForm: React.FC = () => {
 
           <div className="space-y-2">
             <Label htmlFor="title">
-              Title <span className="text-xs text-muted-foreground">(optional)</span>
+              Title{" "}
+              <span className="text-xs text-muted-foreground">(optional)</span>
             </Label>
             <Input
               id="title"
@@ -234,7 +279,10 @@ const CreateContentForm: React.FC = () => {
             />
           </div>
 
-          <Tabs defaultValue="note" onValueChange={(value) => setContentType(value as ContentType)}>
+          <Tabs
+            defaultValue="note"
+            onValueChange={(value) => setContentType(value as ContentType)}
+          >
             <TabsList className="grid w-full grid-cols-3">
               <TabsTrigger value="note" className="flex items-center gap-2">
                 <FileText className="h-4 w-4" />
@@ -262,9 +310,7 @@ const CreateContentForm: React.FC = () => {
             </TabsContent>
 
             <TabsContent value="picture" className="space-y-2">
-              <Label htmlFor="picture-upload">
-                Please add 1-4 pictures
-              </Label>
+              <Label htmlFor="picture-upload">Please add 1-4 pictures</Label>
               <Input
                 id="picture-upload"
                 type="file"
@@ -273,13 +319,16 @@ const CreateContentForm: React.FC = () => {
                 className="mb-2"
                 multiple
               />
-              
+
               {imagePreview.length > 0 && (
                 <div className="mt-4">
                   <p className="text-sm text-muted-foreground mb-2">Preview:</p>
                   <div className="grid grid-cols-2 gap-2">
                     {imagePreview.map((preview, index) => (
-                      <div key={index} className="relative h-48 bg-muted rounded-md overflow-hidden">
+                      <div
+                        key={index}
+                        className="relative h-48 bg-muted rounded-md overflow-hidden"
+                      >
                         <img
                           src={preview}
                           alt={`Preview ${index + 1}`}
@@ -291,12 +340,13 @@ const CreateContentForm: React.FC = () => {
                 </div>
               )}
             </TabsContent>
-            
+
             <TabsContent value="calendar" className="space-y-2">
               <Label>Select a date for your April calendar</Label>
               <div className="flex flex-col items-center p-4 border rounded-md bg-card">
                 <p className="text-sm text-muted-foreground mb-4">
-                  Mark an important date in April 2025 to share with your friends
+                  Mark an important date in April 2025 to share with your
+                  friends
                 </p>
                 <CalendarComponent
                   mode="single"
@@ -306,13 +356,13 @@ const CreateContentForm: React.FC = () => {
                   month={new Date(2025, 3)}
                   className="p-3 pointer-events-auto border bg-background rounded-md shadow-sm"
                   modifiers={{
-                    withHeart: calendarDates
+                    withHeart: calendarDates,
                   }}
                   modifiersStyles={{
                     withHeart: {
                       color: "#E66767",
-                      fontWeight: "bold"
-                    }
+                      fontWeight: "bold",
+                    },
                   }}
                   components={{
                     DayContent: ({ date, displayMonth }) => {
@@ -320,19 +370,23 @@ const CreateContentForm: React.FC = () => {
                       return (
                         <div className="flex flex-col items-center justify-center h-full">
                           <span>{date.getDate()}</span>
-                          {hasHeart && <Heart className="h-3 w-3 text-red-400 mt-0.5" />}
+                          {hasHeart && (
+                            <Heart className="h-3 w-3 text-red-400 mt-0.5" />
+                          )}
                         </div>
                       );
-                    }
+                    },
                   }}
                 />
                 {date && (
                   <div className="mt-4 p-3 bg-muted rounded-md w-full">
                     <p className="font-medium">Selected Date:</p>
                     <p>{format(date, "MMMM d, yyyy")}</p>
-                    
+
                     <div className="mt-3">
-                      <Label htmlFor="calendar-note" className="block mb-2">Add a note for this date:</Label>
+                      <Label htmlFor="calendar-note" className="block mb-2">
+                        Add a note for this date:
+                      </Label>
                       <Textarea
                         id="calendar-note"
                         value={calendarNote}

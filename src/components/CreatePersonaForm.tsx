@@ -1,7 +1,13 @@
-
 import React, { useState } from "react";
-import { useUser } from "@/contexts/UserContext";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import { useUser } from "@/providers/contexts/UserContext";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -18,7 +24,7 @@ const CreatePersonaForm: React.FC = () => {
 
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!name.trim()) {
       toast({
         title: "Name Required",

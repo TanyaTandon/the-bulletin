@@ -1,4 +1,3 @@
-
 import React, { useState, useRef } from "react";
 import { Plus, Edit, Trash2, Upload } from "lucide-react";
 import { Card } from "./ui/card";
@@ -112,17 +111,8 @@ const ImageUploadGrid: React.FC<{
   return (
     <div className="mb-4 flex justify-center flex-col items-center">
       <div className="w-full max-w-[40rem]">
-        <h3
-          className={`font-semibold text-black mb-2 text-left ${
-            isMobile ? "text-base" : "text-lg"
-          }`}
-          style={{ fontFamily: "Sometype Mono, monospace" }}
-        >
-          upload pictures below. choose up to 4 pictures.
-        </h3>
-        <Separator className="my-4 bg-gray-200" />
         <div
-          className="grid gap-1 mx-auto"
+          className="bg-[#DDFFD8] grid gap-1 mx-auto"
           style={{
             gridTemplateColumns: `repeat(${cols}, minmax(0, 1fr))`,
             width: isMobile
@@ -181,7 +171,7 @@ const ImageUploadGrid: React.FC<{
                 <Plus className="w-5 h-5 text-violet-500" />
                 {images.length === 0 && index === 0 && (
                   <span className="text-xs text-muted-foreground absolute bottom-1">
-                    Add image
+                    Add up to 4 images
                   </span>
                 )}
               </Card>

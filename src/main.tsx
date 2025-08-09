@@ -8,17 +8,11 @@ import { createStytchUIClient } from "@stytch/react/ui";
 import { Provider } from "react-redux";
 import { store } from "./redux/index.ts";
 
-
 // Import your Publishable Key
 const stytch = createStytchUIClient(
-  "public-token-test-cba27da6-eeb9-4c13-9ac7-69467b4c025c"
+  "public-token-live-f10fc60c-b80c-4303-9fc2-9bc732d36f4c"
 );
 
-const PUBLISHABLE_KEY = "pk_live_Y2xlcmsudGhlYnVsbGV0aW4uYXBwJA";
-
-if (!PUBLISHABLE_KEY) {
-  throw new Error("Missing Publishable Key");
-}
 export const showToast = (message: string) => {
   toast.error(message);
 };
@@ -27,7 +21,6 @@ ReactDOM.createRoot(document.getElementById("root")!).render(
   <Provider store={store}>
     <StytchProvider stytch={stytch}>
       <App />
-      <div id="clerk-captcha" />
     </StytchProvider>
   </Provider>
 );

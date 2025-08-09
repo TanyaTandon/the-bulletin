@@ -35,7 +35,7 @@ const SignUp = () => {
     try {
       await new Promise((resolve) => setTimeout(resolve, 1000)); // Simulate API call
 
-      // Instead of immediately navigating, show verification step
+
       setShowVerification(true);
       toast({
         title: "Verification required",

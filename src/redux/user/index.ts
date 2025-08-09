@@ -9,6 +9,7 @@ export type User = {
   phone_number: string;
   address: string;
   recipients: string[];
+  connections: string[];
 };
 
 export type UserState = {

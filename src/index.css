@@ -79,3 +79,118 @@
   border: none;
   outline: none;
 }
+
+html,
+body {
+  background-color: #fff8eb;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-thin.woff2") format("woff2");
+  font-weight: 100;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-light.woff2") format("woff2");
+  font-weight: 300;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-semibold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-bold.woff2") format("woff2");
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-extrabold.woff2") format("woff2");
+  font-weight: 800;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "Delight";
+  src: url("/fonts/delight-black.woff2") format("woff2");
+  font-weight: 900;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "WelcomeWeb";
+  src: url("/fonts/Welcomeweb-Bold.woff2") format("woff2");
+  font-weight: 600;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "WelcomeWeb";
+  src: url("/fonts/Welcomeweb-Medium.woff2") format("woff2");
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+@font-face {
+  font-family: "WelcomeWeb";
+  src: url("/fonts/Welcomeweb-Regular.woff2") format("woff2");
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
+
+h1 {
+  font-family: "Delight";
+  font-weight: 700;
+  font-style: normal;
+  font-display: swap;
+}
+
+h3 {
+  font-family: "Delight";
+  font-weight: 500;
+  font-style: normal;
+  font-display: swap;
+}
+
+p,
+span {
+  font-family: "WelcomeWeb";
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}

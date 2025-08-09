@@ -1,5 +1,5 @@
 import React, { useState, useCallback } from "react";
-import { useUser } from "@/contexts/UserContext";
+import { useUser } from "@/providers/contexts/UserContext";
 import {
   Popover,
   PopoverContent,
@@ -12,34 +12,21 @@ import { Input } from "@/components/ui/input";
 import ContactSync from "./ContactSync";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { useAppDispatch } from "@/redux";
+import { useDialog } from "@/providers/dialog-provider";
+import FriendModalContent from "./FriendModalContent";
 
 const FriendRequests = () => {
-  const { toast } = useToast();
   const [open, setOpen] = useState(false);
-  const dispatch = useAppDispatch();
 
-  // Generate a unique link - in a real app, this would be more sophisticated
-  const uniqueLink = `${window.location.origin}?ref=${Math.random()
-    .toString(36)
-    .substring(2, 10)}`;
-
-  const handleCopyLink = useCallback(() => {
-    navigator.clipboard.writeText(uniqueLink);
-    toast({
-      title: "Link copied!",
-      description:
-        "Share this with your friends to invite them to the bulletin",
-    });
-  }, [uniqueLink, toast]);
+  const { dialog } = useDialog();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
-      {/* <PopoverTrigger asChild> */}
       <Button
         variant="ghost"
         size="icon"
         className="relative text-black hover:text-black/70 hover:bg-gray-50"
-        onClick={() => dispatch(setShowFriendsModal(true))}
+        onClick={() => dialog(<FriendModalContent />)}
       >
         <UserPlus className="h-5 w-5" />
       </Button>

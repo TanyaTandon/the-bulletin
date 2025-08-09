@@ -1,8 +1,14 @@
-
 import React from "react";
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from "@/components/ui/card";
+import {
+  Card,
+  CardContent,
+  CardDescription,
+  CardFooter,
+  CardHeader,
+  CardTitle,
+} from "@/components/ui/card";
 import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
-import { Content, useUser } from "@/contexts/UserContext";
+import { Content, useUser } from "@/providers/contexts/UserContext";
 import { Image, FileText, Pencil } from "lucide-react";
 import { format } from "date-fns";
 
@@ -67,9 +73,7 @@ const ContentCard: React.FC<ContentCardProps> = ({ content }) => {
           </CardDescription>
         </div>
       </CardHeader>
-      <CardContent className="flex-1">
-        {renderContent()}
-      </CardContent>
+      <CardContent className="flex-1">{renderContent()}</CardContent>
       <CardFooter className="pt-2 border-t text-sm text-muted-foreground">
         <div className="flex items-center">
           <Avatar className="h-6 w-6 mr-2">

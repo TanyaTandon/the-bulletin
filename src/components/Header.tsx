@@ -23,8 +23,9 @@ const Header: React.FC = () => {
     await stytch.session.revoke();
   };
 
+  console.log(session)
   return (
-    <header className="border-b border-gray-200 bg-white p-3 shadow-sm">
+    <header className="border-b border-gray-200 bg-[#9DBD99] p-3 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-1">
         <Link
           to="/"
