@@ -25,6 +25,7 @@ export type Bulletin = {
   owner: string;
   savedNotes: CalendarNote[];
   template: string;
+  month: number;
 };
 
 export type NewBulletinItem = {
@@ -193,6 +194,20 @@ export async function getBulletin(bulletinId: string) {
     .select("*")
     .eq("id", bulletinId);
   console.log("raw Bulletin:", data);
+  return data;
+}
+
+export async function getAllBulletins(user: User) {
+  const { data, error } = await supabase
+    .from("bulletins")
+    .select("*")
+    .eq("owner", user.phone_number);
+
+  if (error) {
+    console.error("Error getting all bulletins:", error);
+    throw error;
+  }
+
   return data;
 }
 

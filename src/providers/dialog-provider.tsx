@@ -6,6 +6,7 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 type DialogOptions = {
   header?: React.ReactNode;
@@ -65,10 +66,15 @@ export const DialogProvider: React.FC<{
     content,
   };
 
+  const isMobile = useIsMobile();
+
+  console.log(isMobile);
   return (
     <DialogContext.Provider value={value}>
-      <Dialog open={isOpen}  onOpenChange={() => close()}>
-        <DialogContent className="w-[50vw]">
+      <Dialog open={isOpen} onOpenChange={() => close()}>
+        <DialogContent
+          className={`w-[${isMobile ? "90vw" : "50vw"}] max-w-[90%]`}
+        >
           {options?.title && (
             <DialogHeader>
               <DialogTitle className={options.titleOptions?.className}>

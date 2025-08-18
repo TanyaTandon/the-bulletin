@@ -1,12 +1,18 @@
 import React, { useState } from "react";
-import { Card, CardFooter, CardContent, CardTitle } from "./ui/card";
-import { Button, CardHeader } from "@mui/material";
+import {
+  Card,
+  CardFooter,
+  CardContent,
+  CardTitle,
+  CardHeader,
+} from "./ui/card";
 import { Textarea } from "./ui/textarea";
 import { toast } from "sonner";
 import { staticGetUser } from "@/redux/user/selectors";
 import { useAppSelector } from "@/redux";
 import { submitFeedback } from "@/lib/api";
 import { Input } from "./ui/input";
+import { Button } from "./ui/button";
 
 const FeedbackCard: React.FC<{
   feedback: string;

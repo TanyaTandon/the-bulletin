@@ -7,8 +7,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import FriendRequests from "./FriendRequests";
 import { resetStore } from "@/redux";
 import { useStytch, useStytchSession } from "@stytch/react";
-import { Dialog } from "@mui/material";
 import FeedbackCard from "./FeedbackContent";
+import { useDialog } from "@/providers/dialog-provider";
+import { ListIcon } from "@phosphor-icons/react";
+import { useSheet } from "@/providers/sheet-provider";
+import NavSheetContent from "./NavSheetContent";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -23,87 +26,87 @@ const Header: React.FC = () => {
     await stytch.session.revoke();
   };
 
-  console.log(session)
+  const { dialog } = useDialog();
+  console.log(session);
+
+  const { sheet } = useSheet();
+
   return (
     <header className="border-b border-gray-200 bg-[#9DBD99] p-3 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-1">
         <Link
           to="/"
           className={`font-bold text-black lowercase ${
-            isMobile ? "text-2xl" : "text-3xl"
+            isMobile ? "text-1xl text-left" : "text-3xl"
           }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
           the bulletin.
         </Link>
-        <div className="flex items-center space-x-2">
-          <Button
-            onClick={async () => {
-              setFeedback(true);
-            }}
-            variant="ghost"
-            size="icon"
-            className="w-[7.5rem] hover:text-red-700 hover:bg-red-50"
-            aria-label="Sign Out"
-            title="Sign Out"
-          >
-            Feedback
-          </Button>
-          {feedback && (
-            <Dialog
-              PaperProps={{
-                style: {
-                  padding: "1em",
-                  display: "flex",
-                  alignItems: "center",
-                  width: isMobile ? "97vw" : "52vw",
-                },
+        {!isMobile ? (
+          <div className="flex items-center space-x-2">
+            <Button
+              onClick={async () => {
+                dialog(
+                  <FeedbackCard
+                    inline
+                    closure={() => setFeedback(false)}
+                    feedback={feedbackContent}
+                    setFeedback={setFeedbackContent}
+                  />
+                );
               }}
-              open
+              variant="ghost"
+              size="icon"
+              className="w-[7.5rem] hover:text-red-700 hover:bg-red-50"
+              aria-label="Sign Out"
+              title="Sign Out"
             >
-              <p
-                onClick={() => setFeedback(false)}
-                style={{
-                  position: "absolute",
-                  right: "1em",
-                  top: "0px",
-                  cursor: "pointer",
-                }}
-              >
-                x
-              </p>
-              <FeedbackCard
-                inline
-                closure={() => setFeedback(false)}
-                feedback={feedbackContent}
-                setFeedback={setFeedbackContent}
-              />
-            </Dialog>
-          )}
-          {session && (
-            <>
-              <FriendRequests />
-              <div className="flex items-center space-x-2">
-                <Button
-                  onClick={async () => {
-                    console.log("signing out");
-                    await signOut().then(() => {
-                      resetStore();
-                      navigate("/");
-                    });
-                  }}
-                  variant="ghost"
-                  size="icon"
-                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                  aria-label="Sign Out"
-                  title="Sign Out"
-                >
-                  <LogOut className="h-5 w-5" />
-                </Button>
-              </div>
-            </>
-          )}
-        </div>
+              Feedback
+            </Button>
+            {session && (
+              <>
+                <FriendRequests />
+                <div className="flex items-center space-x-2">
+                  <Button
+                    onClick={async () => {
+                      console.log("signing out");
+                      await signOut().then(() => {
+                        resetStore();
+                        navigate("/");
+                      });
+                    }}
+                    variant="ghost"
+                    size="icon"
+                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                    aria-label="Sign Out"
+                    title="Sign Out"
+                  >
+                    <LogOut className="h-5 w-5" />
+                  </Button>
+                </div>
+              </>
+            )}
+          </div>
+        ) : (
+          <ListIcon
+            size={22}
+            onClick={() => {
+              sheet(<NavSheetContent />, {
+                footer: (
+                  <Button
+                    onClick={async () => {
+                      await stytch.session.revoke();
+                    }}
+                    variant="ghost"
+                  >
+                    Sign Out
+                  </Button>
+                ),
+              });
+            }}
+          />
+        )}
       </div>
     </header>
   );

@@ -19,7 +19,6 @@ import { useSelector } from "react-redux";
 import "../App.css";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { Divider } from "@mui/material";
 import { Separator } from "./ui/separator";
 
 enum FriendStatus {
@@ -399,7 +398,7 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
             >
               Add Friend
             </Button>
-            <Divider />
+            <Separator />
             <h3 className="text-sm text-center">
               or if you'd just like them to be added to your bulletin, you can
               add them manually.

@@ -9,10 +9,10 @@ import NotFound from "./pages/NotFound";
 import BulletinPage from "./pages/bulletin";
 import FilledBulletin from "./pages/filledBulletin";
 import Test from "./pages/test";
-
 import Register from "./pages/Register";
 import ProviderProvider from "./providers/ProviderProvider";
 import { Route, Routes } from "react-router";
+import Catalogue from "./pages/catalogue";
 
 const App = () => {
   return (
@@ -37,12 +37,13 @@ const App = () => {
         <Route path="/" element={<Index key="index" />} />
         <Route path="/signup" element={<SignUp key="signup" />} />
         <Route path="/settings" element={<Settings key="settings" />} />
-        <Route path="/anon" element={<BulletinPage key="bulletin" anon />} />
+        <Route path="/anon" element={<BulletinPage key="bulletin" />} />
         <Route path="/bulletin" element={<BulletinPage key="bulletin" />} />
         <Route
           path="/bulletin/:id"
           element={<FilledBulletin key="filled-bulletin" />}
         />
+        <Route path="/catalogue" element={<Catalogue key="catalogue" />} />
         <Route path="/test" element={<Test key="test" />} />
         <Route path="*" element={<NotFound key="not-found" />} />
       </Routes>

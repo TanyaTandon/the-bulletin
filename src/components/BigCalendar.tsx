@@ -30,9 +30,8 @@ export interface CalendarNote {
 
 const BigCalendar: React.FC<{
   savedNotes: CalendarNote[];
-  setSavedNotes: (notes: CalendarNote[]) => void;
+  setSavedNotes: React.Dispatch<React.SetStateAction<CalendarNote[]>>;
 }> = ({ savedNotes, setSavedNotes }) => {
-
   // Calendar state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showNoteModal, setShowNoteModal] = useState(false);
@@ -134,8 +133,7 @@ const BigCalendar: React.FC<{
                         isCurrentMonth && handleDateClick(currentDate)
                       }
                     >
-                      {/* Day Number */}
-                      <div className="flex justify-between items-start mb-2">
+                      <div className="flex justify-between flex-row-reverse items-start mb-2">
                         <div className="relative">
                           <span
                             className={`text-sm font-medium ${

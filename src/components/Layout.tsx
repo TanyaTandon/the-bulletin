@@ -2,10 +2,6 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Dialog } from "@mui/material";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
-import { toast } from "react-toastify";
 import { selectShowFriendsModal } from "@/redux/nonpersistent/controllers/selectors";
 import { useAppSelector } from "@/redux";
 import {
@@ -25,14 +21,9 @@ const Layout: React.FC<LayoutProps> = ({ children }) => {
 
   const location = useLocation();
 
-  const showFriendsModal = useAppSelector(selectShowFriendsModal);
-
-
-
   return (
     <div className="min-h-screen flex flex-col ">
       {location.pathname !== "/" && <Header />}
-
 
       <main className="flex-1 p-2 container mx-auto">{children}</main>
 

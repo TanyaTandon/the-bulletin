@@ -13,7 +13,6 @@ import { toast } from "sonner";
 import { Send, Image, FileText, LoaderCircle, Heart } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
-import { Dialog } from "@mui/material";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
@@ -461,9 +460,9 @@ const BulletinPage: React.FC<{
       <div
         className={`${isMobile ? "px-4 pt-0" : "py-6 w-[80%] mx-auto pt-4"}`}
       >
-        <aside className="flex gap-4 items-center">
+        <aside className={`${isMobile ? "block" : "flex"} gap-4 items-center`}>
           <h1 className="text-2xl font-bold text-left">
-            Your Bulletin for
+            Your Bulletin for{" "}
             {firstOfNextMonth.toLocaleDateString("en-US", {
               month: "long",
               year: "numeric",
@@ -496,6 +495,8 @@ const BulletinPage: React.FC<{
             <>
               <animated.div style={previewAnimation} className="flex-shrink-0">
                 <PageDesignPreview
+                  // scale={isMobile && 2}
+                  
                   currentStep={currentStep}
                   onboarding={isOnboarding}
                   hover={hover}

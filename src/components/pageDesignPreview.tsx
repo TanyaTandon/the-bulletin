@@ -11,12 +11,12 @@ import {
 import { Lila, Nick, Tanya } from "@/lib/bulletin-templates";
 import { TourGuideClient } from "@sjmc11/tourguidejs";
 import { useTourGuide } from "@/providers/contexts/TourGuideContext";
-import { useUser } from "@/providers/contexts/UserContext";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { Bulletin } from "@/lib/api";
+import { useIsMobile } from "@/hooks/use-mobile";
 
-const PageDesignPreview: React.FC<{
+interface PageDesignPreviewProps {
   currentStep: number;
   onboarding: boolean;
   images: string[];
@@ -27,7 +27,10 @@ const PageDesignPreview: React.FC<{
   hover: boolean;
   setHover: (hover: boolean) => void;
   existingBulletin?: Bulletin;
-}> = ({
+  scale?: number; // Scale multiplier for dimensions (1 = default, 2 = double size, 0.5 = half size)
+}
+
+const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   images,
   editState,
   setEditState,
@@ -38,17 +41,26 @@ const PageDesignPreview: React.FC<{
   onboarding,
   currentStep,
   existingBulletin,
+  scale = 1, // Default scale of 1 (no scaling)
 }) => {
+  const isMobile = useIsMobile();
   const { tour } = useTourGuide();
   const user = useAppSelector(staticGetUser);
 
-  const iframeRef = useRef(null);
+  const iframeRef = useRef<HTMLIFrameElement>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Calculate height based on 0.65:1 aspect ratio
-  const frameHeight = Math.round(iframeRef.current?.offsetWidth / 0.65);
+  // Calculate dimensions with scale factor
+  const baseWidth = isMobile ? "75vw" : "25vw"; // Your current base width
+  const aspectRatio = isMobile ? 0.725 : 0.65; // Your current aspect ratio
 
+  const scaledWidth = `calc(${baseWidth} * ${scale})`;
+  const frameHeight = iframeRef.current
+    ? Math.round(iframeRef.current.offsetWidth / aspectRatio)
+    : 900;
+
+  console.log("🍓", iframeRef.current?.offsetWidth);
   // Tilt animation spring
   const [tiltProps, setTiltProps] = useSpring(() => ({
     rotateX: 0,
@@ -110,16 +122,18 @@ const PageDesignPreview: React.FC<{
       1: Lila(images, bodyText, user.firstName ?? "lila"),
       2: Tanya(images, bodyText, user.firstName ?? "tanya"),
     }),
-    [images, editState, bodyText]
+    [images, editState, bodyText, user.firstName]
   );
 
   useEffect(() => {
     if (iframeRef.current) {
+      console.log("🍕");
       const iframe = iframeRef.current;
-      const doc = iframe.contentDocument || iframe.contentWindow.document;
+      const doc = iframe.contentDocument || iframe.contentWindow?.document;
+      if (!doc) return;
 
       // Calculate scale factor based on width (520 is base size)
-      const scaleFactor = iframeRef.current?.offsetWidth / 520;
+      const scaleFactor = (iframeRef.current.offsetWidth / 520) * scale;
 
       // Insert scaling CSS into the template
       console.log("selectedTemplate", selectedTemplate);
@@ -142,7 +156,14 @@ const PageDesignPreview: React.FC<{
       doc.write(scaledTemplate);
       doc.close();
     }
-  }, [iframeRef.current?.offsetWidth, images, bodyText, selectedTemplate]);
+  }, [
+    iframeRef.current?.offsetWidth,
+    images,
+    bodyText,
+    selectedTemplate,
+    templates,
+    scale,
+  ]);
 
   const setter = (editState: EditState, toSet: EditState) => {
     if (editState === toSet) {
@@ -164,7 +185,7 @@ const PageDesignPreview: React.FC<{
         },
       },
       {
-        id: "images", // Add unique IDs for better tracking
+        id: "images",
         image: <ImagesSquareIcon size={32} />,
         label: "Edit Images",
         onClick: () => {
@@ -188,18 +209,18 @@ const PageDesignPreview: React.FC<{
         onClick: () => setter(editState, EditState.TEMPLATE),
       },
     ],
-    [editState, currentStep]
+    [editState, currentStep, tour]
   );
 
-  // Calculate arc positions for buttons
-  const containerCenterX = iframeRef.current?.offsetWidth / 2.25;
+  // Calculate arc positions for buttons (scaled)
+  const containerCenterX = (iframeRef.current?.offsetWidth || 400) / 2.25;
   const getArcPosition = (index: number, total: number) => {
-    const arcRadius = 120; // Distance from center
+    const arcRadius = 120 * scale; // Scale the arc radius
     const arcSpan = Math.PI * 0.6; // 108 degrees in radians
     const startAngle = Math.PI / 2 + arcSpan / 2; // Start from bottom-right
     const angle = startAngle - (index / (total - 1)) * arcSpan;
 
-    // Calculate the center of the container
+    // Calculate the center of the container (scaled)
     const containerCenterY = frameHeight / 8.5;
 
     return {
@@ -261,40 +282,47 @@ const PageDesignPreview: React.FC<{
         };
       }
     },
-    keys: (item) => item.id, // Use unique keys for tracking
+    keys: (item) => item.id,
     config: {
       tension: 300,
       friction: 20,
     },
   });
 
+  // Container style with scale applied
+  const containerStyle = useMemo(() => {
+    const style: React.CSSProperties = {
+      width: scaledWidth,
+      // @ts-ignore
+      transform: tiltProps.rotateX.to(
+        (x) =>
+          `perspective(1000px) rotateX(${x}deg) rotateY(${tiltProps.rotateY.get()}deg) scale(${tiltProps.scale.get()})`
+      ),
+      transformStyle: "preserve-3d",
+    };
+    return style;
+  }, [scaledWidth, tiltProps]);
+
   return (
     <div className="w-full max-w-6xl mx-auto p-6">
       <div
         className="relative"
-        onMouseMove={handleMouseMove}
-        onMouseLeave={handleMouseLeave}
+        onMouseMove={!isMobile && handleMouseMove}
+        onMouseLeave={!isMobile && handleMouseLeave}
       >
         <animated.div
           data-tg-title="Bulletin Preview"
           ref={containerRef}
-          onMouseOver={handleMouseEnter}
+          onMouseOver={!isMobile && handleMouseEnter}
           className="bg-white rounded-lg shadow-lg mx-auto relative"
-          style={{
-            width: iframeRef.current?.offsetWidth,
-            transform: tiltProps.rotateX.to(
-              (x) =>
-                `perspective(1000px) rotateX(${x}deg) rotateY(${tiltProps.rotateY.get()}deg) scale(${tiltProps.scale.get()})`
-            ),
-            transformStyle: "preserve-3d",
-          }}
+          style={containerStyle}
         >
           <div onMouseOver={handleMouseEnter} onMouseLeave={handleMouseLeave}>
             {buttonTransitions((style, item, _, index) => (
               <animated.div
                 data-tg-title={`select ${item.id}`}
-                onMouseOver={handleMouseEnter}
-                onMouseLeave={handleMouseLeave}
+                onMouseOver={!isMobile && handleMouseEnter}
+                onMouseLeave={!isMobile && handleMouseLeave}
                 key={item.id}
                 style={style}
                 className="absolute pointer-events-auto"
@@ -310,13 +338,13 @@ const PageDesignPreview: React.FC<{
             ))}
           </div>
           <iframe
-            onMouseOver={handleMouseEnter}
-            onMouseLeave={handleMouseLeave}
+            onMouseOver={!isMobile && handleMouseEnter}
+            onMouseLeave={!isMobile && handleMouseLeave}
             ref={iframeRef}
             className="border-0"
             style={{
-              width: "25vw",
-              height: iframeRef.current?.offsetWidth / 0.65,
+              width: "100%", // Fill container width
+              height: frameHeight,
             }}
             title="Page Preview"
             sandbox="allow-same-origin"

@@ -10,9 +10,10 @@ import { Input } from "./ui/input";
 import { useAuth } from "@/providers/contexts/AuthContext";
 import "react-phone-number-input/style.css";
 import { useNavigate } from "react-router";
+import OPTVerification from "./OPTVerification";
 
 const AuthModalContent: React.FC<{
-  signInState: boolean; 
+  signInState: boolean;
   close: () => void;
 }> = ({ signInState, close }) => {
   const isMobile = useIsMobile();
@@ -69,14 +70,11 @@ const AuthModalContent: React.FC<{
               </div>
             </>
           ) : (
-            <section className="flex flex-col items-center justify-center">
+            <section className="">
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
               <span style={isMobile ? { transform: "scale(0.6)" } : {}}>
-                <ReactInputVerificationCode
-                  autoFocus
-                  length={6}
-                  onChange={(code) => setCode(code)}
-                  onCompleted={(code) => handleVerifySignIn(code, navigate)}
+                <OPTVerification
+                  onComplete={(code) => handleVerifySignIn(code, navigate)}
                 />
               </span>
             </section>
@@ -101,7 +99,9 @@ const AuthModalContent: React.FC<{
                       }
                 }
                 size="lg"
-                className="bg-gradient-to-r from-accent to-primary hover:opacity-90 w-full"
+                className={`bg-gradient-to-r from-accent to-primary hover:opacity-90 ${
+                  isMobile ? "w-auto" : "w-full"
+                }`}
                 disabled={isProcessing}
               >
                 {isProcessing
@@ -245,11 +245,19 @@ const AuthModalContent: React.FC<{
           ) : (
             <section className="flex flex-col items-center justify-center w-[30vw]">
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
-              <span style={isMobile ? { transform: "scale(0.6)" } : { transform: "scale(0.85)" }}>
+              <span
+                style={
+                  isMobile
+                    ? { transform: "scale(0.6)" }
+                    : { transform: "scale(0.85)" }
+                }
+              >
                 <ReactInputVerificationCode
                   length={6}
                   onChange={(code) => setCode(code)}
-                  onCompleted={(code) => handleVerifySignUp(code, navigate, close)}
+                  onCompleted={(code) =>
+                    handleVerifySignUp(code, navigate, close)
+                  }
                 />
               </span>
               <Button
