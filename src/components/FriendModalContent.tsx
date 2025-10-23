@@ -431,7 +431,7 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
             </h3>
             <Separator />
             <h3 className="text-sm text-center">
-              You can add up to {2} left for this month
+              You can to {2} left for this month
             </h3>
             <section className="flex gap-2">
               <Input placeholder="Recipient Last Name" />

@@ -8,6 +8,7 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { user } = useStytch();
   const { pathname } = useLocation();
+  console.log(pathname);
   const navigate = useNavigate();
   useEffect(() => {
     async function callUser() {
@@ -20,8 +21,11 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           }
         }
       } catch (error) {
-        if (error.includes("401")) {
-          window.location.href = "/login";
+        console.log(typeof error);
+        console.log(Object.keys(error));
+        console.log(error.status_code);
+        if (error.status_code && error.status_code == 401 && pathname !== "/") {
+          window.location.href = "/";
         }
       }
     }

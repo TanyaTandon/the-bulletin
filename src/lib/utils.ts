@@ -2,11 +2,21 @@ import { UploadedImage } from "@/components/ImageUploadGrid";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
-import { createNewBulletin } from "./api";
+import { Bulletin, createNewBulletin } from "./api";
 import { CalendarNote } from "@/components/BlurbInput";
-import { setUser, User } from "@/redux/user";
+import {
+  setUser,
+  updateBlurb,
+  updateSavedNotes,
+  updateTemplate,
+  User,
+} from "@/redux/user";
 import { NavigateFunction } from "react-router";
 import { Dispatch } from "@reduxjs/toolkit";
+import { isEqual } from "lodash";
+import { store } from "@/redux";
+import axios from "axios";
+
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
 }
@@ -77,3 +87,149 @@ export const anonhandleSubmitBulletin = async (
     setIsSubmitting(false);
   }
 };
+
+export function arrayToDict(arr) {
+  return arr.reduce((dict, item) => {
+    dict[item.date] = item.note;
+    return dict;
+  }, {});
+}
+
+export enum ChangeCategory {
+  IMAGES = "images",
+  BLURB = "blurb",
+  SAVED_NOTES = "saved_notes",
+  TEMPLATE = "template",
+}
+
+let blurbTimer: NodeJS.Timeout | null = null;
+
+export async function handleCategoryChange(
+  category: ChangeCategory,
+  bulletinData: Partial<Bulletin>
+): Promise<void> {
+  switch (category) {
+    case ChangeCategory.SAVED_NOTES:
+      store.dispatch(updateSavedNotes(bulletinData));
+      break;
+
+    case ChangeCategory.TEMPLATE:
+    case ChangeCategory.BLURB:
+      if (blurbTimer) {
+        clearTimeout(blurbTimer);
+      }
+
+      blurbTimer = setTimeout(() => {
+        blurbTimer = null;
+        if (bulletinData && category === ChangeCategory.TEMPLATE) {
+          store.dispatch(updateTemplate(bulletinData));
+        } else if (bulletinData && category === ChangeCategory.BLURB) {
+          store.dispatch(updateBlurb(bulletinData));
+        }
+      }, 1500);
+      break;
+
+    case ChangeCategory.IMAGES:
+      {
+        const images = bulletinData.images;
+
+        console.log(images);
+
+        const uploads = await Promise.all(
+          images.map(async (item) => {
+            const formData = new FormData();
+            formData.append("fileName", item.url);
+            formData.append("file", item.file);
+            await axios.post(
+              "https://be.thebulletin.app/image_processing",
+              formData
+            );
+          })
+        );
+
+        // for (let i = 0; i < images.length; i++) {
+        //   const image = images[i];
+
+        //   if (image.url.includes("blob")) {
+        //     const fetchBlob = await fetch(image.url, {
+        //       method: "GET",
+        //       headers: {
+        //         Accept: "image/png",
+        //       },
+        //     });
+
+        //     const blob = await fetchBlob.blob();
+        //     console.log("Blob created:", blob);
+
+        //     // Create a filename for the image
+        //     const filename = `image_${i}_${Date.now()}.png`;
+
+        //     // Append the actual file to FormData
+        //     formData.append(`images`, blob, filename);
+
+        //     // Keep track of image metadata
+        //     processedImages.push({
+        //       id: image.id,
+        //       filename: filename,
+        //     });
+        //   } else {
+        //     processedImages.push({
+        //       id: image.id,
+        //     });
+        //   }
+        // }
+
+        // formData.append("imageMetadata", JSON.stringify(processedImages));
+        // const response = await axios.put(
+        //   "https://be.thebulletin.app/image_processing",
+        //   formData,
+        //   {
+        //     headers: {
+        //       "Content-Type": "multipart/form-data",
+        //     },
+        //   }
+        // );
+
+        // performImagesDbOperation(bulletinData)
+        //   .then(() => {
+
+        //     toast.success("Saved!");
+        //   })
+        //   .catch((error) => {
+        //     // Optional: Handle errors
+        //     console.error("Error saving images:", error);
+        //     showToast("Error saving images");
+        //   });
+      }
+      break;
+
+    default:
+      console.warn(`Unknown category: ${category}`);
+  }
+}
+
+export function getDetailedDifferences<T>(
+  obj1: T,
+  obj2: T
+): {
+  unequal: boolean;
+  differences: Record<string, { obj1: T; obj2: T }>;
+} {
+  const differences: Record<string, { obj1: T; obj2: T }> = {};
+
+  const allKeys = new Set([...Object.keys(obj1), ...Object.keys(obj2)]);
+
+  allKeys.forEach((key) => {
+    if (!isEqual(obj1[key], obj2[key])) {
+      differences[key] = {
+        obj1: obj1[key],
+        obj2: obj2[key],
+      };
+    }
+  });
+
+  return {
+    unequal: Object.keys(differences).length > 0,
+    differences,
+  };
+}

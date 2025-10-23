@@ -1,0 +1,1 @@
+export const RESET_ALL_SLICES = "RESET_ALL_SLICES";

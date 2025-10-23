@@ -16,6 +16,8 @@ import {
   AccordionTrigger,
 } from "./ui/accordion";
 import { Checkbox } from "./ui/checkbox";
+import { staticGetUser } from "@/redux/user/selectors";
+import { useAppSelector } from "@/redux";
 
 export interface CalendarNote {
   date: Date;
@@ -63,9 +65,13 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
     }
   };
 
+  const user = useAppSelector(staticGetUser);
+
+  console.log(user);
+
   return (
     <section
-    data-tg-title="Image Housing"
+      data-tg-title="Image Housing"
       className="flex flex-col items-center space-y-8 w-full mt-3 pt-7"
     >
       <div className=" flex w-full justify-between">
@@ -107,12 +113,13 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
           <h1>Layouts</h1>
           <Accordion type="multiple">
             {templates.map((template) => (
-              <AccordionItem value={template.id}>
+              <AccordionItem value={template.id.toString()}>
                 <AccordionTrigger>
                   <div className="flex items-center gap-2">
                     <Checkbox
                       checked={selectedTemplate.id === template.id}
                       onCheckedChange={(e) => {
+                        console.log("template", template);
                         setSelectedTemplate(template);
                       }}
                       onClick={(e) => e.stopPropagation()}

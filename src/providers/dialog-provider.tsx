@@ -25,12 +25,13 @@ type DialogOptions = {
   descriptionOptions?: {
     className?: string;
   };
+  additionalClosingAction?: () => void;
 };
 
 type DialogContextType = {
   isOpen: boolean;
   dialog: (children: React.ReactNode, options?: DialogOptions) => void;
-  close: () => void;
+  close: (closeOnly?: boolean) => void;
   options: DialogOptions | null;
   content: React.ReactNode | null;
 };
@@ -50,7 +51,10 @@ export const DialogProvider: React.FC<{
     setContent(children);
   };
 
-  const close = () => {
+  const close = (closeOnly: boolean = false) => {
+    if (options?.additionalClosingAction && !closeOnly) {
+      options.additionalClosingAction();
+    }
     setIsOpen(false);
     setTimeout(() => {
       setOptions(null);

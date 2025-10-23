@@ -24,7 +24,7 @@ const ImageUploadGrid: React.FC<{
     const files = Array.from(event.target.files || []);
 
     if (files.length + images.length > 4) {
-      toast.error("You can only upload up to 4 images", {
+      toast.error("You can only upload 4 images", {
         description: "Please select fewer images.",
       });
       return;
@@ -171,7 +171,7 @@ const ImageUploadGrid: React.FC<{
                 <Plus className="w-5 h-5 text-violet-500" />
                 {images.length === 0 && index === 0 && (
                   <span className="text-xs text-muted-foreground absolute bottom-1">
-                    Add up to 4 images
+                    Add 4 images
                   </span>
                 )}
               </Card>

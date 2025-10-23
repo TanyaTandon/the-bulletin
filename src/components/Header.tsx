@@ -5,7 +5,7 @@ import { Button } from "./ui/button";
 import { useIsMobile } from "@/hooks/use-mobile";
 // import { SignOutButton, useAuth, useUser } from "@clerk/clerk-react";
 import FriendRequests from "./FriendRequests";
-import { resetStore } from "@/redux";
+import { resetAllSlices, resetStore, softReset, useAppDispatch } from "@/redux";
 import { useStytch, useStytchSession } from "@stytch/react";
 import FeedbackCard from "./FeedbackContent";
 import { useDialog } from "@/providers/dialog-provider";
@@ -20,6 +20,7 @@ const Header: React.FC = () => {
   const [feedback, setFeedback] = useState<boolean>(false);
   const [feedbackContent, setFeedbackContent] = useState<string>("");
 
+  const dispatch = useAppDispatch();
   const stytch = useStytch();
 
   const signOut = async () => {
@@ -27,7 +28,7 @@ const Header: React.FC = () => {
   };
 
   const { dialog } = useDialog();
-  console.log(session);
+  // console.log(session);
 
   const { sheet } = useSheet();
 
@@ -72,7 +73,7 @@ const Header: React.FC = () => {
                     onClick={async () => {
                       console.log("signing out");
                       await signOut().then(() => {
-                        resetStore();
+                        dispatch(resetAllSlices);
                         navigate("/");
                       });
                     }}

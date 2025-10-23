@@ -1,5 +1,11 @@
 import { EditState } from "@/pages/bulletin";
-import React, { useState, useRef, useEffect, useMemo } from "react";
+import React, {
+  useState,
+  useRef,
+  useEffect,
+  useMemo,
+  useCallback,
+} from "react";
 import { useSpring, animated, useTransition } from "@react-spring/web";
 import {
   CalendarIcon,
@@ -8,7 +14,7 @@ import {
   PencilLineIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { Lila, Nick, Tanya } from "@/lib/bulletin-templates";
+import { Lila, Nick, Tanya, calculateFontSize } from "@/lib/bulletin-templates";
 import { TourGuideClient } from "@sjmc11/tourguidejs";
 import { useTourGuide } from "@/providers/contexts/TourGuideContext";
 import { useAppSelector } from "@/redux";
@@ -24,8 +30,14 @@ interface PageDesignPreviewProps {
   setEditState: (editState: EditState) => void;
   bodyText: string;
   selectedTemplate: { id: number; name: string };
-  hover: boolean;
-  setHover: (hover: boolean) => void;
+  hover: {
+    preview: boolean;
+    buttons: boolean;
+  };
+  setHover: {
+    preview: (hover: boolean) => void;
+    buttons: (hover: boolean) => void;
+  };
   existingBulletin?: Bulletin;
   scale?: number; // Scale multiplier for dimensions (1 = default, 2 = double size, 0.5 = half size)
 }
@@ -51,16 +63,20 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   const containerRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
+  // Add state to track iframe width for proper height calculation
+  const [iframeWidth, setIframeWidth] = useState<number>(0);
+
   // Calculate dimensions with scale factor
   const baseWidth = isMobile ? "75vw" : "25vw"; // Your current base width
   const aspectRatio = isMobile ? 0.725 : 0.65; // Your current aspect ratio
 
   const scaledWidth = `calc(${baseWidth} * ${scale})`;
-  const frameHeight = iframeRef.current
-    ? Math.round(iframeRef.current.offsetWidth / aspectRatio)
-    : 900;
 
-  console.log("🍓", iframeRef.current?.offsetWidth);
+  // Calculate frame height based on tracked width
+  const frameHeight =
+    iframeWidth > 0 ? Math.round(iframeWidth / aspectRatio) : 900; // Fallback height
+
+  console.log("🍓", iframeWidth);
   // Tilt animation spring
   const [tiltProps, setTiltProps] = useSpring(() => ({
     rotateX: 0,
@@ -69,34 +85,31 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     config: { tension: 300, friction: 40 },
   }));
 
-  const handleMouseEnter = () => {
+  // Container mouse handlers for tilt animation
+  const handleContainerMouseEnter = () => {
     if (!onboarding) {
-      if (hoverTimeoutRef.current) {
-        clearTimeout(hoverTimeoutRef.current);
-        hoverTimeoutRef.current = null;
+      setHover.preview(true);
+    }
+  };
+
+  const handleContainerMouseLeave = () => {
+    if (!onboarding) {
+      setHover.preview(false);
+      // Reset tilt animation when leaving container
+      if (!editState) {
+        setTiltProps({
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
+        });
       }
-      setHover(true);
     }
   };
 
-  const handleMouseLeave = () => {
-    // Set a new timeout and store the reference
-    if (!onboarding) {
-      hoverTimeoutRef.current = setTimeout(() => setHover(false), 1000);
-    }
-    // Reset tilt when mouse leaves (only if editState is falsy)
-    if (!editState) {
-      setTiltProps({
-        rotateX: 0,
-        rotateY: 0,
-        scale: 1,
-      });
-    }
-  };
-
-  const handleMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
-    // Only apply tilt effect when editState is falsy
-    if (editState || !containerRef.current || onboarding) return;
+  const handleContainerMouseMove = (e: React.MouseEvent<HTMLDivElement>) => {
+    // Only apply tilt effect when hover.preview is true and editState is falsy
+    if (!hover.preview || editState || !containerRef.current || onboarding)
+      return;
 
     const rect = containerRef.current.getBoundingClientRect();
     const x = e.clientX - rect.left;
@@ -116,24 +129,56 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     });
   };
 
-  const templates = useMemo(
-    () => ({
-      0: Nick(images, bodyText, user.firstName ?? "nick"),
-      1: Lila(images, bodyText, user.firstName ?? "lila"),
-      2: Tanya(images, bodyText, user.firstName ?? "tanya"),
-    }),
-    [images, editState, bodyText, user.firstName]
-  );
+  // Bulletin Preview animated.div mouse handlers for buttons
+  const handlePreviewMouseEnter = () => {
+    if (!onboarding) {
+      // Clear any existing timeout when re-entering
+      if (hoverTimeoutRef.current) {
+        clearTimeout(hoverTimeoutRef.current);
+        hoverTimeoutRef.current = null;
+      }
+      setHover.buttons(true);
+      // Reset tilt when entering preview area
+      if (!editState) {
+        setTiltProps({
+          rotateX: 0,
+          rotateY: 0,
+          scale: 1,
+        });
+      }
+    }
+  };
+
+  const handlePreviewMouseLeave = () => {
+    if (!onboarding) {
+      // Set timeout to hide buttons after 1 second
+      hoverTimeoutRef.current = setTimeout(() => {
+        setHover.buttons(false);
+        hoverTimeoutRef.current = null;
+      }, 1000);
+    }
+  };
+
+  const templates = useMemo(() => {
+    const name = user?.firstName ?? "nick";
+    const fontSize = calculateFontSize(name);
+
+    return {
+      0: Nick(images, bodyText, name, fontSize),
+      1: Lila(images, bodyText, name, fontSize),
+      2: Tanya(images, bodyText, name, fontSize),
+    };
+  }, [images, bodyText, user?.firstName]);
 
   useEffect(() => {
-    if (iframeRef.current) {
+    if (iframeRef.current && iframeWidth > 0) {
       console.log("🍕");
       const iframe = iframeRef.current;
       const doc = iframe.contentDocument || iframe.contentWindow?.document;
       if (!doc) return;
 
       // Calculate scale factor based on width (520 is base size)
-      const scaleFactor = (iframeRef.current.offsetWidth / 520) * scale;
+      const scaleFactor = (iframeWidth / 520) * scale;
 
       // Insert scaling CSS into the template
       console.log("selectedTemplate", selectedTemplate);
@@ -156,22 +201,67 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       doc.write(scaledTemplate);
       doc.close();
     }
-  }, [
-    iframeRef.current?.offsetWidth,
-    images,
-    bodyText,
-    selectedTemplate,
-    templates,
-    scale,
-  ]);
+  }, [iframeWidth, images, bodyText, selectedTemplate, templates, scale]);
 
-  const setter = (editState: EditState, toSet: EditState) => {
-    if (editState === toSet) {
-      setEditState(null);
-    } else {
-      setEditState(toSet);
+  // Effect to measure and track iframe width
+  useEffect(() => {
+    const updateIframeWidth = () => {
+      if (iframeRef.current) {
+        const width = iframeRef.current.offsetWidth;
+        if (width > 0 && width !== iframeWidth) {
+          setIframeWidth(width);
+        }
+      }
+    };
+
+    // Initial measurement
+    updateIframeWidth();
+
+    // Set up ResizeObserver to track width changes
+    const resizeObserver = new ResizeObserver(() => {
+      updateIframeWidth();
+    });
+
+    if (iframeRef.current) {
+      resizeObserver.observe(iframeRef.current);
     }
-  };
+
+    // Also measure on window resize
+    const handleResize = () => {
+      updateIframeWidth();
+    };
+
+    window.addEventListener("resize", handleResize);
+
+    return () => {
+      resizeObserver.disconnect();
+      window.removeEventListener("resize", handleResize);
+    };
+  }, [iframeWidth]);
+
+  const setter = useCallback(
+    (editState: EditState, toSet: EditState) => {
+      if (editState === toSet) {
+        setEditState(null);
+      } else {
+        setEditState(toSet);
+      }
+    },
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+    []
+  );
+
+  const buttonContainerRef = useRef<HTMLDivElement>(null);
+
+  const [buttonMouseOver, setButtonMouseOver] = useState<boolean>(false);
+  const handleButtonMouseOver = useCallback(() => {
+    console.log("🍕 handleButtonMouseOver");
+    setButtonMouseOver(true);
+  }, []);
+
+  const handleButtonMouseLeave = useCallback(() => {
+    setButtonMouseOver(false);
+  }, []);
 
   const buttons = useMemo(
     () => [
@@ -181,7 +271,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
         label: "close",
         onClick: () => {
           setter(editState, null);
-          setHover(false);
+          setHover.buttons(false);
         },
       },
       {
@@ -209,11 +299,11 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
         onClick: () => setter(editState, EditState.TEMPLATE),
       },
     ],
-    [editState, currentStep, tour]
+    [editState, tour, onboarding, setHover, setter]
   );
 
   // Calculate arc positions for buttons (scaled)
-  const containerCenterX = (iframeRef.current?.offsetWidth || 400) / 2.25;
+  const containerCenterX = (iframeWidth || 400) / 2.25;
   const getArcPosition = (index: number, total: number) => {
     const arcRadius = 120 * scale; // Scale the arc radius
     const arcSpan = Math.PI * 0.6; // 108 degrees in radians
@@ -238,7 +328,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       transform: `translate(${containerCenterX}px, 30px) scale(0.8)`,
     },
     enter: (item, index) => async (next) => {
-      if (!hover) return; // Don't animate in if not hovering
+      if (!hover.buttons) return; // Don't animate in if not hovering
       // Stagger the animations
       await new Promise((resolve) => setTimeout(resolve, index * 80));
 
@@ -261,7 +351,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       transform: `translate(${containerCenterX}px, 30px) scale(0.8)`,
     },
     update: (item, index) => {
-      if (hover) {
+      if (hover.buttons) {
         // Keep close button at origin, others go to arc positions
         if (item.id === "close") {
           return {
@@ -304,25 +394,39 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   }, [scaledWidth, tiltProps]);
 
   return (
-    <div className="w-full max-w-6xl mx-auto p-6">
+    <section className="w-full max-w-6xl mx-auto p-6">
       <div
-        className="relative"
-        onMouseMove={!isMobile && handleMouseMove}
-        onMouseLeave={!isMobile && handleMouseLeave}
+        className="container relative"
+        onMouseEnter={!isMobile ? handleContainerMouseEnter : undefined}
+        onMouseMove={
+          !isMobile && !buttonMouseOver ? handleContainerMouseMove : undefined
+        }
+        onMouseLeave={
+          !isMobile && !buttonMouseOver ? handleContainerMouseLeave : undefined
+        }
       >
         <animated.div
           data-tg-title="Bulletin Preview"
           ref={containerRef}
-          onMouseOver={!isMobile && handleMouseEnter}
+          onMouseEnter={!isMobile ? handlePreviewMouseEnter : undefined}
           className="bg-white rounded-lg shadow-lg mx-auto relative"
           style={containerStyle}
+          onMouseLeave={!buttonMouseOver ? handlePreviewMouseLeave : undefined}
         >
-          <div onMouseOver={handleMouseEnter} onMouseLeave={handleMouseLeave}>
+          <div
+            className="HERE"
+            ref={buttonContainerRef}
+            onMouseLeave={!isMobile && handleButtonMouseLeave}
+          >
             {buttonTransitions((style, item, _, index) => (
               <animated.div
                 data-tg-title={`select ${item.id}`}
-                onMouseOver={!isMobile && handleMouseEnter}
-                onMouseLeave={!isMobile && handleMouseLeave}
+                onMouseOver={(e) => {
+                  setButtonMouseOver(true);
+                  if (!buttonMouseOver) {
+                    setHover.buttons(true);
+                  }
+                }}
                 key={item.id}
                 style={style}
                 className="absolute pointer-events-auto"
@@ -338,8 +442,8 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
             ))}
           </div>
           <iframe
-            onMouseOver={!isMobile && handleMouseEnter}
-            onMouseLeave={!isMobile && handleMouseLeave}
+            // onMouseOver={!isMobile && handleMouseEnter}
+            // onMouseLeave={!isMobile && handleMouseLeave}
             ref={iframeRef}
             className="border-0"
             style={{
@@ -351,7 +455,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
           />
         </animated.div>
       </div>
-    </div>
+    </section>
   );
 };
 

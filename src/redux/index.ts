@@ -20,6 +20,7 @@ import storage from "redux-persist/lib/storage";
 import { reducers } from "./separateReducers.ts";
 import { thunk, ThunkAction } from "redux-thunk";
 import controllersReducer from "./nonpersistent/controllers/index.ts";
+import { RESET_ALL_SLICES } from "./constants.ts";
 /** Must be last in the middleware chain! */
 const customLogger: Middleware = createLogger({
   timestamp: true,
@@ -79,6 +80,9 @@ export const makeStore = () => {
 
 export const { store, persistor } = makeStore();
 
+export const resetAllSlices = () => {
+  store.dispatch({ type: RESET_ALL_SLICES });
+};
 // Function to reset the Redux store and clear persisted storage
 export const resetStore = async () => {
   return new Promise<void>((resolve) => {

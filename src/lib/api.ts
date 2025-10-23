@@ -1,9 +1,11 @@
 import { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import sendError from "@/hooks/use-sendError";
-import { User } from "@/redux/user";
+import { addBulletin, User } from "@/redux/user";
+import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
+import { arrayToDict } from "./utils";
 
 export const supabase = createClient(
   "https://voiuicuaujbhkkljtjfw.supabase.co",
@@ -30,8 +32,6 @@ export type Bulletin = {
 
 export type NewBulletinItem = {
   user: User;
-  bulletin: Bulletin;
-  anon?: boolean;
 };
 
 export async function createNewUser({
@@ -66,135 +66,13 @@ export async function createNewUser({
   }
 }
 
-export async function createNewBulletin({
-  user,
-  bulletin,
-  anon,
-}: NewBulletinItem) {
-  try {
-    const images = bulletin.images;
-    // Upload images to the bucket and collect their URLs
-    const imageUrls: string[] = [];
-
-    for (const image of images) {
-      const fetchBlob = await fetch(image.url, {
-        method: "GET",
-        headers: {
-          Accept: "image/png",
-        },
-      });
-
-      const buff = await fetchBlob.blob();
-
-      const { data: fileData, error: uploadError } = await supabase.storage
-        .from("user-images")
-        .upload(`/${image.id}.png`, buff, {
-          contentType: "image/png",
-        });
-
-      if (uploadError) {
-        console.error("Error uploading image:", uploadError);
-        sendError(user.phone_number, "createNewBulletin", uploadError, "image");
-        continue;
-      }
-
-      // Get the public URL for the uploaded image
-      const { data: urlData } = supabase.storage
-        .from("user-images")
-        .getPublicUrl(image.id);
-
-      if (urlData?.publicUrl) {
-        imageUrls.push(urlData.publicUrl);
-      }
-    }
-
-    function arrayToDict(arr) {
-      return arr.reduce((dict, item) => {
-        dict[item.date] = item.note;
-        return dict;
-      }, {});
-    }
-
-    let returnBulletin: Bulletin[] = [];
-
-    let newUserData: User;
-    // Create a new bulletin item with UUID
-    const bulletinId = uuidv4();
-    const { error: bulletinError } = await supabase
-      .from("bulletins")
-      .insert({
-        id: bulletinId,
-        blurb: bulletin.blurb,
-        images: images.map((item) => item.id),
-        owner: user.phone_number,
-        saved_notes: arrayToDict(bulletin.savedNotes),
-        template: bulletin.template,
-      })
-      .then(async (item) => {
-        if (!anon) {
-          try {
-            if (item.data) {
-              returnBulletin = [item.data[0]];
-            }
-
-            const { data: userData, error: userError } = await supabase
-              .from("user_record")
-              .update({
-                images: [...images.map((item) => item.id), ...user.images],
-                bulletins: [bulletinId, ...user.bulletins],
-              })
-              .eq("phone_number", user.phone_number)
-              .select("*");
-
-            console.log("User data:", userData);
-            newUserData = userData as unknown as User;
-            if (userError) {
-              console.error("Error creating user:", userError);
-              sendError(user.phone_number, "createNewBulletin", userError, {
-                id: bulletinId,
-                blurb: bulletin.blurb,
-                images: images.map((item) => item.id),
-              });
-              throw userError;
-            }
-            return item;
-          } catch (error) {
-            sendError(user.phone_number, "createNewBulletin", error, {
-              id: bulletinId,
-              blurb: bulletin.blurb,
-              images: images.map((item) => item.id),
-            });
-            console.error("Error creating user:", error);
-          }
-        }
-      });
-
-    if (bulletinError) {
-      sendError(user.phone_number, "insertBulletin", bulletinError, {
-        id: bulletinId,
-        blurb: bulletin.blurb,
-        images: images.map((item) => item.id),
-        owner: user.phone_number,
-        saved_notes: arrayToDict(bulletin.savedNotes),
-      });
-      console.error("Error creating bulletin:", bulletinError);
-      throw bulletinError;
-    }
-
-    return { success: true, bulletinId, newUserData };
-  } catch (error) {
-    console.error("Error in createNewUser:", error);
-    return { success: false, error };
-  }
-}
-
-export async function getBulletin(bulletinId: string) {
+export async function getBulletin(bulletinId: string): Promise<Bulletin> {
   const { data, error } = await supabase
     .from("bulletins")
     .select("*")
     .eq("id", bulletinId);
   console.log("raw Bulletin:", data);
-  return data;
+  return data[0] as Bulletin;
 }
 
 export async function getAllBulletins(user: User) {
@@ -441,3 +319,85 @@ export async function getForeignUserImages(id: string) {
   }
   return data;
 }
+
+export const createNewBulletin = createAsyncThunk(
+  "user/createNewBulletin",
+  async ({ user }: NewBulletinItem, { dispatch }) => {
+    try {
+      let newUserData: User;
+      // Create a new bulletin item with UUID
+
+      let createdBulletin: Bulletin;
+
+      const { error: bulletinError } = await supabase
+        .from("bulletins")
+        .insert({
+          blurb: "",
+          images: [],
+          owner: user.phone_number,
+          saved_notes: [],
+          template: "0",
+          month: new Date().getMonth() + 1,
+        })
+        .select("*")
+        .then(async (item) => {
+          console.log("::*", item);
+          console.log("OG Created Bulletin:", item);
+          try {
+            if (item.data) {
+              createdBulletin = [item.data[0]][0] as unknown as Bulletin;
+            }
+
+            const { data: userData, error: userError } = await supabase
+              .from("user_record")
+              .update({
+                bulletins: [createdBulletin.id, ...user.bulletins],
+              })
+              .eq("phone_number", user.phone_number)
+              .select("*");
+
+            console.log("Created bulletin:", createdBulletin);
+            dispatch(addBulletin(createdBulletin));
+            console.log("User data:", userData);
+            newUserData = userData as unknown as User;
+            if (userError) {
+              console.error("Error creating user:", userError);
+              sendError(user.phone_number, "createNewBulletin", userError, {
+                id: createdBulletin.id,
+                blurb: "",
+                images: [],
+              });
+              throw userError;
+            }
+            return item;
+          } catch (error) {
+            sendError(user.phone_number, "createNewBulletin", error, {
+              id: createdBulletin.id,
+              blurb: "",
+              images: [],
+            });
+            console.error("Error creating user:", error);
+          }
+        });
+
+      if (bulletinError) {
+        sendError(user.phone_number, "insertBulletin", bulletinError, {
+          id: createdBulletin.id,
+          blurb: "",
+          images: [],
+          owner: user.phone_number,
+          saved_notes: "",
+        });
+        console.error("Error creating bulletin:", bulletinError);
+        throw bulletinError;
+      }
+
+      const bulletinId = createdBulletin.id;
+      console.log("::*", { success: true, bulletinId, newUserData });
+      return { success: true, bulletinId, newUserData };
+    } catch (error) {
+      console.error("Error in createNewUser:", error);
+      return { success: false, error };
+    }
+  }
+);

@@ -1,22 +1,24 @@
-import React, { CSSProperties, useEffect, useState } from "react";
+import React, { CSSProperties, useEffect, useState, useMemo } from "react";
 import { useNavigate, useParams, useSearchParams } from "react-router-dom";
 import { format, addMonths, isBefore, isAfter } from "date-fns";
 import { useSpring, animated, useTransition } from "@react-spring/web";
 import Layout from "@/components/Layout";
-import ImageUploadGrid, { UploadedImage } from "@/components/ImageUploadGrid";
+import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
-import MonthlyTimer from "@/components/MonthlyTimer";
-import TypewriterText from "@/components/TypewriterText";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Send, Image, FileText, LoaderCircle, Heart } from "lucide-react";
 import { Calendar } from "@/components/ui/calendar";
 import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
-import { anonhandleSubmitBulletin } from "@/lib/utils";
+import {
+  anonhandleSubmitBulletin,
+  ChangeCategory,
+  getDetailedDifferences,
+  handleCategoryChange,
+} from "@/lib/utils";
 import axios from "axios";
 import "@sjmc11/tourguidejs/src/scss/tour.scss"; // Styles
 import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
@@ -28,8 +30,9 @@ import BigCalendar from "@/components/BigCalendar";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { useDialog } from "@/providers/dialog-provider";
 import FriendModalContent from "@/components/FriendModalContent";
-import { Bulletin } from "@/lib/api";
+import { Bulletin, createNewBulletin } from "@/lib/api";
 import { isEqual } from "lodash";
+import { v4 } from "uuid";
 
 export enum EditState {
   IMAGES = "images",
@@ -78,7 +81,21 @@ const BulletinPage: React.FC<{
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [blurb, setBlurb] = useState<string | null>(null);
-  const [hover, setHover] = useState<boolean>(false);
+  const [previewHover, setPreviewHover] = useState<boolean>(false);
+  const [buttonHover, setButtonHover] = useState<boolean>(false);
+
+  const hover = {
+    preview: previewHover,
+    buttons: buttonHover,
+  };
+
+  const setHover = useMemo(
+    () => ({
+      preview: (hover: boolean) => setPreviewHover(hover),
+      buttons: (hover: boolean) => setButtonHover(hover),
+    }),
+    [setPreviewHover, setButtonHover]
+  );
   const [selectedTemplate, setSelectedTemplate] = useState<{
     id: number;
     name: string;
@@ -193,7 +210,6 @@ const BulletinPage: React.FC<{
     }
   };
 
-  console.log("images", images);
   const saveBulletin = async () => {
     if (
       isEqual(
@@ -290,8 +306,6 @@ const BulletinPage: React.FC<{
     }
   };
 
-  console.log("User:", images);
-
   const [searchParams] = useSearchParams();
 
   const tourSteps: TourGuideStep[] = [
@@ -360,6 +374,24 @@ const BulletinPage: React.FC<{
     isInitialized,
   } = useTourGuideWithInit();
 
+  const { dialog, close } = useDialog();
+
+  const getStartedFunc = async () => {
+    const url = new URL(window.location.href);
+    url.searchParams.delete("monthAlert");
+    window.history.replaceState(null, "", url.toString());
+    await dispatch(createNewBulletin({ user }))
+      .unwrap()
+      .then((res) => {
+        console.log("::*", res);
+        if (res.success) {
+          navigate(`/bulletin/${res.bulletinId}`);
+        } else {
+          toast.error("We couldn't create a new bulletin. Please try again.");
+        }
+      });
+  };
+
   useEffect(() => {
     const onboarding = searchParams.get("onboarding");
     if (onboarding && !isVisible && !isInitialized) {
@@ -368,12 +400,31 @@ const BulletinPage: React.FC<{
       onBeforeStepChange((currentStep) => {
         console.log("currentStep", currentStep);
         if (currentStep == 1) {
-          setHover(true);
+          setPreviewHover(true);
         }
         if (currentStep == 5) {
           setTabValue("notes");
         }
       });
+    }
+    const monthAlert = searchParams.get("monthAlert");
+    if (monthAlert) {
+      dialog(
+        <div>
+          <h1>It's a new month! Let's create a new bulletin.</h1>
+          <Button
+            onClick={() => {
+              getStartedFunc();
+              close(true);
+            }}
+          >
+            Get Started
+          </Button>
+        </div>,
+        {
+          additionalClosingAction: getStartedFunc,
+        }
+      );
     }
   }, [
     searchParams,
@@ -428,7 +479,6 @@ const BulletinPage: React.FC<{
 
   useEffect(() => {
     async function syncPostions() {
-      // await updatePositions();
       await tour.updatePositions();
     }
     if (isOnboarding && tabValue === "notes") {
@@ -439,21 +489,47 @@ const BulletinPage: React.FC<{
     }
   }, [isOnboarding, tabValue, tour]);
 
-  const { dialog } = useDialog();
-
   useEffect(() => {
-    console.log("existingBulletin", existingBulletin);
     if (existingBulletin) {
       setImages(existingBulletin.images);
       setBlurb(existingBulletin.blurb);
-      setSavedNotes(existingBulletin.savedNotes);
-      console.log(existingBulletin.savedNotes);
+      setSavedNotes(existingBulletin.saved_notes);
+      console.log(existingBulletin.saved_notes);
       const template = templates.find(
         (template) => template.id === Number(existingBulletin.template)
       );
       setSelectedTemplate(template);
     }
   }, [existingBulletin]);
+
+  useEffect(() => {
+    const diff = getDetailedDifferences(
+      {
+        images: refereenceBulletinData?.images,
+        blurb: refereenceBulletinData?.blurb,
+        saved_notes: refereenceBulletinData?.saved_notes,
+        template: refereenceBulletinData?.template,
+      },
+      {
+        images: images,
+        blurb: blurb,
+        saved_notes: savedNotes,
+        template: selectedTemplate.id.toString(),
+      }
+    );
+
+    if (existingBulletin && diff.unequal) {
+      console.log("diff", diff);
+      handleCategoryChange(Object.keys(diff.differences)[0] as ChangeCategory, {
+        images: images,
+        blurb: blurb,
+        saved_notes: savedNotes,
+        template: selectedTemplate.id.toString(),
+        id: existingBulletin?.id,
+      });
+    }
+    console.log("🧠", existingBulletin);
+  }, [blurb, images, savedNotes, selectedTemplate, existingBulletin]);
 
   return (
     <Layout>
@@ -488,6 +564,28 @@ const BulletinPage: React.FC<{
               <TabsTrigger value="notes">Dates</TabsTrigger>
             </TabsList>
           </Tabs>
+          <Button
+            data-tg-title="submit button"
+            variant="primary"
+            onClick={() => {
+              if (existingBulletin) {
+                toast.loading("saving bulletin");
+                saveBulletin();
+                toast.dismiss();
+              } else {
+                handleSubmitBulletin();
+
+                if (isOnboarding) {
+                  dialog(<FriendModalContent />);
+                  setTimeout(() => {
+                    tour?.nextStep();
+                  }, 500);
+                }
+              }
+            }}
+          >
+            {existingBulletin ? "Save" : "Submit"}
+          </Button>
         </aside>
 
         <section data-tg-title="Image Housing" className="flex gap-4 relative">
@@ -496,7 +594,6 @@ const BulletinPage: React.FC<{
               <animated.div style={previewAnimation} className="flex-shrink-0">
                 <PageDesignPreview
                   // scale={isMobile && 2}
-                  
                   currentStep={currentStep}
                   onboarding={isOnboarding}
                   hover={hover}
@@ -539,30 +636,6 @@ const BulletinPage: React.FC<{
             />
           )}
         </section>
-        <aside className="flex justify-end mt-[7.5vh]">
-          <Button
-            data-tg-title="submit button"
-            variant="primary"
-            onClick={() => {
-              if (existingBulletin) {
-                toast.loading("saving bulletin");
-                saveBulletin();
-                toast.dismiss();
-              } else {
-                handleSubmitBulletin();
-
-                if (isOnboarding) {
-                  dialog(<FriendModalContent />);
-                  setTimeout(() => {
-                    tour?.nextStep();
-                  }, 500);
-                }
-              }
-            }}
-          >
-            {existingBulletin ? "Save" : "Submit"}
-          </Button>
-        </aside>
       </div>
     </Layout>
   );

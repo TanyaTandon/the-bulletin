@@ -193,7 +193,7 @@ const ImageUploadGrid: React.FC<{
                 <Plus className="w-5 h-5 text-violet-500" />
                 {images.length === 0 && index === 0 && (
                   <span className="text-xs text-muted-foreground absolute bottom-1">
-                    Add up to {imageMax} images
+                    Add {imageMax} images
                   </span>
                 )}
               </Card>

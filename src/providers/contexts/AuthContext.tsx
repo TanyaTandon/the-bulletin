@@ -7,7 +7,7 @@ import React, {
 } from "react";
 import { useStytch } from "@stytch/react";
 import { useAppDispatch } from "@/redux";
-import { fetchUser, User } from "@/redux/user";
+import { fetchAllBulletins, fetchBulletins, fetchUser, User } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "sonner";
 import { NavigateFunction, useNavigate } from "react-router-dom";
@@ -158,22 +158,43 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
           .then(async (result) => {
             if (result.status_code === 200) {
               const phone = result.user.phone_numbers[0].phone_number;
-              await dispatch(fetchUser(phone)).then((userDispatchResponse) => {
-                const userRes: User = userDispatchResponse.payload as User;
-                console.log(userRes);
-                if (userRes.bulletins.length > 0) {
-                  navigate(`/bulletin/${userRes.bulletins[0]}`);
-                } else {
-                  navigate("/bulletin");
+              await dispatch(fetchUser(phone)).then(
+                async (userDispatchResponse) => {
+                  const userRes: User = userDispatchResponse.payload as User;
+                  console.log(userRes);
+                  if (userRes.bulletins.length > 0) {
+                    const bulletins = await dispatch(fetchAllBulletins(phone)).unwrap();
+
+                    const currentMonth = new Date().getMonth() + 1;
+
+                    if (
+                      bulletins.length > 0 &&
+                      bulletins.some(
+                        (bulletin) => bulletin.month === currentMonth
+                      )
+                    ) {
+                      navigate(
+                        `/bulletin/${
+                          bulletins.find(
+                            (bulletin) => bulletin.month === currentMonth
+                          )?.id
+                        }`
+                      );
+                    } else {
+                      navigate("/bulletin?monthAlert=true");
+                    }
+                  } else {
+                    navigate("/bulletin");
+                  }
+                  // Close any open dialogs
+                  const closeDialogButton =
+                    document.getElementById("close-dialog");
+                  if (closeDialogButton) {
+                    closeDialogButton.click();
+                  }
+                  toast.success("Welcome back! You're now signed in.");
                 }
-                // Close any open dialogs
-                const closeDialogButton =
-                  document.getElementById("close-dialog");
-                if (closeDialogButton) {
-                  closeDialogButton.click();
-                }
-                toast.success("Welcome back! You're now signed in.");
-              });
+              );
             }
             return result;
           });
@@ -363,5 +384,9 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     validatePhoneNumber,
   };
 
-  return <CreateAuthContext.Provider value={value}>{children}</CreateAuthContext.Provider>;
+  return (
+    <CreateAuthContext.Provider value={value}>
+      {children}
+    </CreateAuthContext.Provider>
+  );
 };

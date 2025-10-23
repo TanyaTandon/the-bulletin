@@ -1,7 +1,72 @@
+// Measure text width using canvas for precise calculations
+const measureTextWidth = (
+  text: string,
+  fontSize: number,
+  fontFamily: string = "Delight",
+  fontWeight: string = "900"
+): number => {
+  // Create a temporary canvas element to measure text
+  const canvas = document.createElement("canvas");
+  const context = canvas.getContext("2d");
+
+  if (!context) return text.length * fontSize * 0.6; // Fallback estimation
+
+  // Set the font properties to match the CSS exactly
+  context.font = `${fontWeight} ${fontSize}px ${fontFamily}`;
+
+  // Measure the text width
+  const metrics = context.measureText(text);
+
+  // Account for letter-spacing: -0.02em (which is -0.02 * fontSize)
+  const letterSpacing = -0.02 * fontSize;
+  const adjustedWidth = metrics.width + (text.length - 2) * letterSpacing;
+
+  return adjustedWidth;
+};
+
+// Calculate appropriate font size based on actual text width measurement
+export const calculateFontSize = (
+  name: string,
+  maxWidth: number = 500
+): number => {
+  const baseFontSize = 180;
+  const minFontSize = 25;
+
+  // Measure the actual width of the text at base font size
+  const textWidthAtBaseSize = measureTextWidth(name, baseFontSize);
+
+  console.log(`Font calculation for "${name}":`, {
+    textWidthAtBaseSize,
+    maxWidth,
+    baseFontSize,
+    fits: textWidthAtBaseSize <= maxWidth,
+  });
+
+  // If it fits at base size, return base size
+  if (textWidthAtBaseSize <= maxWidth) {
+    console.log(`Using base font size: ${baseFontSize}px`);
+    return baseFontSize;
+  }
+
+  // Calculate the scale factor needed to fit within max width
+  const scaleFactor = maxWidth / textWidthAtBaseSize;
+  const calculatedFontSize = Math.floor(baseFontSize * scaleFactor);
+  const finalFontSize = Math.max(calculatedFontSize, minFontSize);
+
+  console.log(
+    `Scaling font: ${baseFontSize}px → ${finalFontSize}px (scale factor: ${scaleFactor.toFixed(
+      3
+    )})`
+  );
+
+  return finalFontSize;
+};
+
 export const Nick = (
   images: string[],
   bodyText: string,
-  name: string
+  name: string,
+  fontSize: number = 180
 ) => `<!DOCTYPE html>
   <html>
   <head>
@@ -66,7 +131,7 @@ export const Nick = (
         background-position: center;
       }
       .name {
-        font-size: 180px;
+        font-size: ${fontSize}px;
         font-weight: 900;
         color: #000;
         text-align: left;
@@ -98,30 +163,14 @@ export const Nick = (
       </div>
       <h1 class="name" id="nameElement">${name.toLowerCase()}</h1>
     </div>
-    <script>
-      function adjustFontSize() {
-        const nameElement = document.getElementById('nameElement');
-        const container = nameElement.parentElement;
-        let fontSize = 180;
-        
-        nameElement.style.fontSize = fontSize + 'px';
-        
-        while (nameElement.scrollWidth > container.clientWidth && fontSize > 75) {
-          fontSize -= 5;
-          nameElement.style.fontSize = fontSize + 'px';
-        }
-      }
-      
-      window.addEventListener('load', adjustFontSize);
-      window.addEventListener('resize', adjustFontSize);
-    </script>
   </body>
   </html>`;
 
 export const Lila = (
   images: string[],
   bodyText: string,
-  name: string
+  name: string,
+  fontSize: number = 180
 ) => `<!DOCTYPE html>
   <html>
   <head>
@@ -203,30 +252,14 @@ export const Lila = (
       </div>
       <h1 class="name" id="nameElement">${name.toLowerCase()}</h1>
     </div>
-    <script>
-      function adjustFontSize() {
-        const nameElement = document.getElementById('nameElement');
-        const container = nameElement.parentElement;
-        let fontSize = 180;
-        
-        nameElement.style.fontSize = fontSize + 'px';
-        
-        while (nameElement.scrollWidth > container.clientWidth && fontSize > 75) {
-          fontSize -= 5;
-          nameElement.style.fontSize = fontSize + 'px';
-        }
-      }
-      
-      window.addEventListener('load', adjustFontSize);
-      window.addEventListener('resize', adjustFontSize);
-    </script>
   </body>
   </html>`;
 
 export const Tanya = (
   images: string[],
   bodyText: string,
-  name: string
+  name: string,
+  fontSize: number = 180
 ) => `<!DOCTYPE html>
   <html>
   <head>
@@ -337,22 +370,23 @@ export const Tanya = (
       <h1 class="name" id="nameElement">${name.toLowerCase()}</h1>
     </div>
     <script>
-      function adjustFontSize() {
-        const nameElement = document.getElementById('nameElement');
-        const container = nameElement.parentElement;
-        let fontSize = 180;
-        
-        nameElement.style.fontSize = fontSize + 'px';
-        
-        while (nameElement.scrollWidth > container.clientWidth && fontSize > 75) {
-          fontSize -= 5;
-          nameElement.style.fontSize = fontSize + 'px';
-        }
-      }
+    function adjustFontSize() {
+      const nameElement = document.getElementById('nameElement');
+      const container = nameElement.parentElement;
+      let fontSize = 180;
       
-      window.addEventListener('load', adjustFontSize);
-      window.addEventListener('resize', adjustFontSize);
-    </script>
+      nameElement.style.fontSize = fontSize + 'px';
+      
+      // Compare scrollWidth of the element to its own offsetWidth (not container)
+      while (nameElement.scrollWidth > nameElement.offsetWidth && fontSize > 75) {
+        fontSize -= 5;
+        nameElement.style.fontSize = fontSize + 'px';
+      }
+    }
+    
+    window.addEventListener('load', adjustFontSize);
+    window.addEventListener('resize', adjustFontSize);
+  </script>
   </body>
   </html>`;
 

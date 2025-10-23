@@ -1,26 +1,11 @@
 "use client";
 
-import { useState, useEffect } from "react";
-import Image from "next/image";
-import {
-  ChevronLeft,
-  ChevronRight,
-  Plus,
-  Search,
-  Settings,
-  Menu,
-  Clock,
-  MapPin,
-  Users,
-  Calendar,
-  Pause,
-  Sparkles,
-  X,
-  Heart,
-} from "lucide-react";
+import { useState } from "react";
+import { X, Heart } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
+import { store } from "@/redux";
 
 export interface CalendarNote {
   date: Date;
@@ -32,12 +17,9 @@ const BigCalendar: React.FC<{
   savedNotes: CalendarNote[];
   setSavedNotes: React.Dispatch<React.SetStateAction<CalendarNote[]>>;
 }> = ({ savedNotes, setSavedNotes }) => {
-  // Calendar state
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [calendarNote, setCalendarNote] = useState("");
-
-  console.log(savedNotes);
 
   // Calendar functionality
   const handleDateClick = (date: Date) => {
@@ -67,9 +49,10 @@ const BigCalendar: React.FC<{
     setCalendarNote("");
   };
 
+  console.log(savedNotes);
   const getNoteForDate = (date: Date) => {
     return savedNotes.find(
-      (note) => note.date.toDateString() === date.toDateString()
+      (note) => new Date(note.date).toDateString() === date.toDateString()
     );
   };
 
@@ -133,10 +116,10 @@ const BigCalendar: React.FC<{
                         isCurrentMonth && handleDateClick(currentDate)
                       }
                     >
-                      <div className="flex justify-between flex-row-reverse items-start mb-2">
+                      <div className="flex justify-between flex-row items-start mb-2">
                         <div className="relative">
                           <span
-                            className={`text-sm font-medium ${
+                            className={`text-sm font-medium px-3 ${
                               isToday
                                 ? "bg-blue-500 text-black w-6 h-6 rounded-full flex items-center justify-center"
                                 : "text-black"

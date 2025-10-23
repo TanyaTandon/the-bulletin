@@ -1,3 +1,4 @@
+import { RESET_ALL_SLICES } from "../../constants.ts";
 import { PayloadAction } from "@reduxjs/toolkit";
 
 import { createSlice } from "@reduxjs/toolkit";
@@ -7,7 +8,7 @@ export type ControllerState = {
 };
 
 const initialState: ControllerState = {
-    showFriendsModal:false
+  showFriendsModal: false,
 };
 export const controllerUpdater = createSlice({
   name: "controllerUpdater",
@@ -16,6 +17,12 @@ export const controllerUpdater = createSlice({
     setShowFriendsModal: (state, action: PayloadAction<boolean>) => {
       state.showFriendsModal = action.payload;
     },
+  },
+  extraReducers: (builder) => {
+    builder.addCase(RESET_ALL_SLICES, (state) => {
+      state = initialState;
+      return state;
+    });
   },
 });
 
