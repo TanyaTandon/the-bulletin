@@ -33,6 +33,7 @@ import FriendModalContent from "@/components/FriendModalContent";
 import { Bulletin, createNewBulletin } from "@/lib/api";
 import { isEqual } from "lodash";
 import { v4 } from "uuid";
+import { useStytch } from "@stytch/react";
 
 export enum EditState {
   IMAGES = "images",
@@ -83,6 +84,7 @@ const BulletinPage: React.FC<{
   const [blurb, setBlurb] = useState<string | null>(null);
   const [previewHover, setPreviewHover] = useState<boolean>(false);
   const [buttonHover, setButtonHover] = useState<boolean>(false);
+  const [loaded, setLoaded] = useState(false);
 
   const hover = {
     preview: previewHover,
@@ -207,102 +209,6 @@ const BulletinPage: React.FC<{
       toast.error("We couldn't save your bulletin. Please try again.");
     } finally {
       setIsSubmitting(false);
-    }
-  };
-
-  const saveBulletin = async () => {
-    if (
-      isEqual(
-        {
-          images: refereenceBulletinData?.images,
-          blurb: refereenceBulletinData?.blurb,
-          savedNotes: refereenceBulletinData?.savedNotes,
-          template: refereenceBulletinData?.template,
-        },
-        {
-          images: images,
-          blurb: blurb,
-          savedNotes: savedNotes,
-          template: selectedTemplate.id,
-        }
-      )
-    ) {
-      toast.error("No changes to save");
-      return;
-    } else {
-      const formData = new FormData();
-
-      if (blurb !== refereenceBulletinData?.blurb) {
-        formData.append("blurb", blurb);
-      }
-      if (!isEqual(savedNotes, refereenceBulletinData?.savedNotes)) {
-        formData.append("savedNotes", JSON.stringify(savedNotes));
-      }
-      if (selectedTemplate.id !== refereenceBulletinData?.template) {
-        formData.append("template", selectedTemplate.id);
-      }
-
-      formData.append("id", refereenceBulletinData?.id);
-
-      console.log({
-        images: refereenceBulletinData?.images,
-        blurb: refereenceBulletinData?.blurb,
-        savedNotes: refereenceBulletinData?.savedNotes,
-        template: refereenceBulletinData?.template,
-      });
-
-      if (!isEqual(images, refereenceBulletinData?.images)) {
-        const processedImages = [];
-
-        for (let i = 0; i < images.length; i++) {
-          const image = images[i];
-
-          if (image.url.includes("blob")) {
-            const fetchBlob = await fetch(image.url, {
-              method: "GET",
-              headers: {
-                Accept: "image/png",
-              },
-            });
-
-            const blob = await fetchBlob.blob();
-            console.log("Blob created:", blob);
-
-            // Create a filename for the image
-            const filename = `image_${i}_${Date.now()}.png`;
-
-            // Append the actual file to FormData
-            formData.append(`images`, blob, filename);
-
-            // Keep track of image metadata
-            processedImages.push({
-              id: image.id,
-              filename: filename,
-            });
-          } else {
-            processedImages.push({
-              id: image.id,
-            });
-          }
-        }
-
-        formData.append("imageMetadata", JSON.stringify(processedImages));
-      }
-
-      const response = await axios.put(
-        "http://localhost:3900/bulletinUpdate",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log("response", response);
-      console.log("FormData:", formData);
-
-      toast.error("not good comp to save");
     }
   };
 
@@ -496,13 +402,19 @@ const BulletinPage: React.FC<{
       setSavedNotes(existingBulletin.saved_notes);
       console.log(existingBulletin.saved_notes);
       const template = templates.find(
-        (template) => template.id === Number(existingBulletin.template)
+        (template) => template.id === existingBulletin.template
       );
       setSelectedTemplate(template);
+      console.log("loaded");
+      setLoaded(true);
     }
   }, [existingBulletin]);
 
+  const stytch = useStytch();
+
+  const tokens = stytch.session.getTokens();
   useEffect(() => {
+    console.log();
     const diff = getDetailedDifferences(
       {
         images: refereenceBulletinData?.images,
@@ -514,22 +426,25 @@ const BulletinPage: React.FC<{
         images: images,
         blurb: blurb,
         saved_notes: savedNotes,
-        template: selectedTemplate.id.toString(),
+        template: selectedTemplate.id,
       }
     );
 
-    if (existingBulletin && diff.unequal) {
-      console.log("diff", diff);
-      handleCategoryChange(Object.keys(diff.differences)[0] as ChangeCategory, {
-        images: images,
-        blurb: blurb,
-        saved_notes: savedNotes,
-        template: selectedTemplate.id.toString(),
-        id: existingBulletin?.id,
-      });
+    if (existingBulletin && diff.unequal && loaded) {
+      handleCategoryChange(
+        Object.keys(diff.differences)[0] as ChangeCategory,
+        {
+          images: images,
+          blurb: blurb,
+          saved_notes: savedNotes,
+          template: selectedTemplate.id,
+          id: existingBulletin?.id,
+        },
+        tokens
+      );
     }
     console.log("🧠", existingBulletin);
-  }, [blurb, images, savedNotes, selectedTemplate, existingBulletin]);
+  }, [loaded, blurb, images, savedNotes, selectedTemplate, existingBulletin]);
 
   return (
     <Layout>
@@ -545,47 +460,53 @@ const BulletinPage: React.FC<{
               day: "numeric",
             })}
           </h1>
-          <Tabs
-            defaultValue="page"
-            onValueChange={(e) => {
-              if (isOnboarding && e === "notes") {
-                tour?.nextStep();
-                setTimeout(async () => {
-                  console.log("updating positions");
-                  await tour?.updatePositions();
-                }, 500);
-              }
-              setTabValue(e);
-            }}
-            data-tg-title="tab housing"
+          <section
+            className={`${
+              isMobile ? "flex justify-between" : "block"
+            } items-center gap-4`}
           >
-            <TabsList>
-              <TabsTrigger value="page">Page</TabsTrigger>
-              <TabsTrigger value="notes">Dates</TabsTrigger>
-            </TabsList>
-          </Tabs>
-          <Button
-            data-tg-title="submit button"
-            variant="primary"
-            onClick={() => {
-              if (existingBulletin) {
-                toast.loading("saving bulletin");
-                saveBulletin();
-                toast.dismiss();
-              } else {
-                handleSubmitBulletin();
-
-                if (isOnboarding) {
-                  dialog(<FriendModalContent />);
-                  setTimeout(() => {
-                    tour?.nextStep();
+            <Tabs
+              defaultValue="page"
+              onValueChange={(e) => {
+                if (isOnboarding && e === "notes") {
+                  tour?.nextStep();
+                  setTimeout(async () => {
+                    console.log("updating positions");
+                    await tour?.updatePositions();
                   }, 500);
                 }
-              }
-            }}
-          >
-            {existingBulletin ? "Save" : "Submit"}
-          </Button>
+                setTabValue(e);
+              }}
+              data-tg-title="tab housing"
+            >
+              <TabsList>
+                <TabsTrigger value="page">Page</TabsTrigger>
+                <TabsTrigger value="notes">Dates</TabsTrigger>
+              </TabsList>
+            </Tabs>
+            <Button
+              data-tg-title="submit button"
+              variant="primary"
+              onClick={() => {
+                if (existingBulletin) {
+                  toast.loading("saving bulletin");
+                  // saveBulletin();
+                  toast.dismiss();
+                } else {
+                  handleSubmitBulletin();
+
+                  if (isOnboarding) {
+                    dialog(<FriendModalContent />);
+                    setTimeout(() => {
+                      tour?.nextStep();
+                    }, 500);
+                  }
+                }
+              }}
+            >
+              {existingBulletin ? "Save" : "Submit"}
+            </Button>
+          </section>
         </aside>
 
         <section data-tg-title="Image Housing" className="flex gap-4 relative">

@@ -16,6 +16,7 @@ import { Dispatch } from "@reduxjs/toolkit";
 import { isEqual } from "lodash";
 import { store } from "@/redux";
 import axios from "axios";
+import { SessionTokens } from "@stytch/vanilla-js";
 
 export function cn(...inputs: ClassValue[]) {
   return twMerge(clsx(inputs));
@@ -106,7 +107,8 @@ let blurbTimer: NodeJS.Timeout | null = null;
 
 export async function handleCategoryChange(
   category: ChangeCategory,
-  bulletinData: Partial<Bulletin>
+  bulletinData: Partial<Bulletin>,
+  tokens: SessionTokens
 ): Promise<void> {
   switch (category) {
     case ChangeCategory.SAVED_NOTES:
@@ -138,12 +140,18 @@ export async function handleCategoryChange(
         const uploads = await Promise.all(
           images.map(async (item) => {
             const formData = new FormData();
-            formData.append("fileName", item.url);
-            formData.append("file", item.file);
-            await axios.post(
-              "https://be.thebulletin.app/image_processing",
-              formData
-            );
+            if (item.file) {
+              formData.append("bulletin_id", bulletinData.id);
+              formData.append("filename", item.id);
+              formData.append("image", item.file);
+              await fetch("http://localhost:8080/api/image_processing_ffmpeg", {
+                method: "POST",
+                body: formData,
+                headers: {
+                  Authorization: `Bearer ${tokens.session_jwt}`,
+                },
+              });
+            }
           })
         );
 

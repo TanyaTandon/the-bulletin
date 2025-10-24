@@ -4,12 +4,11 @@ import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Separator } from "./ui/separator";
 
 export interface UploadedImage {
   id: string;
   url: string;
-  file: File;
+  file?: File;
 }
 
 const ImageUploadGrid: React.FC<{

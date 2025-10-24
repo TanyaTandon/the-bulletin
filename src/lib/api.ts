@@ -26,7 +26,7 @@ export type Bulletin = {
   images: UploadedImage[];
   owner: string;
   savedNotes: CalendarNote[];
-  template: string;
+  template: number;
   month: number;
 };
 
@@ -71,7 +71,6 @@ export async function getBulletin(bulletinId: string): Promise<Bulletin> {
     .from("bulletins")
     .select("*")
     .eq("id", bulletinId);
-  console.log("raw Bulletin:", data);
   return data[0] as Bulletin;
 }
 
@@ -320,6 +319,8 @@ export async function getForeignUserImages(id: string) {
   return data;
 }
 
+export async function uploadImage()
+
 export const createNewBulletin = createAsyncThunk(
   "user/createNewBulletin",
   async ({ user }: NewBulletinItem, { dispatch }) => {
@@ -336,7 +337,7 @@ export const createNewBulletin = createAsyncThunk(
           images: [],
           owner: user.phone_number,
           saved_notes: [],
-          template: "0",
+          template: 0,
           month: new Date().getMonth() + 1,
         })
         .select("*")

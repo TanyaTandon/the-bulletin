@@ -254,10 +254,6 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   const buttonContainerRef = useRef<HTMLDivElement>(null);
 
   const [buttonMouseOver, setButtonMouseOver] = useState<boolean>(false);
-  const handleButtonMouseOver = useCallback(() => {
-    console.log("🍕 handleButtonMouseOver");
-    setButtonMouseOver(true);
-  }, []);
 
   const handleButtonMouseLeave = useCallback(() => {
     setButtonMouseOver(false);
@@ -302,7 +298,6 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     [editState, tour, onboarding, setHover, setter]
   );
 
-  // Calculate arc positions for buttons (scaled)
   const containerCenterX = (iframeWidth || 400) / 2.25;
   const getArcPosition = (index: number, total: number) => {
     const arcRadius = 120 * scale; // Scale the arc radius
@@ -393,9 +388,19 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     return style;
   }, [scaledWidth, tiltProps]);
 
+  console.log(iframeRef.current);
+
   return (
     <section className="w-full max-w-6xl mx-auto p-6">
       <div
+        style={
+          isMobile
+            ? {
+                paddingRight: "0px",
+                paddingLeft: "0px",
+              }
+            : {}
+        }
         className="container relative"
         onMouseEnter={!isMobile ? handleContainerMouseEnter : undefined}
         onMouseMove={
@@ -421,7 +426,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
             {buttonTransitions((style, item, _, index) => (
               <animated.div
                 data-tg-title={`select ${item.id}`}
-                onMouseOver={(e) => {
+                onMouseOver={() => {
                   setButtonMouseOver(true);
                   if (!buttonMouseOver) {
                     setHover.buttons(true);
@@ -441,11 +446,21 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
               </animated.div>
             ))}
           </div>
+          {isMobile ? (
+            <div
+              onClick={() => {
+                setHover.buttons(true);
+              }}
+              style={{
+                position: "absolute",
+                width: iframeRef.current?.offsetWidth,
+                height: iframeRef.current?.offsetHeight,
+              }}
+            ></div>
+          ) : null}
           <iframe
-            // onMouseOver={!isMobile && handleMouseEnter}
-            // onMouseLeave={!isMobile && handleMouseLeave}
             ref={iframeRef}
-            className="border-0"
+            className="iframeHERE border-0"
             style={{
               width: "100%", // Fill container width
               height: frameHeight,
