@@ -170,12 +170,11 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     }
   };
 
-  const [fontSize, setFontSize] = useState<number>(0);
 
   const templates = useMemo(() => {
     const name = user?.firstName ?? "nick";
     const fontSize = calculateFontSize(name);
-    setFontSize(fontSize);
+
 
     return {
       0: Nick(images, bodyText, name, fontSize),
@@ -295,7 +294,6 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     return () => clearTimeout(timeoutId);
   }, [images, bodyText, updateIframeContent]);
 
-  const [buttonMouseOver, setButtonMouseOver] = useState<boolean>(false);
 
   const handleReplaceImage = useCallback(() => {
     if (fileInputRef.current) {
@@ -318,7 +316,6 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
 
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
-      console.log("event.data", event);
       if (event.data?.type === "BUTTON_CLICKED") {
         if (event.data.buttonId === "edit") {
           handleReplaceImage();
@@ -338,7 +335,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     return () => {
       window.removeEventListener("message", handleMessage);
     };
-  }, []);
+  }, [isMobile]);
 
   const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
@@ -357,6 +354,11 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       };
       console.log("setting image", newImage, imageIndex);
       setImages(newImage, imageIndex);
+    // INSERT_YOUR_CODE
+    const iframe = document.querySelector('iframe');
+    if (iframe && iframe.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "HIDE_BUTTONS" }, "*");
+    }
     }
 
     if (event.target.value) {
@@ -383,8 +385,6 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
 
     templateHolder.addEventListener("mouseleave", function () {
       setMO(false);
-      // or remove it entirely:
-      // this.removeAttribute('data-hover');
     });
     return () => {
       templateHolder.removeEventListener("mouseenter", function () {
@@ -479,6 +479,13 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
                   updateCurrentStepTarget("[data-tg-title='template-button']");
                 }
                 setEditState(EditState.TEMPLATE);
+                if (isMobile && editState === EditState.TEMPLATE) {
+                  setTimeout(() => {
+                    document
+                      .querySelector(".editStateWrapper")
+                      ?.scrollIntoView({ behavior: "smooth" });
+                  }, 500);
+                }
               }}
             >
               <NotebookIcon />

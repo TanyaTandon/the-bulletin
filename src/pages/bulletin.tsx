@@ -279,6 +279,7 @@ const BulletinPage: React.FC<{
 
     console.log(existingBulletin, diff.unequal, loaded);
     if (existingBulletin && diff.unequal && loaded) {
+      console.log("❤️",diff.differences);
       handleCategoryChange(
         Object.keys(diff.differences)[0] as ChangeCategory,
         {
@@ -292,10 +293,9 @@ const BulletinPage: React.FC<{
         imageIndex + 1
       ).then((arg) => {
         console.log("arg", arg);
-        if (tour && arg.image) {
-          tour?.nextStep();
-        }
+
         const bulletin = JSON.parse(arg.payload.data[0].bulletin);
+        console.log(bulletin);
         setImages(
           bulletin.images.map((item) => ({
             id: item.id,
@@ -305,15 +305,7 @@ const BulletinPage: React.FC<{
         setImageIndex(null);
       });
     }
-  }, [
-    tour,
-    loaded,
-    blurb,
-    images,
-    savedNotes,
-    selectedTemplate,
-    existingBulletin,
-  ]);
+  }, [loaded, blurb, images, savedNotes, selectedTemplate, existingBulletin]);
 
   const imageSetFunction = (
     imageToInsert: UploadedImage,
@@ -339,7 +331,9 @@ const BulletinPage: React.FC<{
               })}
             </h1>
           )}
-          <section className={`${"flex justify-between"} items-center gap-4`}>
+          <section
+            className={`tabHousing ${"flex justify-between"} items-center gap-4`}
+          >
             <Tabs
               defaultValue="page"
               onValueChange={(e) => {

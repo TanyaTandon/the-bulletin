@@ -46,6 +46,9 @@ const Header: React.FC = () => {
         </Link>
         {!isMobile ? (
           <div className="flex items-center space-x-2">
+            <Button variant="ghost" onClick={() => navigate("/catalogue")}>
+              Your Bulletins
+            </Button>
             <Button
               onClick={async () => {
                 dialog(

@@ -6,9 +6,10 @@ const NavSheetContent: React.FC = () => {
   const stytch = useStytch();
   return (
     <section className="flex flex-col gap-4">
-      <Button variant="ghost">My Bulletins</Button>
+      <Button variant="ghost">
+        <a href="/bulletins">My Bulletins</a>
+      </Button>
       <Button variant="ghost">Feedback</Button>
-      
     </section>
   );
 };

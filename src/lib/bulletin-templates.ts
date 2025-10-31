@@ -36,13 +36,6 @@ export const calculateFontSize = (
   const textWidthAtBaseSize = measureTextWidth(name, baseFontSize);
   // alert(`textWidthAtBaseSize: ${textWidthAtBaseSize}`);
 
-  console.log(`Font calculation for "${name}":`, {
-    textWidthAtBaseSize,
-    maxWidth,
-    baseFontSize,
-    fits: textWidthAtBaseSize <= maxWidth,
-  });
-
   // If it fits at base size, return base size
   if (textWidthAtBaseSize <= maxWidth) {
     console.log(`Using base font size: ${baseFontSize}px`);
@@ -53,12 +46,6 @@ export const calculateFontSize = (
   const scaleFactor = maxWidth / textWidthAtBaseSize;
   const calculatedFontSize = Math.floor(baseFontSize * scaleFactor);
   const finalFontSize = Math.max(calculatedFontSize, minFontSize);
-
-  console.log(
-    `Scaling font: ${baseFontSize}px → ${finalFontSize}px (scale factor: ${scaleFactor.toFixed(
-      3
-    )})`
-  );
 
   return finalFontSize;
 };
@@ -828,7 +815,7 @@ export const Tanya = (
         background-size: cover;
         background-position: center;
       }
-      .small-photo {
+      .photo {
         width: 100%;
         height: 100px;
         background: #666;
@@ -935,7 +922,7 @@ export const Tanya = (
     <div class="container">
       <div class="main-content">
         <div class="left-column">
-          <div class="large-photo img" style="background-image: url('${
+          <div class="large-photo img" data-image-index="0" style="background-image: url('${
             images[0]
           }')"></div>
           <div class="text">
@@ -943,16 +930,16 @@ export const Tanya = (
           </div>
         </div>
         <div class="right-column">
-          <div class="small-photo img" style="background-image: url('${
+          <div class="photo img" data-image-index="1" style="background-image: url('${
             images[1]
           }')"></div>
-          <div class="small-photo img" style="background-image: url('${
+          <div class="photo img" data-image-index="2" style="background-image: url('${
             images[2]
           }')"></div>
-          <div class="small-photo img" style="background-image: url('${
+          <div class="photo img" data-image-index="3" style="background-image: url('${
             images[3]
           }')"></div>
-          <div class="small-photo img" style="background-image: url('${
+          <div class="photo img" data-image-index="4" style="background-image: url('${
             images[4]
           }')"></div>
         </div>

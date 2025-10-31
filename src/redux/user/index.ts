@@ -95,7 +95,15 @@ export const updateSavedNotes = createAsyncThunk(
         .select("*")
         .then((res) => {
           console.log(res.data);
-          dispatch(updateBulletin(res.data[0]));
+          const updatedBulletin = res.data[0];
+          const setData = {
+            ...updatedBulletin,
+            images: updatedBulletin.images.map((item) => ({
+              id: item.id,
+              url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
+            })),
+          };
+          dispatch(updateBulletin(setData));
           return res;
         });
 

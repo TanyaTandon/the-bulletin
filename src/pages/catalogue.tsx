@@ -57,28 +57,15 @@ const Catalogue: React.FC = () => {
                   className="w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none shadow-none"
                   // style={monthTextStyle}
                 >
-                  {/* <style>{`
-            .month-text::before {
-              content: var(--month-number);
-              position: absolute;
-              top: 50%;
-              left: 50%;
-              transform: translate(-50%, -50%);
-              font-size: 7.5rem;
-              font-weight: bold;
-              color: #FFF8EB;
-              opacity: 0.3;
-              z-index: -1;
-              pointer-events: none;
-              font-family: "Delight", "Inter";
-            }
-          `}</style> */}
                   <BulletinPreview
                     className={"scale-[.5] mx-auto"}
                     images={
                       catalogue
                         .find((bulletin) => bulletin.month === month)
-                        ?.images.map((image) => image.url) || []
+                        ?.images.map((image) => {
+                          console.log(image);
+                          return `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`;
+                        }) || []
                     }
                     firstName={
                       catalogue.find((bulletin) => bulletin.month === month)

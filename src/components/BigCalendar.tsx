@@ -7,6 +7,8 @@ import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { store } from "@/redux";
 import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
+import { useLocation } from "react-router";
+import { useSearchParams } from "react-router-dom";
 
 export interface CalendarNote {
   date: Date;
@@ -21,6 +23,8 @@ const BigCalendar: React.FC<{
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
   const [showNoteModal, setShowNoteModal] = useState(false);
   const [calendarNote, setCalendarNote] = useState("");
+
+  const [queryParams] = useSearchParams();
 
   // Calendar functionality
   const handleDateClick = (date: Date) => {
@@ -71,29 +75,21 @@ const BigCalendar: React.FC<{
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOffset = firstOfNextMonth.getDay();
 
-  const {
-    tour,
-    updateCurrentStepTarget,
-    updatePositions,
-    refreshDialog,
-    refresh,
-  } = useTourGuideWithInit();
-
-  const [mounted, setMounted] = useState(false);
+  const { tour, updateCurrentStepTarget, updatePositions } =
+    useTourGuideWithInit();
 
   useEffect(() => {
-    if (tour) {
+    if (tour && queryParams.get("onboarding") === "true") {
       setTimeout(() => {
         updateCurrentStepTarget("[data-tg-title='calendar housing']");
         updatePositions();
-        setMounted(true);
         const bodyEl = document.querySelector("body");
         if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
           bodyEl.classList.remove("tg-no-interaction");
         }
       }, 750);
     }
-  }, [tour, updateCurrentStepTarget, updatePositions]);
+  }, [tour, queryParams, updateCurrentStepTarget, updatePositions]);
 
   return (
     <div className="relative  w-full overflow-hidden">
