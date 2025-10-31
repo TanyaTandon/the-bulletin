@@ -7,12 +7,12 @@ import React, {
 } from "react";
 import { useStytch } from "@stytch/react";
 import { useAppDispatch } from "@/redux";
-import { fetchAllBulletins, fetchBulletins, fetchUser, User } from "@/redux/user";
+import { fetchAllBulletins, fetchUser, User } from "@/redux/user";
 import { createNewUser } from "@/lib/api";
 import { toast } from "sonner";
-import { NavigateFunction, useNavigate } from "react-router-dom";
+import { NavigateFunction } from "react-router-dom";
 import sendError from "@/hooks/use-sendError";
-import { useDialog } from "../dialog-provider";
+import { setTokens } from "@/redux/tokens";
 
 type AuthResponse = {
   request_id: string;
@@ -58,7 +58,7 @@ interface AuthContextType {
     close: () => void
   ) => Promise<void>;
   resetAuthState: () => void;
-  setAdditionalAction: (action: () => void | null) => void;
+  setAdditionalAction: (action: () => Promise<void> | null) => void;
 
   // Validation
   validatePhoneNumber: (phone: string) => boolean;
@@ -162,8 +162,16 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                 async (userDispatchResponse) => {
                   const userRes: User = userDispatchResponse.payload as User;
                   console.log(userRes);
+                  dispatch(
+                    setTokens({
+                      session_token: result.session_token,
+                      session_jwt: result.session_jwt,
+                    })
+                  );
                   if (userRes.bulletins.length > 0) {
-                    const bulletins = await dispatch(fetchAllBulletins(phone)).unwrap();
+                    const bulletins = await dispatch(
+                      fetchAllBulletins(phone)
+                    ).unwrap();
 
                     const currentMonth = new Date().getMonth() + 1;
 
@@ -379,7 +387,6 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     handleVerifySignUp,
     resetAuthState,
     setAdditionalAction,
-
     // Validation
     validatePhoneNumber,
   };

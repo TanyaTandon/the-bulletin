@@ -1,4 +1,4 @@
-import React, { ReactNode, useState } from "react";
+import React, { ReactNode, useEffect, useState } from "react";
 import { Textarea } from "./ui/textarea";
 import { Button } from "./ui/button";
 import { Heart, LoaderCircle } from "lucide-react";
@@ -18,6 +18,7 @@ import {
 import { Checkbox } from "./ui/checkbox";
 import { staticGetUser } from "@/redux/user/selectors";
 import { useAppSelector } from "@/redux";
+import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
 
 export interface CalendarNote {
   date: Date;
@@ -34,11 +35,11 @@ interface BlurbInputProps {
   setImages: React.Dispatch<React.SetStateAction<UploadedImage[]>>;
   placeholder?: string;
   isSubmitting: boolean;
-  handleSubmitBulletin: () => void;
+
   editState: EditState;
-  selectedTemplate: { id: string; name: string; images: number };
+  selectedTemplate: { id: number; name: string; images: number };
   setSelectedTemplate: React.Dispatch<
-    React.SetStateAction<{ id: string; name: string; images: number }>
+    React.SetStateAction<{ id: number; name: string; images: number }>
   >;
 }
 
@@ -69,6 +70,21 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
 
   console.log(user);
 
+  const { tour, updateCurrentStepTarget } = useTourGuideWithInit();
+
+  useEffect(() => {
+    if (tour && editState === EditState.BLURB) {
+      setTimeout(() => {
+        updateCurrentStepTarget("[data-tg-title='data-blurb-input']");
+      }, 1000);
+    }
+    if (tour && editState === EditState.TEMPLATE) {
+      setTimeout(() => {
+        updateCurrentStepTarget("[data-tg-title='template-selection']");
+      }, 750);
+    }
+  }, [tour, updateCurrentStepTarget, editState]);
+
   return (
     <section
       data-tg-title="Image Housing"
@@ -86,7 +102,7 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
           </div>
         )}
         {editState === EditState.BLURB && (
-          <section className="w-full mt-3">
+          <section className="w-full mt-3" data-tg-title="data-blurb-input">
             <h1 className="mb-2 text-left">Blurb</h1>
             <div className="relative w-full flex flex-col items-end">
               <Textarea
@@ -96,7 +112,7 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
                   placeholder ||
                   "e.g. April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. I'm trying to build a cult of people who don't sleep with their phones in their rooms — and honestly, I'm kinda succeeding. I am terrified of all the FUN that May will bring!!"
                 }
-                className={`resize-none w-full max-w-3xl border-violet-200 bg-[#fcffef] focus:border-violet-400 focus:ring-violet-400 text-sm ${
+                className={`data-blurb-input resize-none w-full max-w-3xl border-violet-200 bg-[#fcffef] focus:border-violet-400 focus:ring-violet-400 text-sm ${
                   isMobile ? "min-h-[250px]" : "min-h-[300px]"
                 }`}
                 maxLength={MAX_CHARS}
@@ -109,7 +125,10 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
         )}
       </div>
       {editState == EditState.TEMPLATE && (
-        <section className="w-full text-left">
+        <section
+          data-tg-title="template-selection"
+          className="w-full text-left"
+        >
           <h1>Layouts</h1>
           <Accordion type="multiple">
             {templates.map((template) => (

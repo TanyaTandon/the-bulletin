@@ -35,6 +35,7 @@ const FilledBulletin: React.FC = () => {
   );
   useEffect(() => {
     if (bulletinFromRedux && bulletinData !== null) {
+      console.log("💥bulletinFromRedux", bulletinFromRedux);
       setBulletin(bulletinFromRedux);
     }
   }, [bulletinFromRedux]);

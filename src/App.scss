@@ -1,0 +1,19 @@
+.templateButton {
+  margin-left: 1vw;
+  background-color: white;
+  z-index: 1000;
+  width: 50px;
+  border-radius: 100px;
+  height: 50px;
+  display: block;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+  padding: 12px;
+  transition: opacity 0.25s ease-in-out;
+  transition: margin-top 0.25s ease-in-out;
+
+  svg {
+    width: 25px;
+    height: 25px;
+    display: block;
+  }
+}

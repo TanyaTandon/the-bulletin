@@ -15,6 +15,12 @@ import { Route, Routes } from "react-router";
 import Catalogue from "./pages/catalogue";
 
 const App = () => {
+
+  window.addEventListener('load', function() {
+    setTimeout(function() {
+      window.scrollTo(0, 1);
+    }, 0);
+  });
   return (
     <ProviderProvider>
       <Helmet>
@@ -24,6 +30,7 @@ const App = () => {
           name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
         ></meta>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
         <meta
           name="description"
           content="Share your moments with friends and family through our monthly bulletin service"

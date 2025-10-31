@@ -1,4 +1,4 @@
-import React, { useRef } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-number-input";
 import { Button } from "./ui/button";
 import ReactInputVerificationCode from "react-input-verification-code";
@@ -38,6 +38,16 @@ const AuthModalContent: React.FC<{
   } = useAuth();
 
   const navigate = useNavigate();
+
+
+  const [disabled, setDisabled] = useState<boolean>(true);
+
+  useEffect(() => {
+    setTimeout(() => {
+      setDisabled(false);
+    }, 100);
+  }, []);
+
   return (
     <>
       {signInState ? (
@@ -56,7 +66,8 @@ const AuthModalContent: React.FC<{
                 }}
               >
                 <PhoneInput
-                  focusInputOnCountrySelection
+                  focusInputOnCountrySelection={false}
+                  countryCallingCodeEditable={false}
                   ref={phoneInputRef}
                   defaultCountry="US"
                   value={phoneNumber}
@@ -64,7 +75,7 @@ const AuthModalContent: React.FC<{
                   onChange={(e) => {
                     setPhoneNumber(e);
                   }}
-                  disabled={isProcessing}
+                  disabled={disabled}
                   className="w-full"
                 />
               </div>
@@ -152,6 +163,8 @@ const AuthModalContent: React.FC<{
                     }}
                   >
                     <PhoneInput
+                      focusInputOnCountrySelection={false}
+                      countryCallingCodeEditable={false}
                       defaultCountry="US"
                       id="phone"
                       type="tel"

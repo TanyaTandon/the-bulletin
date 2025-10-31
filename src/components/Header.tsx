@@ -30,7 +30,7 @@ const Header: React.FC = () => {
   const { dialog } = useDialog();
   // console.log(session);
 
-  const { sheet } = useSheet();
+  const { sheet, close } = useSheet();
 
   return (
     <header className="border-b border-gray-200 bg-[#9DBD99] p-3 shadow-sm">
@@ -97,7 +97,11 @@ const Header: React.FC = () => {
                 footer: (
                   <Button
                     onClick={async () => {
-                      await stytch.session.revoke();
+                      await signOut().then(() => {
+                        dispatch(resetAllSlices);
+                        navigate("/");
+                        close();
+                      });
                     }}
                     variant="ghost"
                   >

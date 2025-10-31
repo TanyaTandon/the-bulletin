@@ -7,6 +7,7 @@ import { CalendarNote } from "@/components/BlurbInput";
 import {
   setUser,
   updateBlurb,
+  updateImage,
   updateSavedNotes,
   updateTemplate,
   User,
@@ -108,7 +109,8 @@ let blurbTimer: NodeJS.Timeout | null = null;
 export async function handleCategoryChange(
   category: ChangeCategory,
   bulletinData: Partial<Bulletin>,
-  tokens: SessionTokens
+  tokens: SessionTokens,
+  imageIndex: number | null
 ): Promise<void> {
   switch (category) {
     case ChangeCategory.SAVED_NOTES:
@@ -137,77 +139,19 @@ export async function handleCategoryChange(
 
         console.log(images);
 
-        const uploads = await Promise.all(
-          images.map(async (item) => {
-            const formData = new FormData();
-            if (item.file) {
-              formData.append("bulletin_id", bulletinData.id);
-              formData.append("filename", item.id);
-              formData.append("image", item.file);
-              await fetch("http://localhost:8080/api/image_processing_ffmpeg", {
-                method: "POST",
-                body: formData,
-                headers: {
-                  Authorization: `Bearer ${tokens.session_jwt}`,
-                },
-              });
-            }
-          })
-        );
-
-        // for (let i = 0; i < images.length; i++) {
-        //   const image = images[i];
-
-        //   if (image.url.includes("blob")) {
-        //     const fetchBlob = await fetch(image.url, {
-        //       method: "GET",
-        //       headers: {
-        //         Accept: "image/png",
-        //       },
-        //     });
-
-        //     const blob = await fetchBlob.blob();
-        //     console.log("Blob created:", blob);
-
-        //     // Create a filename for the image
-        //     const filename = `image_${i}_${Date.now()}.png`;
-
-        //     // Append the actual file to FormData
-        //     formData.append(`images`, blob, filename);
-
-        //     // Keep track of image metadata
-        //     processedImages.push({
-        //       id: image.id,
-        //       filename: filename,
-        //     });
-        //   } else {
-        //     processedImages.push({
-        //       id: image.id,
-        //     });
-        //   }
-        // }
-
-        // formData.append("imageMetadata", JSON.stringify(processedImages));
-        // const response = await axios.put(
-        //   "https://be.thebulletin.app/image_processing",
-        //   formData,
-        //   {
-        //     headers: {
-        //       "Content-Type": "multipart/form-data",
-        //     },
-        //   }
-        // );
-
-        // performImagesDbOperation(bulletinData)
-        //   .then(() => {
-
-        //     toast.success("Saved!");
-        //   })
-        //   .catch((error) => {
-        //     // Optional: Handle errors
-        //     console.error("Error saving images:", error);
-        //     showToast("Error saving images");
-        //   });
+        const result = await store
+          .dispatch(
+            updateImage({
+              bulletin: bulletinData,
+              images: images,
+              imageIndex: imageIndex,
+            })
+          )
+          .then(() => {
+            toast.success("Image updated!");
+          });
+        result.image = true;
+        return result;
       }
       break;
 

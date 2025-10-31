@@ -2,6 +2,7 @@ import { PayloadAction, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
 import { Bulletin, supabase } from "@/lib/api.ts";
 import { RESET_ALL_SLICES } from "../constants.ts";
 import { toast } from "sonner";
+import { UploadedImage } from "@/components/ImageUploadGrid.tsx";
 
 export type User = {
   id: number;
@@ -122,8 +123,15 @@ export const updateTemplate = createAsyncThunk(
         .eq("id", bulletin.id)
         .select("*")
         .then((res) => {
-          console.log(res.data);
-          dispatch(updateBulletin(res.data[0]));
+          const updatedBulletin = res.data[0];
+          const setData = {
+            ...updatedBulletin,
+            images: updatedBulletin.images.map((item) => ({
+              id: item.id,
+              url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
+            })),
+          };
+          dispatch(updateBulletin(setData));
           return res;
         });
 
@@ -151,7 +159,15 @@ export const updateBlurb = createAsyncThunk(
         .eq("id", bulletin.id)
         .select("*")
         .then((res) => {
-          dispatch(updateBulletin(res.data[0]));
+          const updatedBulletin = res.data[0];
+          const setData = {
+            ...updatedBulletin,
+            images: updatedBulletin.images.map((item) => ({
+              id: item.id,
+              url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
+            })),
+          };
+          dispatch(updateBulletin(setData));
           return res;
         });
 
@@ -163,6 +179,73 @@ export const updateBlurb = createAsyncThunk(
       return { success: true, data: res[0].data };
     } catch (error) {
       console.error("Error updating saved notes:", error);
+      return error;
+    }
+  }
+);
+
+export const updateImage = createAsyncThunk(
+  "user/updateImage",
+  async (
+    {
+      bulletin,
+      images,
+      imageIndex,
+    }: {
+      bulletin: Partial<Bulletin>;
+      images: UploadedImage[];
+      imageIndex: number;
+    },
+    { dispatch, getState }
+  ) => {
+    try {
+      const state = getState() as {
+        app: { tokensUpdater: { tokens: { session_jwt: string } | null } };
+      };
+      const tokens = state.app.tokensUpdater.tokens;
+
+      if (!tokens?.session_jwt) {
+        throw new Error("No session token available");
+      }
+
+      const uploads = await Promise.all(
+        images.map(async (item) => {
+          const formData = new FormData();
+          if (item.file && imageIndex !== null) {
+            formData.append("bulletin_id", bulletin.id);
+            formData.append("filename", item.id);
+            formData.append("image", item.file);
+            formData.append("image_index", imageIndex.toString());
+            return await fetch(
+              "https://be.thebulletin.app/api/image_processing_ffmpeg",
+              {
+                method: "POST",
+                body: formData,
+                headers: {
+                  Authorization: `Bearer ${tokens.session_jwt}`,
+                },
+              }
+            ).then((res) => res.json());
+          }
+        })
+      ).then((res) => res.filter((upload) => upload !== undefined));
+      try {
+        const updatedBulletin = JSON.parse(uploads[0].bulletin);
+        const setData = {
+          ...updatedBulletin,
+          images: updatedBulletin.images.map((item) => ({
+            id: item.id,
+            url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
+          })),
+        };
+        dispatch(updateBulletin(setData));
+        return { success: true, data: uploads };
+      } catch (error) {
+        console.error("Error updating image:", error);
+        return error;
+      }
+    } catch (error) {
+      console.error("Error updating image:", error);
       return error;
     }
   }

@@ -1,11 +1,12 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useLayoutEffect, useState } from "react";
 import { X, Heart } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
 import { format } from "date-fns";
 import { store } from "@/redux";
+import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
 
 export interface CalendarNote {
   date: Date;
@@ -69,6 +70,30 @@ const BigCalendar: React.FC<{
   const month = firstOfNextMonth.getMonth();
   const daysInMonth = new Date(year, month + 1, 0).getDate();
   const firstDayOffset = firstOfNextMonth.getDay();
+
+  const {
+    tour,
+    updateCurrentStepTarget,
+    updatePositions,
+    refreshDialog,
+    refresh,
+  } = useTourGuideWithInit();
+
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    if (tour) {
+      setTimeout(() => {
+        updateCurrentStepTarget("[data-tg-title='calendar housing']");
+        updatePositions();
+        setMounted(true);
+        const bodyEl = document.querySelector("body");
+        if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
+          bodyEl.classList.remove("tg-no-interaction");
+        }
+      }, 750);
+    }
+  }, [tour, updateCurrentStepTarget, updatePositions]);
 
   return (
     <div className="relative  w-full overflow-hidden">

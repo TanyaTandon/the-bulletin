@@ -2,7 +2,7 @@ import React from "react";
 import Layout from "../components/Layout";
 import { Button } from "@/components/ui/button";
 import { Link } from "react-router-dom";
-import { useAppSelector } from "@/redux";
+import { resetAllSlices, useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import AnimatedButton from "@/components/AnimatedButton";
 import { useDialog } from "@/providers/dialog-provider";
@@ -24,7 +24,6 @@ const Index = () => {
             className="w-20 h-20 ml-[auto] mr-[auto]"
           />
         </div>
-
         <Link
           to="/"
           className={`lowercase text-5xl`}

@@ -1,5 +1,5 @@
 import { fetchBulletins } from "@/redux/user";
-import { useAppDispatch, useAppSelector } from "@/redux/";
+import { resetAllSlices, useAppDispatch, useAppSelector } from "@/redux/";
 import React from "react";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { toast } from "react-toastify";
@@ -14,6 +14,7 @@ const Test: React.FC = () => {
 
   const user = useAppSelector(staticGetUser);
   const userData = useStytchUser();
+  const dispatch = useAppDispatch();
   console.log(user);
   console.log(userData);
   const tokens = stytch.session.getTokens();
@@ -41,14 +42,15 @@ const Test: React.FC = () => {
         <br />
         <button
           onClick={async () => {
-            const { data, error } = await supabase.rpc("array_append_images", {
+            const { data, error } = await supabase.rpc('insert_new_image', {
               row_id: "c4bb5824-f4d0-4f9c-abaa-3ba7dc2645d4",
-              new_value: "test",
+              new_value: "cbcb83c9-dae4-47ca-a529-4edf00c38d61",
+              image_index: 3,
             });
             console.log(data);
           }}
         >
-          click 2 here to test arrayAppend
+          click 2 insert yo
         </button>
         <br />
         <br />
@@ -57,9 +59,10 @@ const Test: React.FC = () => {
         <br />
         <button
           onClick={async () => {
-            await fetch("http://localhost:8080/ping",{
-              method: "GET",
-            })
+            // await fetch("http://localhost:8080/ping",{
+            //   method: "GET",
+            // })
+            dispatch(resetAllSlices);
           }}
         >
           click try remote array_append

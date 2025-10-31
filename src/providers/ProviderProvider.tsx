@@ -9,8 +9,10 @@ import { DialogProvider } from "../providers/dialog-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { showToast } from "../main";
 import { SheetProvider } from "./sheet-provider";
-import { getBulletins } from "@/redux/user/selectors";
-import { useAppSelector } from "@/redux";
+import { getBulletins, staticGetUser } from "@/redux/user/selectors";
+import { useAppDispatch, useAppSelector } from "@/redux";
+import { useStytchUser } from "@stytch/react";
+import { createNewBulletin } from "@/lib/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -26,24 +28,45 @@ const ProviderProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
   const pathname = window.location.pathname;
+  const searchParams = window.location.search;
   const allBulletins = useAppSelector(getBulletins);
+  const user = useAppSelector(staticGetUser);
+  const dispatch = useAppDispatch();
 
+  const stytchUser = useStytchUser();
 
+  const dummyBulletinAll = 0;
 
   useEffect(() => {
     console.log("ProviderProvider");
-    if (pathname === "/" || pathname === "/bulletin") {
+    if (
+      (pathname === "/" || pathname === "/bulletin") &&
+      user &&
+      stytchUser.user
+    ) {
       if (
         allBulletins.length !== 0 &&
         allBulletins.some(
           (bulletin) => bulletin.month === new Date().getMonth() + 1
-        )
+        ) &&
+        !searchParams.includes("onboarding")
       ) {
         window.location.href = `/bulletin/${
           allBulletins.find(
             (bulletin) => bulletin.month === new Date().getMonth() + 1
           )?.id
         }`;
+      } else if (
+        searchParams.includes("onboarding") &&
+        dummyBulletinAll === 0
+      ) {
+        dispatch(createNewBulletin({ user }))
+          .unwrap()
+          .then((res) => {
+            if (res.success) {
+              window.location.href = `/bulletin/${res.bulletinId}?onboarding=true`;
+            }
+          });
       }
     }
   }, [pathname]);
@@ -57,7 +80,11 @@ const ProviderProvider: React.FC<{
               <AuthProvider>
                 <DialogProvider>
                   <SheetProvider>
-                    <TourGuideProvider>{children}</TourGuideProvider>
+                    <TourGuideProvider
+                      initialOptions={{ exitOnClickOutside: false }}
+                    >
+                      {children}
+                    </TourGuideProvider>
                   </SheetProvider>
                 </DialogProvider>
               </AuthProvider>

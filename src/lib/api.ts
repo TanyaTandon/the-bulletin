@@ -25,7 +25,7 @@ export type Bulletin = {
   blurb: string;
   images: UploadedImage[];
   owner: string;
-  savedNotes: CalendarNote[];
+  saved_notes: CalendarNote[];
   template: number;
   month: number;
 };
@@ -144,7 +144,7 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
     const updatedBulletin = {
       blurb: bulletin.blurb,
       images: images.map((item) => item.id),
-      saved_notes: arrayToDict(bulletin.savedNotes),
+      saved_notes: arrayToDict(bulletin.saved_notes),
     };
 
     console.log("Updating bulletin with data:", updatedBulletin);
@@ -319,7 +319,7 @@ export async function getForeignUserImages(id: string) {
   return data;
 }
 
-export async function uploadImage()
+
 
 export const createNewBulletin = createAsyncThunk(
   "user/createNewBulletin",

@@ -45,8 +45,12 @@ interface TourGuideContextType {
 
   // Utility
   refresh: () => Promise<unknown>;
+  refreshDialog: () => Promise<unknown>;
   updatePositions: () => Promise<unknown>;
   deleteFinishedTour: (groupKey?: string | "all") => void;
+
+  // Step management
+  updateCurrentStepTarget: (target: string | HTMLElement) => Promise<void>;
 }
 
 const TourGuideContext = createContext<TourGuideContextType | undefined>(
@@ -108,6 +112,7 @@ export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
         tourInstance.exit();
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Tour actions
@@ -240,6 +245,12 @@ export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
     return await tour.refresh();
   }, [tour]);
 
+  const refreshDialog = useCallback(async () => {
+    if (!tour) return;
+    console.log("happening");
+    return await tour.refreshDialog();
+  }, [tour]);
+
   const updatePositions = useCallback(async () => {
     if (!tour) return;
     return await tour.updatePositions();
@@ -251,6 +262,29 @@ export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
       tour.deleteFinishedTour(groupKey);
     },
     [tour]
+  );
+
+  // Step management
+  const updateCurrentStepTarget = useCallback(
+    async (target: string | HTMLElement) => {
+      console.log("target", target);
+      console.log("tour", tour);
+      if (!tour) return;
+
+      // Get the current step
+      const currentStep = tour.tourSteps[tour.activeStep];
+
+      console.log("currentStep", currentStep);
+      if (currentStep) {
+        // Update the target
+        currentStep.target =
+          typeof target === "string" ? document.querySelector(target) : target;
+
+        // Refresh the dialog to apply changes
+        await refreshDialog();
+      }
+    },
+    [tour, refreshDialog]
   );
 
   const contextValue: TourGuideContextType = {
@@ -274,8 +308,10 @@ export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
     onBeforeExit,
     onAfterExit,
     refresh,
+    refreshDialog,
     updatePositions,
     deleteFinishedTour,
+    updateCurrentStepTarget,
   };
 
   return (

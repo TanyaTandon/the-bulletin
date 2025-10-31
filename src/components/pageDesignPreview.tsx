@@ -12,15 +12,20 @@ import {
   ImagesSquareIcon,
   NotebookIcon,
   PencilLineIcon,
+  TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { Lila, Nick, Tanya, calculateFontSize } from "@/lib/bulletin-templates";
 import { TourGuideClient } from "@sjmc11/tourguidejs";
-import { useTourGuide } from "@/providers/contexts/TourGuideContext";
+import {
+  useTourGuide,
+  useTourGuideWithInit,
+} from "@/providers/contexts/TourGuideContext";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { Bulletin } from "@/lib/api";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { UploadedImage } from "./NewUploadImageGrid";
 
 interface PageDesignPreviewProps {
   currentStep: number;
@@ -40,6 +45,9 @@ interface PageDesignPreviewProps {
   };
   existingBulletin?: Bulletin;
   scale?: number; // Scale multiplier for dimensions (1 = default, 2 = double size, 0.5 = half size)
+  setImages: (imageToInsert: UploadedImage, imageIndex: number) => void;
+  setImageIndex: (imageIndex: number) => void;
+  imageIndex: number | null;
 }
 
 const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
@@ -54,17 +62,25 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   currentStep,
   existingBulletin,
   scale = 1, // Default scale of 1 (no scaling)
+  setImages,
+  setImageIndex,
+  imageIndex,
 }) => {
   const isMobile = useIsMobile();
-  const { tour } = useTourGuide();
+  const { tour, nextStep, updateCurrentStepTarget } = useTourGuide();
   const user = useAppSelector(staticGetUser);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
+  const iframeInitializedRef = useRef<boolean>(false);
+  const lastContentRef = useRef<{
+    templateId: number;
+    scale: number;
+    isMobile: boolean;
+  } | null>(null);
   const containerRef = useRef<HTMLDivElement>(null);
   const hoverTimeoutRef = useRef<NodeJS.Timeout | null>(null);
 
-  // Add state to track iframe width for proper height calculation
-  const [iframeWidth, setIframeWidth] = useState<number>(0);
+  const fileInputRef = useRef<HTMLInputElement>(null);
 
   // Calculate dimensions with scale factor
   const baseWidth = isMobile ? "75vw" : "25vw"; // Your current base width
@@ -72,11 +88,6 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
 
   const scaledWidth = `calc(${baseWidth} * ${scale})`;
 
-  // Calculate frame height based on tracked width
-  const frameHeight =
-    iframeWidth > 0 ? Math.round(iframeWidth / aspectRatio) : 900; // Fallback height
-
-  console.log("🍓", iframeWidth);
   // Tilt animation spring
   const [tiltProps, setTiltProps] = useSpring(() => ({
     rotateX: 0,
@@ -159,9 +170,12 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     }
   };
 
+  const [fontSize, setFontSize] = useState<number>(0);
+
   const templates = useMemo(() => {
     const name = user?.firstName ?? "nick";
     const fontSize = calculateFontSize(name);
+    setFontSize(fontSize);
 
     return {
       0: Nick(images, bodyText, name, fontSize),
@@ -170,19 +184,80 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     };
   }, [images, bodyText, user?.firstName]);
 
+  // Memoize the base template - only regenerates when template changes
+  const baseTemplateHTML = useMemo(() => {
+    return templates[selectedTemplate.id];
+  }, [templates, selectedTemplate.id]);
+
+  // Helper to update content inside iframe without rewriting document
+  const updateIframeContent = useCallback(() => {
+    const iframe = iframeRef.current;
+    if (!iframe || !iframeInitializedRef.current) return;
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc || doc.readyState !== "complete") return;
+
+    // Update text content - only innerHTML, preserve structure
+    const textEl = doc.querySelector(".text");
+    if (textEl) {
+      textEl.innerHTML = bodyText;
+    }
+
+    // Update name content
+    const nameEl = doc.getElementById("nameElement");
+    if (nameEl) {
+      const name = (user?.firstName ?? "nick").toLowerCase();
+      nameEl.textContent = name;
+    }
+
+    // Update images - only background-image URL, don't touch any other styles
+    const imgEls = doc.querySelectorAll("[data-image-index]");
+    imgEls.forEach((el) => {
+      const idx = parseInt(
+        (el as HTMLElement).getAttribute("data-image-index") || "-1"
+      );
+      if (
+        !Number.isNaN(idx) &&
+        idx >= 0 &&
+        idx < images.length &&
+        images[idx]
+      ) {
+        const existingStyle = (el as HTMLElement).style.cssText;
+        // Extract non-background-image properties
+        const otherStyles = existingStyle
+          .split(";")
+          .filter((s) => !s.trim().startsWith("background-image"))
+          .join(";");
+        // Set only the background-image, preserving other styles
+        (el as HTMLElement).style.cssText =
+          `${otherStyles}; background-image: url('${images[idx]}');`.replace(
+            /^; /,
+            ""
+          );
+      }
+    });
+  }, [bodyText, images, user?.firstName]);
+
+  // Full document write - only when template/scale/isMobile changes
   useEffect(() => {
-    if (iframeRef.current && iframeWidth > 0) {
-      console.log("🍕");
-      const iframe = iframeRef.current;
-      const doc = iframe.contentDocument || iframe.contentWindow?.document;
-      if (!doc) return;
+    if (!iframeRef.current || !baseTemplateHTML) return;
 
-      // Calculate scale factor based on width (520 is base size)
-      const scaleFactor = (iframeWidth / 520) * scale;
+    const iframe = iframeRef.current;
+    const width = iframe.offsetWidth;
+    if (width === 0) return;
 
-      // Insert scaling CSS into the template
-      console.log("selectedTemplate", selectedTemplate);
-      const scaledTemplate = templates[selectedTemplate.id]
+    const doc = iframe.contentDocument || iframe.contentWindow?.document;
+    if (!doc) return;
+
+    const needsFullWrite =
+      !iframeInitializedRef.current ||
+      lastContentRef.current?.templateId !== selectedTemplate.id ||
+      lastContentRef.current?.scale !== scale ||
+      lastContentRef.current?.isMobile !== isMobile;
+
+    if (needsFullWrite) {
+      const scaleFactor = (width / 520) * scale;
+
+      const scaledTemplate = baseTemplateHTML
         .replace(
           "<style>",
           `<style>
@@ -200,181 +275,34 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       doc.open();
       doc.write(scaledTemplate);
       doc.close();
-    }
-  }, [iframeWidth, images, bodyText, selectedTemplate, templates, scale]);
 
-  // Effect to measure and track iframe width
+      iframeInitializedRef.current = true;
+      lastContentRef.current = {
+        templateId: selectedTemplate.id,
+        scale,
+        isMobile,
+      };
+    }
+  }, [baseTemplateHTML, selectedTemplate.id, scale, isMobile]);
+
+  // Update content in-place when images or bodyText change
   useEffect(() => {
-    const updateIframeWidth = () => {
-      if (iframeRef.current) {
-        const width = iframeRef.current.offsetWidth;
-        if (width > 0 && width !== iframeWidth) {
-          setIframeWidth(width);
-        }
-      }
-    };
-
-    // Initial measurement
-    updateIframeWidth();
-
-    // Set up ResizeObserver to track width changes
-    const resizeObserver = new ResizeObserver(() => {
-      updateIframeWidth();
-    });
-
-    if (iframeRef.current) {
-      resizeObserver.observe(iframeRef.current);
-    }
-
-    // Also measure on window resize
-    const handleResize = () => {
-      updateIframeWidth();
-    };
-
-    window.addEventListener("resize", handleResize);
-
-    return () => {
-      resizeObserver.disconnect();
-      window.removeEventListener("resize", handleResize);
-    };
-  }, [iframeWidth]);
-
-  const setter = useCallback(
-    (editState: EditState, toSet: EditState) => {
-      if (editState === toSet) {
-        setEditState(null);
-      } else {
-        setEditState(toSet);
-      }
-    },
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-    []
-  );
-
-  const buttonContainerRef = useRef<HTMLDivElement>(null);
+    if (!iframeInitializedRef.current) return;
+    // Small delay to ensure iframe is ready after potential full write
+    const timeoutId = setTimeout(() => {
+      updateIframeContent();
+    }, 0);
+    return () => clearTimeout(timeoutId);
+  }, [images, bodyText, updateIframeContent]);
 
   const [buttonMouseOver, setButtonMouseOver] = useState<boolean>(false);
 
-  const handleButtonMouseLeave = useCallback(() => {
-    setButtonMouseOver(false);
+  const handleReplaceImage = useCallback(() => {
+    if (fileInputRef.current) {
+      fileInputRef.current.click();
+    }
   }, []);
 
-  const buttons = useMemo(
-    () => [
-      {
-        id: "close",
-        image: <XIcon size={32} />,
-        label: "close",
-        onClick: () => {
-          setter(editState, null);
-          setHover.buttons(false);
-        },
-      },
-      {
-        id: "images",
-        image: <ImagesSquareIcon size={32} />,
-        label: "Edit Images",
-        onClick: () => {
-          if (onboarding) {
-            console.log("onboarding");
-            tour?.nextStep();
-          }
-          setter(editState, EditState.IMAGES);
-        },
-      },
-      {
-        id: "blurb",
-        image: <PencilLineIcon size={32} />,
-        label: "edit description",
-        onClick: () => setter(editState, EditState.BLURB),
-      },
-      {
-        id: "template",
-        image: <NotebookIcon size={32} />,
-        label: "choose template",
-        onClick: () => setter(editState, EditState.TEMPLATE),
-      },
-    ],
-    [editState, tour, onboarding, setHover, setter]
-  );
-
-  const containerCenterX = (iframeWidth || 400) / 2.25;
-  const getArcPosition = (index: number, total: number) => {
-    const arcRadius = 120 * scale; // Scale the arc radius
-    const arcSpan = Math.PI * 0.6; // 108 degrees in radians
-    const startAngle = Math.PI / 2 + arcSpan / 2; // Start from bottom-right
-    const angle = startAngle - (index / (total - 1)) * arcSpan;
-
-    // Calculate the center of the container (scaled)
-    const containerCenterY = frameHeight / 8.5;
-
-    return {
-      x: Math.cos(angle) * arcRadius + containerCenterX,
-      y: onboarding
-        ? Math.sin(angle) * arcRadius + containerCenterY
-        : Math.sin(angle) * arcRadius * -1 + containerCenterY,
-    };
-  };
-
-  // Fixed button transitions - use stable array reference
-  const buttonTransitions = useTransition(buttons, {
-    from: {
-      opacity: 0,
-      transform: `translate(${containerCenterX}px, 30px) scale(0.8)`,
-    },
-    enter: (item, index) => async (next) => {
-      if (!hover.buttons) return; // Don't animate in if not hovering
-      // Stagger the animations
-      await new Promise((resolve) => setTimeout(resolve, index * 80));
-
-      // Keep close button at origin, others go to arc positions
-      if (item.id === "close") {
-        await next({
-          opacity: 1,
-          transform: `translate(${containerCenterX}px, 30px) scale(1)`,
-        });
-      } else {
-        const pos = getArcPosition(index, buttons.length);
-        await next({
-          opacity: 1,
-          transform: `translate(${pos.x}px, ${pos.y}px) scale(1)`,
-        });
-      }
-    },
-    leave: {
-      opacity: 0,
-      transform: `translate(${containerCenterX}px, 30px) scale(0.8)`,
-    },
-    update: (item, index) => {
-      if (hover.buttons) {
-        // Keep close button at origin, others go to arc positions
-        if (item.id === "close") {
-          return {
-            opacity: 1,
-            transform: `translate(${containerCenterX}px, 30px) scale(1)`,
-          };
-        } else {
-          const pos = getArcPosition(index, buttons.length);
-          return {
-            opacity: 1,
-            transform: `translate(${pos.x}px, ${pos.y}px) scale(1)`,
-          };
-        }
-      } else {
-        return {
-          opacity: 0,
-          transform: `translate(${containerCenterX}px, 30px) scale(0.8)`,
-        };
-      }
-    },
-    keys: (item) => item.id,
-    config: {
-      tension: 300,
-      friction: 20,
-    },
-  });
-
-  // Container style with scale applied
   const containerStyle = useMemo(() => {
     const style: React.CSSProperties = {
       width: scaledWidth,
@@ -388,7 +316,85 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     return style;
   }, [scaledWidth, tiltProps]);
 
-  console.log(iframeRef.current);
+  useEffect(() => {
+    const handleMessage = async (event: MessageEvent) => {
+      console.log("event.data", event);
+      if (event.data?.type === "BUTTON_CLICKED") {
+        if (event.data.buttonId === "edit") {
+          handleReplaceImage();
+          setImageIndex(event.data.imageIndex);
+        }
+        if (event.data.buttonId === "delete") {
+          setEditState(EditState.IMAGES);
+        }
+      }
+      if (event.data?.type === "TEXT_CLICKED") {
+        setEditState(EditState.BLURB);
+      }
+    };
+
+    window.addEventListener("message", handleMessage);
+
+    return () => {
+      window.removeEventListener("message", handleMessage);
+    };
+  }, []);
+
+  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+    const files = Array.from(event.target.files || []);
+
+    if (imageIndex === null) {
+      alert("no image inded yo");
+      return;
+    }
+
+    console.log("imageIndex", imageIndex);
+    if (files.length === 1 && imageIndex !== null) {
+      const newImage = {
+        id: crypto.randomUUID(),
+        url: URL.createObjectURL(files[0]),
+        file: files[0],
+      };
+      console.log("setting image", newImage, imageIndex);
+      setImages(newImage, imageIndex);
+    }
+
+    if (event.target.value) {
+      event.target.value = "";
+    }
+  };
+
+  const [mO, setMO] = useState<boolean>(false);
+
+  // Transition for the dismiss (X) button
+  const xButtonTransition = useTransition(!!editState, {
+    from: { opacity: 0, h: 0 },
+    enter: { opacity: 1, h: 50 },
+    leave: { opacity: 0, h: 0 },
+    config: { tension: 250, friction: 22 },
+  });
+
+  useEffect(() => {
+    const templateHolder = document.querySelector(".templateHolder");
+
+    templateHolder.addEventListener("mouseenter", function () {
+      setMO(true);
+    });
+
+    templateHolder.addEventListener("mouseleave", function () {
+      setMO(false);
+      // or remove it entirely:
+      // this.removeAttribute('data-hover');
+    });
+    return () => {
+      templateHolder.removeEventListener("mouseenter", function () {
+        setMO(true);
+      });
+      templateHolder.removeEventListener("mouseleave", function () {
+        setMO(false);
+      });
+    };
+  }, []);
 
   return (
     <section className="w-full max-w-6xl mx-auto p-6">
@@ -401,73 +407,83 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
               }
             : {}
         }
-        className="container relative"
+        className="container relative templateHolder"
         onMouseEnter={!isMobile ? handleContainerMouseEnter : undefined}
-        onMouseMove={
-          !isMobile && !buttonMouseOver ? handleContainerMouseMove : undefined
-        }
-        onMouseLeave={
-          !isMobile && !buttonMouseOver ? handleContainerMouseLeave : undefined
-        }
+        onMouseMove={!isMobile ? handleContainerMouseMove : undefined}
+        onMouseLeave={!isMobile ? handleContainerMouseLeave : undefined}
       >
         <animated.div
           data-tg-title="Bulletin Preview"
           ref={containerRef}
           onMouseEnter={!isMobile ? handlePreviewMouseEnter : undefined}
-          className="bg-white rounded-lg shadow-lg mx-auto relative"
+          className="bg-white rounded-lg shadow-lg mx-auto flex relative wrap"
           style={containerStyle}
-          onMouseLeave={!buttonMouseOver ? handlePreviewMouseLeave : undefined}
+          onMouseLeave={handlePreviewMouseLeave}
         >
-          <div
-            className="HERE"
-            ref={buttonContainerRef}
-            onMouseLeave={!isMobile && handleButtonMouseLeave}
-          >
-            {buttonTransitions((style, item, _, index) => (
-              <animated.div
-                data-tg-title={`select ${item.id}`}
-                onMouseOver={() => {
-                  setButtonMouseOver(true);
-                  if (!buttonMouseOver) {
-                    setHover.buttons(true);
-                  }
-                }}
-                key={item.id}
-                style={style}
-                className="absolute pointer-events-auto"
-              >
-                <button
-                  onClick={item.onClick}
-                  className="bg-white rounded-full shadow-lg p-3 hover:shadow-xl transition-shadow duration-200 border border-gray-200"
-                  title={item.label}
-                >
-                  {item.image}
-                </button>
-              </animated.div>
-            ))}
-          </div>
-          {isMobile ? (
-            <div
-              onClick={() => {
-                setHover.buttons(true);
-              }}
-              style={{
-                position: "absolute",
-                width: iframeRef.current?.offsetWidth,
-                height: iframeRef.current?.offsetHeight,
-              }}
-            ></div>
-          ) : null}
+          <input
+            ref={fileInputRef}
+            type="file"
+            accept="image/png, image/jpeg, image/jpg"
+            multiple={false}
+            className="hidden"
+            onChange={handleFileSelect}
+          />
           <iframe
             ref={iframeRef}
             className="iframeHERE border-0"
             style={{
-              width: "100%", // Fill container width
-              height: frameHeight,
+              width: "100%",
+              aspectRatio: `${aspectRatio}`, // Browser calculates height automatically
+              zIndex: 1000,
             }}
             title="Page Preview"
-            sandbox="allow-same-origin"
+            sandbox="allow-same-origin allow-scripts"
           />
+          <section
+            style={{
+              position: "relative",
+              zIndex: 1,
+              height: "auto",
+              display: "block",
+              maxHeight: "110px",
+            }}
+          >
+            {xButtonTransition((styles, show) =>
+              show ? (
+                <animated.div
+                  style={{
+                    // overflow: "hidden",
+                    height: styles.h,
+                    opacity: styles.opacity,
+                  }}
+                >
+                  <button
+                    className="templateButton"
+                    onClick={() => setEditState(null)}
+                  >
+                    <XIcon />
+                  </button>
+                </animated.div>
+              ) : null
+            )}
+            <button
+              data-tg-title="template-button"
+              style={
+                mO || editState || isMobile
+                  ? { opacity: 1, cursor: "pointer", marginTop: "10px" }
+                  : { opacity: 0, cursor: "default", marginTop: "0px" }
+              }
+              className="templateButton"
+              onClick={() => {
+                if (tour) {
+                  updateCurrentStepTarget("[data-tg-title='template-button']");
+                }
+                setEditState(EditState.TEMPLATE);
+              }}
+            >
+              <NotebookIcon />
+            </button>
+          </section>
         </animated.div>
       </div>
     </section>

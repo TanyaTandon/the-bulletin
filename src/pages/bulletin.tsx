@@ -1,20 +1,16 @@
-import React, { CSSProperties, useEffect, useState, useMemo } from "react";
-import { useNavigate, useParams, useSearchParams } from "react-router-dom";
-import { format, addMonths, isBefore, isAfter } from "date-fns";
-import { useSpring, animated, useTransition } from "@react-spring/web";
+import React, { useEffect, useState, useMemo } from "react";
+import { useNavigate, useSearchParams } from "react-router-dom";
+import { useSpring, animated, useTransition, update } from "@react-spring/web";
 import Layout from "@/components/Layout";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
 import { toast } from "sonner";
-import { Calendar } from "@/components/ui/calendar";
-import { Input } from "@/components/ui/input";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
 import {
-  anonhandleSubmitBulletin,
   ChangeCategory,
   getDetailedDifferences,
   handleCategoryChange,
@@ -22,18 +18,18 @@ import {
 import axios from "axios";
 import "@sjmc11/tourguidejs/src/scss/tour.scss"; // Styles
 import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
-import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
+import {
+  useTourGuide,
+  useTourGuideWithInit,
+} from "@/providers/contexts/TourGuideContext";
 import PageDesignPreview from "@/components/pageDesignPreview";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Textarea } from "@/components/ui/textarea";
 import BigCalendar from "@/components/BigCalendar";
-import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { useDialog } from "@/providers/dialog-provider";
 import FriendModalContent from "@/components/FriendModalContent";
 import { Bulletin, createNewBulletin } from "@/lib/api";
-import { isEqual } from "lodash";
-import { v4 } from "uuid";
 import { useStytch } from "@stytch/react";
+import { tourSteps } from "@/lib/tour-steps";
 
 export enum EditState {
   IMAGES = "images",
@@ -86,6 +82,8 @@ const BulletinPage: React.FC<{
   const [buttonHover, setButtonHover] = useState<boolean>(false);
   const [loaded, setLoaded] = useState(false);
 
+  const [editState, setEditState] = useState<EditState | null>(null);
+
   const hover = {
     preview: previewHover,
     buttons: buttonHover,
@@ -117,157 +115,7 @@ const BulletinPage: React.FC<{
   const customPlaceholder =
     "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
 
-  const handleSubmitBulletin = async () => {
-    if (!blurb && images.length === 0) {
-      toast.error("Please add some content to your bulletin before submitting");
-      return;
-    }
-
-    // Validate the number of images
-    if (images.length > selectedTemplate.images) {
-      toast.error(
-        `You can only upload up to ${selectedTemplate.images} images`
-      );
-      return;
-    }
-
-    setIsSubmitting(true);
-
-    try {
-      toast.loading("Saving your bulletin...");
-
-      // Create a FormData object to properly handle file uploads
-      const formData = new FormData();
-
-      // Add the non-file data
-      formData.append("user", JSON.stringify(user));
-      formData.append("blurb", blurb);
-      formData.append("savedNotes", JSON.stringify(savedNotes));
-      formData.append("owner", user?.phone_number || "");
-
-      // Process and append each image
-      const processedImages = [];
-
-      for (let i = 0; i < images.length; i++) {
-        const image = images[i];
-
-        const fetchBlob = await fetch(image.url, {
-          method: "GET",
-          headers: {
-            Accept: "image/png",
-          },
-        });
-
-        const blob = await fetchBlob.blob();
-        console.log("Blob created:", blob);
-
-        // Create a filename for the image
-        const filename = `image_${i}_${Date.now()}.png`;
-
-        // Append the actual file to FormData
-        formData.append(`images`, blob, filename);
-
-        // Keep track of image metadata
-        processedImages.push({
-          id: image.id,
-          filename: filename,
-        });
-      }
-
-      // Add image metadata as a JSON string
-      formData.append("imageMetadata", JSON.stringify(processedImages));
-
-      // Use FormData with axios
-      const response = await axios.post(
-        "https://lvwebhookrepo-production.up.railway.app/bulletinCreation",
-        formData,
-        {
-          headers: {
-            "Content-Type": "multipart/form-data",
-          },
-        }
-      );
-
-      console.log("Response:", response);
-
-      if (response.data.newUserData) {
-        dispatch(setUser(response.data.newUserData[0]));
-      }
-
-      if (response.data.success) {
-        navigate(`/bulletin/${response.data.bulletinId}`);
-      } else {
-        toast.error("We couldn't save your bulletin. Please try again.");
-      }
-
-      toast.dismiss();
-      setImages([]);
-      setBlurb("");
-      setSavedNotes([]);
-    } catch (error) {
-      console.error("Error saving bulletin:", error);
-      toast.error("We couldn't save your bulletin. Please try again.");
-    } finally {
-      setIsSubmitting(false);
-    }
-  };
-
   const [searchParams] = useSearchParams();
-
-  const tourSteps: TourGuideStep[] = [
-    {
-      content: "let's get familiar with how to get started!",
-      title: "hi and welcome to the Bulletin!",
-    },
-    {
-      content: "you can choose a layout, add images, and add a blurb",
-      title: "this is your bulletin!",
-      target: "[data-tg-title='Bulletin Preview']",
-    },
-    {
-      content: "hovering over the preview will allow you to edit the layout",
-      target: "[data-tg-title='Bulletin Preview']",
-    },
-    {
-      title: "click this icon to select some images",
-      content:
-        "you can add a certain number depending on the layout you choose",
-      target: "[data-tg-title='select images']",
-    },
-    {
-      title: "after you choose some images, write a blurb about your month",
-      content:
-        "after you select the images you want, they'll populate the template",
-      target: "[data-tg-title='select blurb']",
-    },
-    {
-      title: "next, play around with different layouts",
-      content:
-        "some are for the photographers among us, while others are for our writer friends",
-      target: "[data-tg-title='select template']",
-    },
-    {
-      title: "lastly, let's add some dates",
-      content: "select the right tab to check out the calendar",
-      target: "[data-tg-title='tab housing']",
-    },
-    {
-      title: "add some upcoming events to your calendar for next month",
-      content:
-        "select a date cell, enter a short note for the day, and your friends can see what you're looking forward to",
-      target: "[data-tg-title='calendar housing']",
-    },
-    {
-      title: "tea! your bulletin is ready",
-      content: "click the submit button to save your bulletin",
-      target: "[data-tg-title='submit button']",
-    },
-    {
-      title: "lastly let's add some friends to your bulletin for the month",
-      content: "click the submit button to save your bulletin",
-      target: "[data-tg-title='friend modal']",
-    },
-  ];
 
   const {
     currentStep,
@@ -278,6 +126,7 @@ const BulletinPage: React.FC<{
     initializeTour,
     tour,
     isInitialized,
+    updateCurrentStepTarget,
   } = useTourGuideWithInit();
 
   const { dialog, close } = useDialog();
@@ -339,22 +188,18 @@ const BulletinPage: React.FC<{
     onBeforeStepChange,
     initializeTour,
     isInitialized,
+    editState,
+    tourSteps,
   ]);
 
   const today = new Date();
 
-  const firstOfNextMonth = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    1
-  );
-
-  const [editState, setEditState] = useState<EditState | null>(null);
+  const firstOfNextMonth = new Date(today.getFullYear(), today.getMonth());
 
   const previewAnimation = useSpring({
-    transform: editState
-      ? `translateX(${isMobile ? "-10px" : "-20px"})`
-      : "translateX(0px)",
+    // transform: editState
+    //   ? `translateX(${isMobile ? "-10px" : "-20px"})`
+    //   : "translateX(0px)",
     width: editState ? (isMobile ? "45%" : "50%") : isMobile ? "100%" : "100%",
     config: {
       tension: 280,
@@ -411,8 +256,10 @@ const BulletinPage: React.FC<{
   }, [existingBulletin]);
 
   const stytch = useStytch();
+  const [imageIndex, setImageIndex] = useState<number | null>(null);
 
   const tokens = stytch.session.getTokens();
+
   useEffect(() => {
     console.log();
     const diff = getDetailedDifferences(
@@ -430,6 +277,7 @@ const BulletinPage: React.FC<{
       }
     );
 
+    console.log(existingBulletin, diff.unequal, loaded);
     if (existingBulletin && diff.unequal && loaded) {
       handleCategoryChange(
         Object.keys(diff.differences)[0] as ChangeCategory,
@@ -440,11 +288,41 @@ const BulletinPage: React.FC<{
           template: selectedTemplate.id,
           id: existingBulletin?.id,
         },
-        tokens
-      );
+        tokens,
+        imageIndex + 1
+      ).then((arg) => {
+        console.log("arg", arg);
+        if (tour && arg.image) {
+          tour?.nextStep();
+        }
+        const bulletin = JSON.parse(arg.payload.data[0].bulletin);
+        setImages(
+          bulletin.images.map((item) => ({
+            id: item.id,
+            url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
+          }))
+        );
+        setImageIndex(null);
+      });
     }
-    console.log("🧠", existingBulletin);
-  }, [loaded, blurb, images, savedNotes, selectedTemplate, existingBulletin]);
+  }, [
+    tour,
+    loaded,
+    blurb,
+    images,
+    savedNotes,
+    selectedTemplate,
+    existingBulletin,
+  ]);
+
+  const imageSetFunction = (
+    imageToInsert: UploadedImage,
+    imageIndex: number
+  ) => {
+    const newImages = structuredClone(images);
+    newImages[imageIndex] = imageToInsert;
+    setImages(newImages);
+  };
 
   return (
     <Layout>
@@ -452,28 +330,25 @@ const BulletinPage: React.FC<{
         className={`${isMobile ? "px-4 pt-0" : "py-6 w-[80%] mx-auto pt-4"}`}
       >
         <aside className={`${isMobile ? "block" : "flex"} gap-4 items-center`}>
-          <h1 className="text-2xl font-bold text-left">
-            Your Bulletin for{" "}
-            {firstOfNextMonth.toLocaleDateString("en-US", {
-              month: "long",
-              year: "numeric",
-              day: "numeric",
-            })}
-          </h1>
-          <section
-            className={`${
-              isMobile ? "flex justify-between" : "block"
-            } items-center gap-4`}
-          >
+          {!isMobile && !editState && (
+            <h1 className="text-2xl font-bold text-left mb-2">
+              Your Bulletin for{" "}
+              {firstOfNextMonth.toLocaleDateString("en-US", {
+                month: "long",
+                year: "numeric",
+              })}
+            </h1>
+          )}
+          <section className={`${"flex justify-between"} items-center gap-4`}>
             <Tabs
               defaultValue="page"
               onValueChange={(e) => {
                 if (isOnboarding && e === "notes") {
-                  tour?.nextStep();
-                  setTimeout(async () => {
-                    console.log("updating positions");
-                    await tour?.updatePositions();
-                  }, 500);
+                  // tour?.nextStep();
+                  // setTimeout(async () => {
+                  //   console.log("updating positions");
+                  //   await tour?.updatePositions();
+                  // }, 500);
                 }
                 setTabValue(e);
               }}
@@ -493,8 +368,6 @@ const BulletinPage: React.FC<{
                   // saveBulletin();
                   toast.dismiss();
                 } else {
-                  handleSubmitBulletin();
-
                   if (isOnboarding) {
                     dialog(<FriendModalContent />);
                     setTimeout(() => {
@@ -509,12 +382,15 @@ const BulletinPage: React.FC<{
           </section>
         </aside>
 
-        <section data-tg-title="Image Housing" className="flex gap-4 relative">
+        <section
+          data-tg-title="Image Housing"
+          className={`${isMobile ? "block" : "flex"} gap-4 relative`}
+        >
           {tabValue === "page" ? (
             <>
               <animated.div style={previewAnimation} className="flex-shrink-0">
                 <PageDesignPreview
-                  // scale={isMobile && 2}
+                  scale={isMobile ? 0.9 : 1}
                   currentStep={currentStep}
                   onboarding={isOnboarding}
                   hover={hover}
@@ -524,6 +400,9 @@ const BulletinPage: React.FC<{
                   images={images.map((image) => image.url)}
                   bodyText={blurb ?? customPlaceholder}
                   selectedTemplate={selectedTemplate}
+                  setImages={imageSetFunction}
+                  setImageIndex={setImageIndex}
+                  imageIndex={imageIndex}
                 />
               </animated.div>
               {blurbTransitions((style, item) =>
@@ -544,7 +423,6 @@ const BulletinPage: React.FC<{
                       setImages={setImages}
                       placeholder={customPlaceholder}
                       isSubmitting={isSubmitting}
-                      handleSubmitBulletin={handleSubmitBulletin}
                     />
                   </animated.div>
                 ) : null
