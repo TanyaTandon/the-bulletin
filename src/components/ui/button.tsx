@@ -37,10 +37,11 @@ export interface ButtonProps
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ className, variant, size, asChild = false, ...props }, ref) => {
+  ({ style, className, variant, size, asChild = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
+        style={style}
         className={cn(
           buttonVariants({ variant, size, className }),
           "font-[WelcomeWeb]"

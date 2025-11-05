@@ -1,11 +1,12 @@
 import { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import sendError from "@/hooks/use-sendError";
-import { addBulletin, User } from "@/redux/user";
+import { addBulletin, updateUserConnections, User } from "@/redux/user";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
 import { arrayToDict } from "./utils";
+import { toast } from "sonner";
 
 export const supabase = createClient(
   "https://voiuicuaujbhkkljtjfw.supabase.co",
@@ -319,8 +320,6 @@ export async function getForeignUserImages(id: string) {
   return data;
 }
 
-
-
 export const createNewBulletin = createAsyncThunk(
   "user/createNewBulletin",
   async ({ user }: NewBulletinItem, { dispatch }) => {
@@ -333,7 +332,7 @@ export const createNewBulletin = createAsyncThunk(
       const { error: bulletinError } = await supabase
         .from("bulletins")
         .insert({
-          blurb: "",
+          blurb: "Enter your blurb here",
           images: [],
           owner: user.phone_number,
           saved_notes: [],
@@ -398,6 +397,47 @@ export const createNewBulletin = createAsyncThunk(
       return { success: true, bulletinId, newUserData };
     } catch (error) {
       console.error("Error in createNewUser:", error);
+      return { success: false, error };
+    }
+  }
+);
+
+export type PhonNumberUpdateResponse = {
+  success: boolean;
+  message: string;
+  mutual: boolean;
+  user: User;
+};
+
+export const addFriendViaPhoneNumber = createAsyncThunk(
+  "user/addFriendViaPhoneNumber",
+  async (
+    { user, friendPhoneNumber }: { user: User; friendPhoneNumber: string },
+    { dispatch }
+  ) => {
+    try {
+      const { data, error } = await supabase.rpc("add_phone_number", {
+        adding_number: user.phone_number,
+        number_to_be_added: friendPhoneNumber,
+      });
+
+      if (error) {
+        toast.error(error.message);
+        return { success: false, error };
+      }
+
+      const response: PhonNumberUpdateResponse =
+        data as PhonNumberUpdateResponse;
+
+      if (response.success) {
+        dispatch(updateUserConnections(response.user.connections));
+      } else {
+        toast.error(response.message);
+      }
+
+      return { success: true, response };
+    } catch (error) {
+      console.error("Error in addFriendViaPhoneNumber:", error);
       return { success: false, error };
     }
   }

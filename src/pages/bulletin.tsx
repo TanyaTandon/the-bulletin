@@ -126,7 +126,6 @@ const BulletinPage: React.FC<{
     initializeTour,
     tour,
     isInitialized,
-    updateCurrentStepTarget,
   } = useTourGuideWithInit();
 
   const { dialog, close } = useDialog();

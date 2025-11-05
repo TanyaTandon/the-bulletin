@@ -17,3 +17,26 @@
     display: block;
   }
 }
+
+.month-add-hover {
+  cursor: pointer;
+  transition: opacity 0.25s ease-in-out;
+
+  &:hover {
+    .month-text {
+      &::after {
+        transition: opacity 0.25s ease-in-out;
+        opacity: 0.9;
+      }
+      &::before {
+        transition: opacity 0.25s ease-in-out;
+        opacity: 0;
+      }
+    }
+    .month-text-hover {
+      transition: opacity 0.25s ease-in-out;
+
+      opacity: 0;
+    }
+  }
+}

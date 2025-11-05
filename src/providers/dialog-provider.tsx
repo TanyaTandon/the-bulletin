@@ -7,6 +7,7 @@ import {
   DialogTitle,
 } from "@/components/ui/dialog";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { QuestionIcon } from "@phosphor-icons/react";
 
 type DialogOptions = {
   header?: React.ReactNode;
@@ -79,6 +80,7 @@ export const DialogProvider: React.FC<{
         <DialogContent
           className={`w-[${isMobile ? "90vw" : "50vw"}] max-w-[90%]`}
         >
+          <QuestionIcon className="absolute top-2 right-2" size={18} />
           {options?.title && (
             <DialogHeader>
               <DialogTitle className={options.titleOptions?.className}>

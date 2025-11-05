@@ -16,7 +16,11 @@ const FriendRequests: React.FC = () => {
         variant="ghost"
         size="icon"
         className="relative text-black hover:text-black/70 hover:bg-gray-50"
-        onClick={() => dialog(<FriendModalContent />)}
+        onClick={() =>
+          dialog(<FriendModalContent />, {
+            headerOptions: {},
+          })
+        }
       >
         <UserPlus className="h-5 w-5" />
       </Button>

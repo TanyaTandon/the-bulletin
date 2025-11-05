@@ -7,6 +7,7 @@ import { Bulletin, getAllBulletins } from "@/lib/api";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useEffect, useState } from "react";
+import { useNavigate } from "react-router";
 
 const Catalogue: React.FC = () => {
   const user = useAppSelector(staticGetUser);
@@ -28,6 +29,8 @@ const Catalogue: React.FC = () => {
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
 
   console.log(catalogue);
+
+  const navigate = useNavigate();
   return (
     <Layout>
       <main>
@@ -43,19 +46,21 @@ const Catalogue: React.FC = () => {
         <section className="mx-[10vw] grid grid-cols-3 gap-4">
           {months.map((month) => {
             if (catalogue?.find((bulletin) => bulletin.month === month)) {
-              const monthTextStyle = {
-                color: "#FFF8EB",
-                position: "relative" as const,
-                zIndex: 10,
-                fontSize: "3.75rem",
-                fontWeight: 500,
-                "--month-number": `"${switchMonth(month)}"`,
-              } as React.CSSProperties & { "--month-number": string };
-
               return (
                 <Card
-                  className="w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none shadow-none"
-                  // style={monthTextStyle}
+                  className="w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none shadow-none cursor-pointer"
+                  onClick={() => {
+                    if (
+                      catalogue?.find((bulletin) => bulletin.month === month)
+                    ) {
+                      navigate(
+                        `/bulletin/${
+                          catalogue.find((bulletin) => bulletin.month === month)
+                            ?.id
+                        }`
+                      );
+                    }
+                  }}
                 >
                   <BulletinPreview
                     className={"scale-[.5] mx-auto"}
@@ -65,7 +70,8 @@ const Catalogue: React.FC = () => {
                         ?.images.map((image) => {
                           console.log(image);
                           return `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`;
-                        }) || []
+                        })
+                        .slice(0, 4) || []
                     }
                     firstName={
                       catalogue.find((bulletin) => bulletin.month === month)

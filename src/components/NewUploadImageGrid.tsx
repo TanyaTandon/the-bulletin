@@ -1,10 +1,9 @@
 import React, { useState, useRef } from "react";
-import { Plus, Edit, Trash2, Upload } from "lucide-react";
+import { Plus, Edit, Trash2 } from "lucide-react";
 import { Card } from "./ui/card";
 import { Button } from "./ui/button";
 import { toast } from "sonner";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { Separator } from "./ui/separator";
 
 export interface UploadedImage {
   id: string;
@@ -148,7 +147,6 @@ const ImageUploadGrid: React.FC<{
                   {/* Single image hover overlay */}
                   {images.length === 1 && (
                     <>
-                      {/* Hover overlay for adding more images */}
                       <div
                         className={`absolute inset-0 bg-black/50 flex items-center justify-center cursor-pointer transition-opacity duration-200 ${
                           hoveredIndex === index ? "opacity-100" : "opacity-0"

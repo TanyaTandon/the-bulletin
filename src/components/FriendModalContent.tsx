@@ -10,357 +10,23 @@ import {
   Plus,
   Trash,
 } from "lucide-react";
-import { addFriendToSupabase, removeRecipient, supabase } from "@/lib/api";
+import {
+  addFriendToSupabase,
+  addFriendViaPhoneNumber,
+  removeRecipient,
+  supabase,
+} from "@/lib/api";
 import { toast } from "sonner";
 import { Button } from "./ui/button";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
-import { setUser } from "@/redux/user";
 import { useSelector } from "react-redux";
 import "../App.css";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
 import { Separator } from "./ui/separator";
-
-enum FriendStatus {
-  NOT_REGISTERED = -1,
-  FRACTIONAL = 0,
-  EXISTS = 1,
-}
-
-const FriendInput: React.FC<{
-  friend: string;
-  existingFriends: string[];
-  setFriendInputs: React.Dispatch<React.SetStateAction<string[]>>;
-  setExistingFriends: React.Dispatch<React.SetStateAction<string[]>>;
-}> = ({ friend, existingFriends, setFriendInputs, setExistingFriends }) => {
-  const dispatch = useAppDispatch();
-
-  const [loading, setLoading] = useState<boolean>(false);
-  const [phoneNumber, setPhoneNumber] = useState(friend ?? "");
-  const [timer, setTimer] = useState<NodeJS.Timeout | null>(null);
-  const [friendName, setFriendName] = useState<string | null>(null);
-  const [hover, setHover] = useState<boolean>(false);
-
-  const [friendDetails, setFriendDetails] = useState<{
-    name: string;
-    address: string;
-  } | null>({ name: null, address: null });
-
-  const [friendStatus, setFriendStatus] = useState<FriendStatus | null>(null);
-  const [fractionalData, setFractionalData] = useState(null);
-  const [addDetails, setAddDetails] = useState<boolean>(false);
-  const [addFriend, setAddFriend] = useState<boolean>(false);
-
-  useEffect(() => {
-    if (timer) {
-      clearTimeout(timer);
-    }
-
-    if (phoneNumber) {
-      const newTimer = setTimeout(async () => {
-        console.log("Calling API with phone number:", phoneNumber);
-
-        if (phoneNumber.length === 10) {
-          if (phoneNumber === user.phone_number) {
-            toast.info(`Sweetie... \n\n you're already your own best friend!`);
-            return;
-          }
-          setLoading(true);
-          await supabase
-            .from("user_record")
-            .select("*")
-            .eq("phone_number", phoneNumber)
-            .then(async (response) => {
-              if (response.data.length === 0) {
-                await supabase
-                  .from("fractional_user_record")
-                  .select("*")
-                  .eq("id", phoneNumber)
-                  .then((fractionalResponse) => {
-                    if (fractionalResponse.data.length === 0) {
-                      setLoading(false);
-                      toast.info(
-                        "You're the first to send your friend a bulletin! \n \n They're lucky 😉"
-                      );
-                      setAddDetails(true);
-                      setFriendStatus(FriendStatus.NOT_REGISTERED);
-                    } else {
-                      if (existingFriends.includes(phoneNumber)) {
-                        toast.info("User found with that phone number");
-                      } else {
-                        toast.info(
-                          "Your friend has been added by others! \n \n How popular!"
-                        );
-                      }
-                      setFriendName(
-                        fractionalResponse.data[0].suggested_name[0]
-                      );
-                      setLoading(false);
-                      setFriendStatus(FriendStatus.FRACTIONAL);
-                      setFractionalData(fractionalResponse.data[0]);
-                      setTimeout(() => {
-                        setAddFriend(true);
-                      }, 2000);
-                    }
-                  });
-              } else {
-                setLoading(false);
-                setFriendName(response.data[0].firstName);
-                console.log(response.data);
-                toast.info("User found with that phone number");
-                setFriendStatus(FriendStatus.EXISTS);
-                setTimeout(() => {
-                  setAddFriend(true);
-                }, 2000);
-              }
-            });
-        } else {
-          toast.info("Please enter a valid phone number");
-        }
-      }, 1500);
-
-      setTimer(newTimer);
-    }
-
-    return () => {
-      if (timer) {
-        clearTimeout(timer);
-      }
-    };
-  }, [phoneNumber]);
-
-  const user = useSelector(staticGetUser);
-
-  const renderIcon = useMemo(() => {
-    if (loading) {
-      return (
-        <Loader2
-          style={{
-            width: 50,
-          }}
-        />
-      );
-    }
-    if (existingFriends.includes(friend)) {
-      return (
-        <>
-          {hover == false ? (
-            <Check
-              onMouseOver={() => {
-                setHover(true);
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
-          ) : (
-            <Trash
-              onClick={async () => {
-                await removeRecipient({
-                  user,
-                  recipient: friend,
-                }).then((response) => {
-                  if (response) {
-                    setExistingFriends(
-                      existingFriends.filter((item) => item !== friend)
-                    );
-                    setFriendInputs((prev) =>
-                      prev.filter((item) => item !== friend)
-                    );
-                    dispatch(setUser(response[0]));
-                    toast.success("Friend removed successfully");
-                  }
-                });
-              }}
-              onMouseOut={() => {
-                setHover(false);
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
-          )}
-        </>
-      );
-    } else if (phoneNumber?.length !== 10) {
-      return (
-        <Ellipsis
-          style={{
-            width: 40,
-          }}
-        />
-      );
-    } else if (addFriend) {
-      return (
-        <Plus
-          onClick={async () => {
-            setLoading(true);
-            await addFriendToSupabase({
-              friend: {
-                ...friendDetails,
-                phone_number: phoneNumber,
-              },
-              fractionalUser: friendStatus,
-              user,
-              fractionalData,
-            }).then((response) => {
-              setLoading(false);
-              toast.success("Friend added successfully");
-              setExistingFriends([...existingFriends, phoneNumber]);
-              dispatch(setUser(response[0]));
-              setFriendStatus(FriendStatus.EXISTS);
-            });
-          }}
-          style={{
-            cursor: "pointer",
-            width: 50,
-            padding: 8,
-            background: "lightgrey",
-            borderRadius: 4,
-          }}
-        />
-      );
-    } else {
-      if (friendStatus === FriendStatus.NOT_REGISTERED) {
-        if (
-          friendDetails.name == null ||
-          (friendDetails.address == null && friendDetails.address?.length > 12)
-        ) {
-          return (
-            <PencilLine
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                borderRadius: 4,
-              }}
-            />
-          );
-        } else {
-          return (
-            <Plus
-              onClick={async () => {
-                await addFriendToSupabase({
-                  friend: {
-                    ...friendDetails,
-                    phone_number: phoneNumber,
-                  },
-                  fractionalUser: friendStatus,
-                  user,
-                  fractionalData,
-                }).then((response) => {
-                  setLoading(false);
-                  toast.success("Friend added successfully");
-                  setExistingFriends([...existingFriends, phoneNumber]);
-                  dispatch(setUser(response[0]));
-                });
-              }}
-              style={{
-                cursor: "pointer",
-                width: 50,
-                padding: 8,
-                background: "lightgrey",
-                borderRadius: 4,
-              }}
-            />
-          );
-        }
-      } else if (friendStatus === FriendStatus.FRACTIONAL) {
-        return (
-          <Check
-            style={{
-              width: 50,
-              padding: 8,
-            }}
-          />
-        );
-      } else if (friendStatus === FriendStatus.EXISTS) {
-        return (
-          <Check
-            style={{
-              width: 50,
-              padding: 8,
-            }}
-          />
-        );
-      }
-    }
-    return null;
-  }, [
-    loading,
-    existingFriends,
-    friend,
-    phoneNumber,
-    addFriend,
-    friendDetails,
-    friendStatus,
-    user,
-    fractionalData,
-    setExistingFriends,
-    hover,
-    setHover,
-  ]);
-
-  const isMobile = useIsMobile();
-
-  return (
-    <>
-      <span className="flex items-center gap-2 browserHelper">
-        <Input
-          className="disabled:opacity-100"
-          disabled={existingFriends.includes(friend) && friendName != null}
-          type="tel"
-          placeholder="Enter phone number"
-          value={phoneNumber}
-          onChange={(e) => {
-            setPhoneNumber(e.target.value);
-          }}
-        />
-        {friendName != null && (
-          <Input
-            className="disabled:opacity-100"
-            disabled={true}
-            type="text"
-            value={friendName}
-          />
-        )}
-        {addDetails && (
-          <>
-            <Input
-              onChange={(e) => {
-                setFriendDetails({ ...friendDetails, name: e.target.value });
-              }}
-              type="text"
-              placeholder="Enter name"
-              value={friendDetails.name}
-            />
-          </>
-        )}
-        {renderIcon}
-      </span>
-      {friendStatus === FriendStatus.NOT_REGISTERED && (
-        <>
-          <Input
-            value={friendDetails.address}
-            onChange={(e) => {
-              setFriendDetails({ ...friendDetails, address: e.target.value });
-            }}
-            type="text"
-            placeholder="123 Test Ave, San Francisco, CA 94101"
-          />
-        </>
-      )}
-    </>
-  );
-};
+import { animated, useSpring } from "@react-spring/web";
+import PhoneInput from "react-phone-number-input";
+import { useDialog } from "@/providers/dialog-provider";
 
 const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
   const { toast } = useToast();
@@ -380,37 +46,128 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
 
   const [step, setStep] = useState<number>(0);
 
+  const [friendPhoneNumber, setFriendPhoneNumber] = useState<string | null>(
+    null
+  );
+
+  const heightAnimation = useSpring({
+    height: friendPhoneNumber == null ? "100%" : "0%",
+    opacity: friendPhoneNumber == null ? 1 : 0,
+    config: { tension: 300, friction: 50 },
+  });
+
+  const buttonAnimation = useSpring({
+    opacity: friendPhoneNumber !== null ? 1 : 0,
+    height: friendPhoneNumber !== null ? "100%" : "0%",
+    position: "relative",
+    zIndex: friendPhoneNumber !== null ? 10 : 0,
+    width: "100%",
+    display: friendPhoneNumber !== null ? "block" : "none",
+    config: { tension: 300, friction: 50 },
+  });
+  const titleAnimation = useSpring({
+    opacity: friendPhoneNumber !== null ? 1 : 0,
+    height: friendPhoneNumber !== null ? "2rem" : "0%",
+    width: "100%",
+    config: { tension: 300, friction: 50 },
+  });
+
+  console.log(friendPhoneNumber?.length);
+
+  const dispatch = useAppDispatch();
+
+  const { close } = useDialog();
+
   function switchStep(step: number) {
     switch (step) {
       case 0:
         return (
           <>
-            <h1 className="text-2xl font-medium text-center">
-              Here you can add friends to your bulletin.
-            </h1>
-            <h3 className="text-sm text-center">
-              Copy the link below and send it to your friends
-            </h3>
-            <Button
-              onClick={() => {
-                handleCopyLink();
-              }}
+            <animated.div
+              className="flex flex-col gap-4 w-full"
+              style={heightAnimation}
             >
-              Add Friend
-            </Button>
-            <Separator />
-            <h3 className="text-sm text-center">
-              or if you'd just like them to be added to your bulletin, you can
-              add them manually.
-            </h3>
-            <Button
-              onClick={() => {
-                setStep(1);
+              <h1 className="text-2xl font-medium text-center">
+                Here you can add friends and recipients to your bulletin.
+              </h1>
+              <h3 className="text-sm text-center">
+                Invite your friends to join the platform and add themselves to
+                your bulletin!
+              </h3>
+              <Button
+                className="relative z-0"
+                onClick={() => {
+                  handleCopyLink();
+                }}
+              >
+                Add Friend
+              </Button>
+              <Separator className="w-[50%] mx-auto block" />
+              <h3 className="text-sm text-center">
+                Or if you know your friend's phone number, you can add them
+                directly to your bulletin!
+                <br /> (they'll get a notification when you add them)
+              </h3>
+            </animated.div>
+
+            <animated.div style={titleAnimation}>
+              <h3 className="text-sm text-center mb-0">
+                Your friends will receive a notification when you add them to
+                your bulletin!
+              </h3>
+            </animated.div>
+            <PhoneInput
+              className="border-[1px] border-gray-300 rounded-md p-2"
+              focusInputOnCountrySelection={false}
+              countryCallingCodeEditable={false}
+              defaultCountry="US"
+              id="phone"
+              type="tel"
+              placeholder="Enter friend's phone number"
+              onChange={(e) => {
+                if (e == null) {
+                  setFriendPhoneNumber(null);
+                } else {
+                  setFriendPhoneNumber(e);
+                }
               }}
-              variant="outline"
+              required
+            />
+            <animated.div style={buttonAnimation}>
+              <Button
+                onClick={async () => {
+                  await dispatch(
+                    addFriendViaPhoneNumber({ user, friendPhoneNumber })
+                  ).then(() => {
+                    toast({
+                      title: "Friend added!",
+                    });
+                    close();
+                  });
+                }}
+                className="block w-[90%] mx-auto relative z-30"
+              >
+                Add Friend Directly
+              </Button>
+            </animated.div>
+            <animated.div
+              className="flex flex-col gap-4 w-full"
+              style={heightAnimation}
             >
-              Add Recipient
-            </Button>
+              <Separator />
+              <h3 className="text-sm text-center">
+                if you'd like to add someone as a Recipient, enter their
+                information below!
+              </h3>
+              <Button
+                onClick={() => {
+                  setStep(1);
+                }}
+                variant="outline"
+              >
+                Add Recipient
+              </Button>
+            </animated.div>
           </>
         );
       case 1:

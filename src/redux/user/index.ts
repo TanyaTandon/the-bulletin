@@ -274,6 +274,12 @@ export const userUpdater = createSlice({
         bulletin.id === action.payload.id ? action.payload : bulletin
       );
     },
+    updateUserConnections: (state, action: PayloadAction<string[]>) => {
+      state.user = {
+        ...state.user,
+        connections: action.payload,
+      };
+    },
     addBulletin: (state, action: PayloadAction<Bulletin>) => {
       state.bulletins = [...state.bulletins, action.payload];
       state.user = {
@@ -292,7 +298,12 @@ export const userUpdater = createSlice({
   },
 });
 
-export const { setUser, setBulletins, addBulletin, updateBulletin } =
-  userUpdater.actions;
+export const {
+  setUser,
+  setBulletins,
+  addBulletin,
+  updateBulletin,
+  updateUserConnections,
+} = userUpdater.actions;
 
 export default userUpdater.reducer;

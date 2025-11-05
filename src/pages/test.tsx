@@ -19,6 +19,10 @@ const Test: React.FC = () => {
   console.log(userData);
   const tokens = stytch.session.getTokens();
   console.log(tokens);
+
+  const signOut = async () => {
+    await stytch.session.revoke();
+  };
   return (
     <>
       <div className="flex flex-col items-center justify-center h-screen">
@@ -42,15 +46,14 @@ const Test: React.FC = () => {
         <br />
         <button
           onClick={async () => {
-            const { data, error } = await supabase.rpc('insert_new_image', {
-              row_id: "c4bb5824-f4d0-4f9c-abaa-3ba7dc2645d4",
-              new_value: "cbcb83c9-dae4-47ca-a529-4edf00c38d61",
-              image_index: 3,
+            const { data, error } = await supabase.rpc("add_phone_number", {
+              adding_number: "+12535149837",
+              number_to_be_added: "+14692226142",
             });
             console.log(data);
           }}
         >
-          click 2 insert yo
+          apppppendy
         </button>
         <br />
         <br />
@@ -62,7 +65,7 @@ const Test: React.FC = () => {
             // await fetch("http://localhost:8080/ping",{
             //   method: "GET",
             // })
-            dispatch(resetAllSlices);
+            signOut();
           }}
         >
           click try remote array_append
