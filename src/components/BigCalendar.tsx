@@ -149,7 +149,7 @@ const BigCalendar: React.FC<{
                             {isCurrentMonth ? dayNumber : ""}
                           </span>
                           {hasNote && (
-                            <Heart className="absolute -top-1 -right-1 h-3 w-3 text-pink-500" />
+                            <Heart className="absolute -top-0 -right-1 h-3 w-3 text-pink-500" />
                           )}
                         </div>
                       </div>

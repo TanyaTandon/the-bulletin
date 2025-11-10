@@ -3,7 +3,7 @@ import { UploadedImage } from "@/components/ImageUploadGrid";
 import { clsx, type ClassValue } from "clsx";
 import { twMerge } from "tailwind-merge";
 import { toast } from "sonner";
-import { Bulletin, createNewBulletin } from "./api";
+import { Bulletin } from "./api";
 import { CalendarNote } from "@/components/BlurbInput";
 import {
   setUser,

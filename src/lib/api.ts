@@ -14,7 +14,8 @@ export const supabase = createClient(
 );
 
 export type NewUserItem = {
-  name: string;
+  firstName: string;
+  lastName: string;
   id: string;
   created_user_id: string;
   phoneNumber: string;
@@ -36,7 +37,8 @@ export type NewBulletinItem = {
 };
 
 export async function createNewUser({
-  name,
+  firstName,
+  lastName,
   id,
   created_user_id,
   phoneNumber,
@@ -47,7 +49,8 @@ export async function createNewUser({
     const { error: userError } = await supabase.from("user_record").insert({
       created_user_id: created_user_id,
       id: created_user_id,
-      firstName: name,
+      firstName: firstName,
+      lastName: lastName,
       images: [],
       bulletins: [],
       phone_number: phoneNumber,
@@ -442,3 +445,12 @@ export const addFriendViaPhoneNumber = createAsyncThunk(
     }
   }
 );
+
+export const quickValidation = async (phoneNumber: string) => {
+  const { data, error } = await supabase
+    .from("user_record")
+    .select("*")
+    .eq("phone_number", phoneNumber)
+
+  return data;
+};

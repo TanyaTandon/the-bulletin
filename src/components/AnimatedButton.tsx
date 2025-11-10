@@ -1,24 +1,12 @@
 import React from "react";
+import { animated, useSpring } from "@react-spring/web";
 import styled from "styled-components";
 
-const AnimatedButton: React.FC<{
-  onClick: () => void;
-  children: React.ReactNode;
-}> = ({ onClick, children }) => {
-  return (
-    <StyledWrapper onClick={onClick}>
-      <div className="container">
-        <a href="#" className="button type--C">
-          {/* <div className="button__line" />
-          <div className="button__line" /> */}
-          <span className="button__text">{children}</span>
-          <div className="button__drow1" />     
-          <div className="button__drow2" />
-        </a>
-      </div>
-    </StyledWrapper>
-  );
-};
+const BUTTON_WIDTH = 240;
+const BUTTON_HEIGHT = 56;
+const BUTTON_RADIUS = 18;
+const ACCENT_PATH =
+  "M 26 14 C 10 20 12 40 38 40 S 110 20 150 24 S 208 42 196 50";
 
 const StyledWrapper = styled.div`
   .type--A {
@@ -31,230 +19,181 @@ const StyledWrapper = styled.div`
   }
   .type--C {
     --line_color: #00135c;
-    --back_color: #9DBD99;
-  }
-  .button {
-    position: relative;
-    z-index: 0;
-    width: 240px;
-    height: 56px;
-    text-decoration: none;
-    font-size: 14px;
-    font-weight: bold;
-    color: var(--line_color);
-    letter-spacing: 2px;
-    transition: all 0.3s ease;
-  }
-  .button__text {
-    font-family: "WelcomeWeb";
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    width: 100%;
-    height: 100%;
-  }
-  .button::before,
-  .button::after,
-
-  .button__text::before {
-    bottom: 0;
-    right: 54px;
-    width: calc(100% - 56px * 2 - 16px);
-  }
-  .button__text::after {
-    bottom: 0;
-    left: 54px;
-    width: 8px;
-  }
-  .button__line {
-    position: absolute;
-    top: 0;
-    width: 56px;
-    height: 100%;
-    overflow: hidden;
-  }
-  .button__line::before {
-    content: "";
-    position: absolute;
-    top: 0;
-    width: 150%;
-    height: 100%;
-    box-sizing: border-box;
-    border-radius: 300px;
-    border: solid 3px var(--line_color);
-  }
-  .button__line:nth-child(1),
-  .button__line:nth-child(1)::before {
-    left: 0;
-  }
-  .button__line:nth-child(2),
-  .button__line:nth-child(2)::before {
-    right: 0;
-  }
-  .button:hover {
-    letter-spacing: 6px;
-  }
-  .button:hover::before,
-  .button:hover .button__text::before {
-    width: 8px;
-  }
-  .button:hover::after,
-  .button:hover .button__text::after {
-    width: calc(100% - 56px * 2 - 16px);
-  }
-  .button__drow1,
-  .button__drow2 {
-    position: absolute;
-    z-index: -1;
-    border-radius: 16px;
-    transform-origin: 16px 16px;
-  }
-  .button__drow1 {
-    top: -16px;
-    left: 40px;
-    width: 32px;
-    height: 0;
-    transform: rotate(30deg);
-  }
-  .button__drow2 {
-    top: 44px;
-    left: 77px;
-    width: 32px;
-    height: 0;
-    transform: rotate(-127deg);
-  }
-  .button__drow1::before,
-  .button__drow1::after,
-  .button__drow2::before,
-  .button__drow2::after {
-    content: "";
-    position: absolute;
-  }
-  .button__drow1::before {
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 32px;
-    border-radius: 16px;
-    transform-origin: 16px 16px;
-    transform: rotate(-60deg);
-  }
-  .button__drow1::after {
-    top: -10px;
-    left: 45px;
-    width: 0;
-    height: 32px;
-    border-radius: 16px;
-    transform-origin: 16px 16px;
-    transform: rotate(69deg);
-  }
-  .button__drow2::before {
-    bottom: 0;
-    left: 0;
-    width: 0;
-    height: 32px;
-    border-radius: 16px;
-    transform-origin: 16px 16px;
-    transform: rotate(-146deg);
-  }
-  .button__drow2::after {
-    bottom: 26px;
-    left: -40px;
-    width: 0;
-    height: 32px;
-    border-radius: 16px;
-    transform-origin: 16px 16px;
-    transform: rotate(-262deg);
-  }
-  .button__drow1,
-  .button__drow1::before,
-  .button__drow1::after,
-  .button__drow2,
-  .button__drow2::before,
-  .button__drow2::after {
-    background: var(--back_color);
-  }
-  .button:hover .button__drow1 {
-    animation: drow1 ease-in 0.06s;
-    animation-fill-mode: forwards;
-  }
-  .button:hover .button__drow1::before {
-    animation: drow2 linear 0.08s 0.06s;
-    animation-fill-mode: forwards;
-  }
-  .button:hover .button__drow1::after {
-    animation: drow3 linear 0.03s 0.14s;
-    animation-fill-mode: forwards;
-  }
-  .button:hover .button__drow2 {
-    animation: drow4 linear 0.06s 0.2s;
-    animation-fill-mode: forwards;
-  }
-  .button:hover .button__drow2::before {
-    animation: drow3 linear 0.03s 0.26s;
-    animation-fill-mode: forwards;
-  }
-  .button:hover .button__drow2::after {
-    animation: drow5 linear 0.06s 0.32s;
-    animation-fill-mode: forwards;
-  }
-  @keyframes drow1 {
-    0% {
-      height: 0;
-    }
-    100% {
-      height: 100px;
-    }
-  }
-  @keyframes drow2 {
-    0% {
-      width: 0;
-      opacity: 0;
-    }
-    10% {
-      opacity: 0;
-    }
-    11% {
-      opacity: 1;
-    }
-    100% {
-      width: 120px;
-    }
-  }
-  @keyframes drow3 {
-    0% {
-      width: 0;
-    }
-    100% {
-      width: 80px;
-    }
-  }
-  @keyframes drow4 {
-    0% {
-      height: 0;
-    }
-    100% {
-      height: 120px;
-    }
-  }
-  @keyframes drow5 {
-    0% {
-      width: 0;
-    }
-    100% {
-      width: 124px;
-    }
-  }
-
-  .container {
-    display: flex;
-    flex-direction: column;
-    justify-content: center;
-    align-items: center;
-  }
-  .button:not(:last-child) {
-    margin-bottom: 64px;
+    --back_color: #9dbd99;
   }
 `;
+
+const Container = styled.div`
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  align-items: center;
+`;
+
+const ButtonBase = styled(animated.button)`
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: ${BUTTON_WIDTH}px;
+  height: ${BUTTON_HEIGHT}px;
+  border: none;
+  padding: 0;
+  border-radius: ${BUTTON_RADIUS}px;
+  background: transparent;
+  color: var(--line_color);
+  font-family: "WelcomeWeb";
+  font-weight: bold;
+  font-size: 14px;
+  letter-spacing: 2px;
+  cursor: pointer;
+  isolation: isolate;
+
+  &:focus {
+    outline: none;
+  }
+
+  &:focus-visible {
+    outline: 2px solid var(--line_color);
+    outline-offset: 4px;
+  }
+`;
+
+const ButtonLabel = styled.span`
+  position: relative;
+  z-index: 1;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-family: "WelcomeWeb";
+  font-weight: inherit;
+  font-size: inherit;
+  color: currentColor;
+`;
+
+const TraceSvg = styled(animated.svg)`
+  position: absolute;
+  inset: 0;
+  z-index: 0;
+  width: 100%;
+  height: 100%;
+  pointer-events: none;
+`;
+
+const AnimatedButton: React.FC<{
+  onClick: () => void;
+  children: React.ReactNode;
+}> = ({ onClick, children }) => {
+  const [isHovered, setIsHovered] = React.useState(false);
+  const outlineRef = React.useRef<SVGRectElement | null>(null);
+  const accentRef = React.useRef<SVGPathElement | null>(null);
+
+  const [outlineLength, setOutlineLength] = React.useState(1);
+  const [accentLength, setAccentLength] = React.useState(1);
+
+  React.useEffect(() => {
+    if (outlineRef.current) {
+      setOutlineLength(outlineRef.current.getTotalLength());
+    }
+    if (accentRef.current) {
+      setAccentLength(accentRef.current.getTotalLength());
+    }
+  }, []);
+
+  const hoverSpring = useSpring({
+    translateY: isHovered ? -4 : 0,
+    letterSpacing: isHovered ? 6 : 2,
+    fillOpacity: isHovered ? 0.35 : 0,
+    strokeDashoffset: isHovered ? 0 : outlineLength,
+    accentOffset: isHovered ? 0 : accentLength,
+    config: { mass: 1, tension: 240, friction: 22 },
+  });
+
+  const handleHoverChange = React.useCallback((value: boolean) => {
+    setIsHovered(value);
+  }, []);
+
+  const handleClick = React.useCallback(
+    (event: React.MouseEvent<HTMLButtonElement>) => {
+      event.preventDefault();
+      onClick();
+    },
+    [onClick]
+  );
+
+  return (
+    <StyledWrapper>
+      <Container>
+        <ButtonBase
+          type="button"
+          className="button type--C"
+          style={{
+            transform: hoverSpring.translateY.to(
+              (value: number) => `translateY(${value}px)`
+            ),
+            letterSpacing: hoverSpring.letterSpacing.to(
+              (value: number) => `${value}px`
+            ),
+          }}
+          onMouseEnter={() => handleHoverChange(true)}
+          onMouseLeave={() => handleHoverChange(false)}
+          onFocus={() => handleHoverChange(true)}
+          onBlur={() => handleHoverChange(false)}
+          onClick={handleClick}
+        >
+          <ButtonLabel>{children}</ButtonLabel>
+          <TraceSvg
+            viewBox={`0 0 ${BUTTON_WIDTH} ${BUTTON_HEIGHT}`}
+            preserveAspectRatio="none"
+            aria-hidden="true"
+            focusable="false"
+          >
+            <animated.rect
+              x={6}
+              y={6}
+              width={BUTTON_WIDTH - 12}
+              height={BUTTON_HEIGHT - 12}
+              rx={BUTTON_RADIUS - 6}
+              fill="var(--back_color)"
+              style={{
+                opacity: hoverSpring.fillOpacity,
+              }}
+            />
+            <animated.rect
+              ref={outlineRef}
+              x={1.5}
+              y={1.5}
+              width={BUTTON_WIDTH - 3}
+              height={BUTTON_HEIGHT - 3}
+              rx={BUTTON_RADIUS}
+              stroke="var(--line_color)"
+              strokeWidth={3}
+              strokeLinejoin="round"
+              fill="none"
+              style={{
+                strokeDasharray: outlineLength,
+                strokeDashoffset: hoverSpring.strokeDashoffset,
+              }}
+            />
+            <animated.path
+              ref={accentRef}
+              d={ACCENT_PATH}
+              stroke="var(--back_color)"
+              strokeWidth={5}
+              strokeLinecap="round"
+              fill="none"
+              style={{
+                strokeDasharray: accentLength,
+                strokeDashoffset: hoverSpring.accentOffset,
+              }}
+            />
+          </TraceSvg>
+        </ButtonBase>
+      </Container>
+    </StyledWrapper>
+  );
+};
 
 export default AnimatedButton;

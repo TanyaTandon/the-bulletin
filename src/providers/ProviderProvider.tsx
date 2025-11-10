@@ -12,7 +12,6 @@ import { SheetProvider } from "./sheet-provider";
 import { getBulletins, staticGetUser } from "@/redux/user/selectors";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { useStytchUser } from "@stytch/react";
-import { createNewBulletin } from "@/lib/api";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -56,17 +55,6 @@ const ProviderProvider: React.FC<{
             (bulletin) => bulletin.month === new Date().getMonth() + 1
           )?.id
         }`;
-      } else if (
-        searchParams.includes("onboarding") &&
-        dummyBulletinAll === 0
-      ) {
-        dispatch(createNewBulletin({ user }))
-          .unwrap()
-          .then((res) => {
-            if (res.success) {
-              window.location.href = `/bulletin/${res.bulletinId}?onboarding=true`;
-            }
-          });
       }
     }
   }, [pathname]);

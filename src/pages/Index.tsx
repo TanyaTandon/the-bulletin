@@ -12,7 +12,7 @@ import { useAuth } from "@/providers/contexts/AuthContext";
 const Index = () => {
   const { dialog, close } = useDialog();
 
-
+  const user = useAppSelector(staticGetUser);
 
   return (
     <Layout>
@@ -33,26 +33,30 @@ const Index = () => {
         </Link>
 
         <div className="gap-4">
-          <section className="flex flex-col items-center">
-            <Button
-              variant="primary"
-              size="lg"
-              onClick={() => {
-                dialog(<AuthModalContent close={close} signInState={true} />);
-              }}
-              className="block w-[10rem] text-[#FCE5BA] rounded-[100px] hover:opacity-90"
-            >
-              sign in
-            </Button>
-            <br />
-            <AnimatedButton
-              onClick={() => {
-                dialog(<AuthModalContent close={close} signInState={false} />);
-              }}
-            >
-              sign up
-            </AnimatedButton>
-          </section>
+          {user == null && (
+            <section className="flex flex-col items-center">
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => {
+                  dialog(<AuthModalContent close={close} signInState={true} />);
+                }}
+                className="block w-[10rem] text-[#FCE5BA] rounded-[100px] hover:opacity-90"
+              >
+                sign in
+              </Button>
+              <br />
+              <AnimatedButton
+                onClick={() => {
+                  dialog(
+                    <AuthModalContent close={close} signInState={false} />
+                  );
+                }}
+              >
+                sign up
+              </AnimatedButton>
+            </section>
+          )}
         </div>
       </div>
     </Layout>

@@ -20,7 +20,8 @@ const AuthModalContent: React.FC<{
   const phoneInputRef = useRef(null);
 
   const {
-    setName,
+    setFirstName,
+    setLastName,
     phoneNumber,
     setPhoneNumber,
     code,
@@ -38,7 +39,6 @@ const AuthModalContent: React.FC<{
   } = useAuth();
 
   const navigate = useNavigate();
-
 
   const [disabled, setDisabled] = useState<boolean>(true);
 
@@ -129,27 +129,44 @@ const AuthModalContent: React.FC<{
           {signInStep === 0 ? (
             // <Card className="w-full">
             <>
-              <h1 className="text-2xl font-semibold mb-8 text-center">
+              <h1 className=" text-2xl font-semibold mb-8 text-center">
                 Create your account
               </h1>
               <div className="space-y-6">
-                <div className="space-y-2">
-                  <Label htmlFor="name" className="text-sm font-medium">
-                    Full Name
-                  </Label>
-                  <div className="relative">
-                    <UserIcon className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
-                    <Input
-                      id="name"
-                      placeholder="Enter your name"
-                      onChange={(e) => setName(e.target.value)}
-                      className="pl-9 h-12"
-                      disabled={isProcessing}
-                      required
-                    />
+                <aside className="flex gap-4">
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      First Name
+                    </Label>
+                    <div className="relative">
+                      <UserIcon className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        placeholder="Enter your first name"
+                        onChange={(e) => setFirstName(e.target.value)}
+                        className="pl-9 h-12"
+                        disabled={isProcessing}
+                        required
+                      />
+                    </div>
                   </div>
-                </div>
-
+                  <div className="space-y-2">
+                    <Label htmlFor="name" className="text-sm font-medium">
+                      Last Name
+                    </Label>
+                    <div className="relative">
+                      <UserIcon className="absolute left-3 top-4 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="name"
+                        placeholder="Enter your last name"
+                        onChange={(e) => setLastName(e.target.value)}
+                        className="pl-9 h-12"
+                        disabled={isProcessing}
+                        required
+                      />
+                    </div>
+                  </div>
+                </aside>
                 <div className="space-y-2">
                   <Label htmlFor="phone" className="text-sm font-medium">
                     Phone Number

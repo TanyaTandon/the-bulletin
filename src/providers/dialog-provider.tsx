@@ -26,6 +26,7 @@ type DialogOptions = {
   descriptionOptions?: {
     className?: string;
   };
+  helpContent?: React.ReactNode;
   additionalClosingAction?: () => void;
 };
 
@@ -78,9 +79,13 @@ export const DialogProvider: React.FC<{
     <DialogContext.Provider value={value}>
       <Dialog open={isOpen} onOpenChange={() => close()}>
         <DialogContent
-          className={`w-[${isMobile ? "90vw" : "50vw"}] max-w-[90%]`}
+          className={`w-[${isMobile ? "90vw" : "50vw"}] max-w-[90%] ${
+            isMobile ? "max-h-[85%]" : "max-h-auto"
+          } ${isMobile ? "overflow-y-scroll" : "overflow-y-hidden"}`}
         >
-          <QuestionIcon className="absolute top-2 right-2" size={18} />
+          {options?.helpContent && (
+            <QuestionIcon className="absolute top-2 right-2" size={18} />
+          )}
           {options?.title && (
             <DialogHeader>
               <DialogTitle className={options.titleOptions?.className}>

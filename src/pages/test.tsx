@@ -7,7 +7,7 @@ import sendError from "@/hooks/use-sendError";
 import axios from "axios";
 import { staticGetUser } from "@/redux/user/selectors";
 import { useStytch, useStytchUser } from "@stytch/react";
-import { supabase } from "@/lib/api";
+import { quickValidation, supabase } from "@/lib/api";
 
 const Test: React.FC = () => {
   const stytch = useStytch();
@@ -46,14 +46,12 @@ const Test: React.FC = () => {
         <br />
         <button
           onClick={async () => {
-            const { data, error } = await supabase.rpc("add_phone_number", {
-              adding_number: "+12535149837",
-              number_to_be_added: "+14692226142",
-            });
-            console.log(data);
+            const response = await quickValidation("+12535149837");
+
+            console.log(response);
           }}
         >
-          apppppendy
+          quick val
         </button>
         <br />
         <br />

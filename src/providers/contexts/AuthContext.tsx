@@ -8,7 +8,7 @@ import React, {
 import { useStytch } from "@stytch/react";
 import { useAppDispatch } from "@/redux";
 import { fetchAllBulletins, fetchUser, User } from "@/redux/user";
-import { createNewUser } from "@/lib/api";
+import { createNewUser, quickValidation } from "@/lib/api";
 import { toast } from "sonner";
 import { NavigateFunction } from "react-router-dom";
 import sendError from "@/hooks/use-sendError";
@@ -28,7 +28,7 @@ interface AuthContextType {
   authResponse: AuthResponse | null;
 
   // Form fields
-  name: string;
+  firstName: string;
   phoneNumber: string;
   code: string;
   streetAddress: string;
@@ -37,7 +37,8 @@ interface AuthContextType {
   zipCode: string;
 
   // Setters
-  setName: (name: string) => void;
+  setLastName: (lastName: string) => void;
+  setFirstName: (firstName: string) => void;
   setPhoneNumber: (phoneNumber: string) => void;
   setCode: (code: string) => void;
   setStreetAddress: (streetAddress: string) => void;
@@ -86,7 +87,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
   const [authResponse, setAuthResponse] = useState<AuthResponse | null>(null);
 
   // Form fields
-  const [name, setName] = useState<string>("");
+  const [lastName, setLastName] = useState<string>("");
+  const [firstName, setFirstName] = useState<string>("");
   const [phoneNumber, setPhoneNumber] = useState<string>("");
   const [code, setCode] = useState<string>("");
   const [streetAddress, setStreetAddress] = useState<string>("");
@@ -105,7 +107,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     setSignInStep(0);
     setCode("");
     setPhoneNumber("");
-    setName("");
+    setFirstName("");
     setStreetAddress("");
     setCity("");
     setState("");
@@ -121,6 +123,15 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     }
 
     setIsProcessing(true);
+
+    const response = await quickValidation(phoneNumber);
+
+    if (response.length === 0) {
+      setIsProcessing(false);
+      toast.error("This phone number is not registered. Please sign up.");
+      return;
+    }
+
     try {
       await stytch.otps.sms
         .loginOrCreate(phoneNumber, {
@@ -219,8 +230,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
   );
 
   const handleSignUp = useCallback(async () => {
-    if (!name || name.trim() === "") {
-      toast.error("Please enter your name");
+    if (!firstName || firstName.trim() === "") {
+      toast.error("Please enter your firstName");
       return;
     }
 
@@ -236,6 +247,12 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
       });
       console.log(response);
       if (response.status_code == 200) {
+        await stytch.user.update({
+          name: {
+            first_name: firstName,
+            last_name: lastName,
+          },
+        });
         setAuthResponse(response);
         setReceivedCode(true);
         setSignInStep(1);
@@ -262,18 +279,28 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
         toast.error(error.message);
       } else {
         sendError(phoneNumber, "handleSignUp", error, {
-          name,
+          firstName,
           streetAddress,
           city,
           state,
           zipCode,
+          lastName,
         });
         toast.error(error.message);
       }
     } finally {
       setIsProcessing(false);
     }
-  }, [name, phoneNumber, streetAddress, city, state, zipCode, stytch.otps.sms]);
+  }, [
+    firstName,
+    lastName,
+    phoneNumber,
+    streetAddress,
+    city,
+    state,
+    zipCode,
+    stytch.otps.sms,
+  ]);
 
   const handleVerifySignUp = useCallback(
     async (code: string, navigate: NavigateFunction, close: () => void) => {
@@ -295,7 +322,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
             if (res.status_code == 200) {
               const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
               await createNewUser({
-                name: name,
+                firstName: firstName,
+                lastName: lastName,
                 created_user_id: res.user_id,
                 id: phoneNumber,
                 phoneNumber: phoneNumber,
@@ -314,7 +342,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                   navigate("/bulletin?onboarding=true");
                 } else {
                   sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
-                    name,
+                    firstName,
                     streetAddress,
                     city,
                     state,
@@ -327,7 +355,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
           });
       } catch (error) {
         sendError(phoneNumber, "handleSignUp", error, {
-          name,
+          firstName,
           streetAddress,
           city,
           state,
@@ -345,7 +373,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
       authResponse?.method_id,
       stytch.otps,
       dispatch,
-      name,
+      firstName,
       phoneNumber,
       streetAddress,
       city,
@@ -363,7 +391,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     authResponse,
 
     // Form fields
-    name,
+    firstName,
     phoneNumber,
     code,
     streetAddress,
@@ -372,7 +400,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     zipCode,
 
     // Setters
-    setName,
+    setFirstName,
+    setLastName,
     setPhoneNumber,
     setCode,
     setStreetAddress,
