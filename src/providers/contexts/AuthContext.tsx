@@ -253,12 +253,6 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
       });
       console.log(response);
       if (response.status_code == 200) {
-        await stytch.user.update({
-          name: {
-            first_name: firstName,
-            last_name: lastName,
-          },
-        });
         setAuthResponse(response);
         setReceivedCode(true);
         setSignInStep(1);
@@ -327,6 +321,13 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
           .then(async (res) => {
             if (res.status_code == 200) {
               const fullAddress = `${streetAddress}, ${city}, ${state} ${zipCode}`;
+
+              await stytch.user.update({
+                name: {
+                  first_name: firstName,
+                  last_name: lastName,
+                },
+              });
               await createNewUser({
                 firstName: firstName,
                 lastName: lastName,
