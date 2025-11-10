@@ -240,6 +240,12 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
       return;
     }
 
+    const response = await quickValidation(phoneNumber);
+    if (response.length !== 0) {
+      toast.error("This phone number is already registered. Please sign in.");
+      return;
+    }
+
     setIsProcessing(true);
     try {
       const response = await stytch.otps.sms.loginOrCreate(phoneNumber, {
