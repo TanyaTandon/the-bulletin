@@ -273,7 +273,11 @@ const AuthModalContent: React.FC<{
               </Button>
             </>
           ) : (
-            <section className="flex flex-col items-center justify-center w-[30vw]">
+            <section
+              className={`flex flex-col items-center justify-center ${
+                isMobile ? "w-[85vw]" : "w-[30vw]"
+              }`}
+            >
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
               <span
                 style={
