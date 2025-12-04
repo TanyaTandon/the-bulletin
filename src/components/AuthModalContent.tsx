@@ -106,7 +106,7 @@ const AuthModalContent: React.FC<{
                   signInStep === 0
                     ? handleSignIn
                     : (event) => {
-                        if (code) handleVerifySignIn(code, navigate);
+                        if (code) handleVerifySignIn(code, navigate, close);
                       }
                 }
                 size="lg"

@@ -11,7 +11,6 @@ import {
   Trash,
 } from "lucide-react";
 import {
-  addFriendToSupabase,
   addFriendViaPhoneNumber,
   removeRecipient,
   supabase,
@@ -27,12 +26,28 @@ import { Separator } from "./ui/separator";
 import { animated, useSpring } from "@react-spring/web";
 import PhoneInput from "react-phone-number-input";
 import { useDialog } from "@/providers/dialog-provider";
+  import { useReducer } from "react";
+import { addRecipient } from "@/redux/user";
+import { TourGuideClient } from "@sjmc11/tourguidejs/src/Tour";
 
-const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
+
+export type RecipientState = {
+  firstName: string;
+  lastName: string;
+  phone: string;
+  address: string;
+  city: string;
+  zip: string;
+  fullAddress: string;
+};
+
+const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean) => void, updatePositions?:()=>void, tour?:TourGuideClient  }> = ({ full, setState ,updatePositions, tour}) => {
   const { toast } = useToast();
 
+
   const user = useSelector(staticGetUser);
-  console.log(user);
+  const availableRecipients = 2- user.recipients.length;
+  // console.log(user);
   const uniqueLink = `${window.location.origin}/register/${user.id}?name=${user.firstName}`;
 
   const handleCopyLink = useCallback(() => {
@@ -72,13 +87,71 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
     config: { tension: 300, friction: 50 },
   });
 
-  console.log(friendPhoneNumber?.length);
-
   const dispatch = useAppDispatch();
 
   const { close } = useDialog();
 
+
+  type RecipientAction =
+    | { type: "SET_FIRST_NAME"; payload: string }
+    | { type: "SET_LAST_NAME"; payload: string }
+    | { type: "SET_PHONE"; payload: string }
+    | { type: "SET_ADDRESS"; payload: string }
+    | { type: "SET_CITY"; payload: string }
+    | { type: "SET_ZIP"; payload: string }
+    | { type: "RESET" };
+
+  const initialRecipientState: RecipientState = {
+    firstName: "",
+    lastName: "",
+    phone: "",
+    address: "",
+    city: "",
+    zip: "",
+    fullAddress: "",
+
+  };
+  function formatFullAddress(address: string, city: string, zip: string): string {
+    return [address, city, zip].filter(Boolean).join("-");
+  }
+  function recipientReducer(state: RecipientState, action: RecipientAction): RecipientState {
+    switch (action.type) {
+      case "SET_FIRST_NAME":
+        return{ ...state, firstName: action.payload };
+      case "SET_LAST_NAME":
+        return { ...state, lastName: action.payload };
+      case "SET_PHONE":
+        return { ...state, phone: action.payload };
+      case "SET_ADDRESS": {
+        const address = action.payload;
+        const fullAddress = formatFullAddress(address, state.city, state.zip);
+        return { ...state, address, fullAddress };
+      }
+      case "SET_CITY": {
+        const city = action.payload;
+        const fullAddress = formatFullAddress(state.address, city, state.zip);
+        return { ...state, city, fullAddress };
+      }
+      case "SET_ZIP": {
+        const zip = action.payload;
+        const fullAddress = formatFullAddress(state.address, state.city, zip);
+        return { ...state, zip, fullAddress };
+      }
+      case "RESET":
+        return { ...initialRecipientState };
+      default:
+        return state;
+    }
+  }
+
+  const [recipient, setRecipient] = useReducer(recipientReducer, initialRecipientState);
+
+
+ 
+  console.log(recipient);
+
   function switchStep(step: number) {
+    
     switch (step) {
       case 0:
         return (
@@ -126,8 +199,10 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
               placeholder="Enter friend's phone number"
               onChange={(e) => {
                 if (e == null) {
+                  setState(true);
                   setFriendPhoneNumber(null);
                 } else {
+                  setState(false);
                   setFriendPhoneNumber(e);
                 }
               }}
@@ -138,11 +213,18 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
                 onClick={async () => {
                   await dispatch(
                     addFriendViaPhoneNumber({ user, friendPhoneNumber })
-                  ).then(() => {
-                    toast({
-                      title: "Friend added!",
-                    });
-                    close();
+                  ).then((res) => {
+                    if(res.payload.response.success){
+                      toast({
+                        title: "Friend added!",
+                      });
+                      close();
+                    } else {
+                      toast({
+                        title: "Failed to add friend",
+                        description: res.payload.error.message,
+                      });
+                    }
                   });
                 }}
                 className="block w-[90%] mx-auto relative z-30"
@@ -162,6 +244,10 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
               <Button
                 onClick={() => {
                   setStep(1);
+                  setTimeout(() => {
+                    updatePositions?.();
+                  }, 200);
+
                 }}
                 variant="outline"
               >
@@ -176,7 +262,11 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
             <button
               className="absolute top-5 left-5"
               onClick={() => {
-                setStep(0);
+setStep(0)
+                setTimeout(() => {
+                    
+                  updatePositions?.();
+                }, 200);
               }}
             >
               ←
@@ -188,21 +278,68 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
             </h3>
             <Separator />
             <h3 className="text-sm text-center">
-              You can to {2} left for this month
+              You can currently add {availableRecipients} recipients
             </h3>
             <section className="flex gap-2">
-              <Input placeholder="Recipient Last Name" />
-              <Input placeholder="Recipient First Name" />
+              <Input 
+                value={recipient.firstName}
+                onChange={(e) => setRecipient({ type: "SET_FIRST_NAME", payload: e.target.value })} 
+                placeholder="Recipient First Name" 
+              />
+              <Input 
+                value={recipient.lastName}
+                onChange={(e) => setRecipient({ type: "SET_LAST_NAME", payload: e.target.value })} 
+                placeholder="Recipient Last Name" 
+              />
             </section>
-            <Input placeholder="Recipient phone number" />
-            <Input placeholder="Recipient address" />
+            <PhoneInput
+              className="border-[1px] border-gray-300 rounded-md p-2"
+              focusInputOnCountrySelection={false}
+              countryCallingCodeEditable={false}
+              defaultCountry="US"
+              id="phone"
+              type="tel"
+              value={recipient.phone}
+              placeholder="Enter recipient's phone number"
+              onChange={(e) => setRecipient({ type: "SET_PHONE", payload: e ?? "" })}
+              required
+            />
+            <Input 
+              value={recipient.address}
+              onChange={(e) => setRecipient({ type: "SET_ADDRESS", payload: e.target.value })} 
+              placeholder="Recipient address" 
+            />
             <section className="flex gap-2">
-              <Input placeholder="Recipient city" />
-              <Input placeholder="Recipient state" />
+              <Input 
+                value={recipient.city}
+                onChange={(e) => setRecipient({ type: "SET_CITY", payload: e.target.value })} 
+                placeholder="Recipient city" 
+              />
+              <Input 
+                value={recipient.zip}
+                onChange={(e) => setRecipient({ type: "SET_ZIP", payload: e.target.value })} 
+                placeholder="Recipient zip code" 
+              />
             </section>
-            <Input placeholder="Recipient zip code" />
             <Separator />
-            <Button>Add Recipient</Button>
+            <Button  onClick={()=>{
+              dispatch(addRecipient({recipient, user})).then((res)=>{
+                console.log(res);
+                if(res.payload.success){
+                  toast({
+                    title: "Recipient added!",
+                  });
+                  setRecipient({ type: "RESET" });
+                  setStep(0);
+                  if(tour &&!tour.isFinished) {
+                    tour.nextStep();
+                  }
+                  setTimeout(() => {
+                    updatePositions?.();
+                  }, 200);
+                }
+              });
+            }}>Add Recipient</Button>
           </>
         );
     }
@@ -210,9 +347,10 @@ const FriendModalContent: React.FC<{ full?: boolean }> = ({ full }) => {
 
   return (
     <div
-      data-tg-title="friend modal"
+      data-tg-title="friend_modal_content"
       className={full ? "flex flex-col gap-4 w-full" : "flex flex-col gap-4"}
     >
+      <br />
       {switchStep(step)}
     </div>
   );

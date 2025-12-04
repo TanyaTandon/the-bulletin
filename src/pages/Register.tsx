@@ -29,7 +29,7 @@ const Register: React.FC = () => {
   useEffect(() => {
     if (id) {
       getForeignUserImages(id).then((images) => {
-        console.log(images);
+        // console.log(images);
         setFriendImages(
           images[0].images.map(
             (image) =>
@@ -43,7 +43,7 @@ const Register: React.FC = () => {
   const { dialog, close } = useDialog();
   const { setAdditionalAction } = useAuth();
 
-  console.log(friendImages);
+  // console.log(friendImages);
   function renderScenario(userInfo: User) {
     switch (true) {
       case userInfo && userInfo.id !== null:
@@ -86,7 +86,7 @@ const Register: React.FC = () => {
                   user: user,
                   friendId: id,
                 }).then(async (res) => {
-                  console.log(res);
+                  // console.log(res);
                   toast.success("Connected!");
                   await dispatch(fetchUser(user.phone_number)).then(() => {
                     navigate("/bulletin");
@@ -139,7 +139,7 @@ const Register: React.FC = () => {
                     user: user,
                     friendId: id,
                   }).then(async (res) => {
-                    console.log(res);
+                    // console.log(res);
                     toast.success("Connected!");
                     await dispatch(fetchUser(user.phone_number));
                   });

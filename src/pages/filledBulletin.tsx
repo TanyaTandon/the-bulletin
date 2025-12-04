@@ -35,12 +35,12 @@ const FilledBulletin: React.FC = () => {
   );
   useEffect(() => {
     if (bulletinFromRedux && bulletinData !== null) {
-      console.log("💥bulletinFromRedux", bulletinFromRedux);
+      // console.log("💥bulletinFromRedux", bulletinFromRedux);
       setBulletin(bulletinFromRedux);
     }
   }, [bulletinFromRedux]);
 
-  console.log("bulletinData", bulletinData);
+  // console.log("bulletinData", bulletinData);
   return <BulletinPage existingBulletin={bulletinData} />;
 };
 

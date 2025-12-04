@@ -54,7 +54,7 @@ const BigCalendar: React.FC<{
     setCalendarNote("");
   };
 
-  console.log(savedNotes);
+  // console.log(savedNotes);
   const getNoteForDate = (date: Date) => {
     return savedNotes.find(
       (note) => new Date(note.date).toDateString() === date.toDateString()
@@ -85,6 +85,8 @@ const BigCalendar: React.FC<{
         updatePositions();
         const bodyEl = document.querySelector("body");
         if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
+          console.log("removing tg-no-interaction");
+          
           bodyEl.classList.remove("tg-no-interaction");
         }
       }, 750);

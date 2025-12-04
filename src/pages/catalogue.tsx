@@ -17,7 +17,7 @@ const Catalogue: React.FC = () => {
   useEffect(() => {
     if (user && catalogue == null) {
       getAllBulletins(user).then((data: Bulletin[]) => {
-        console.log(data);
+        // console.log(data);
         const filteredBulletins = data.filter(
           (bulletin) => bulletin.month !== null
         );
@@ -27,8 +27,6 @@ const Catalogue: React.FC = () => {
   }, [user]);
 
   const months = Array.from({ length: 12 }, (_, i) => i + 1);
-
-  console.log(catalogue);
 
   const navigate = useNavigate();
   return (
@@ -68,7 +66,7 @@ const Catalogue: React.FC = () => {
                       catalogue
                         .find((bulletin) => bulletin.month === month)
                         ?.images.map((image) => {
-                          console.log(image);
+                          // console.log(image);
                           return `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`;
                         })
                         .slice(0, 4) || []

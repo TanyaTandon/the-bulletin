@@ -59,13 +59,13 @@ export async function createNewUser({
     });
 
     if (userError) {
-      console.error("Error creating user:", userError);
+      // console.error("Error creating user:", userError);
       throw userError;
     }
 
     return { success: true, userId: created_user_id };
   } catch (error) {
-    console.error("Error in createNewUser:", error);
+    // console.error("Error in createNewUser:", error);
     return { success: false, error };
   }
 }
@@ -85,7 +85,7 @@ export async function getAllBulletins(user: User) {
     .eq("owner", user.phone_number);
 
   if (error) {
-    console.error("Error getting all bulletins:", error);
+    // console.error("Error getting all bulletins:", error);
     throw error;
   }
 
@@ -117,7 +117,7 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
           });
 
         if (uploadError) {
-          console.error("Error uploading image:", uploadError);
+          // console.error("Error uploading image:", uploadError);
           continue;
         }
 
@@ -151,8 +151,8 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
       saved_notes: arrayToDict(bulletin.saved_notes),
     };
 
-    console.log("Updating bulletin with data:", updatedBulletin);
-    console.log("Bulletin ID:", bulletin.id);
+    // console.log("Updating bulletin with data:", updatedBulletin);
+    // console.log("Bulletin ID:", bulletin.id);
 
     const { error: bulletinError, data: bulletinData } = await supabase
       .from("bulletins")
@@ -161,7 +161,7 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
       .select();
 
     if (bulletinError) {
-      console.error("Error updating bulletin:", bulletinError);
+      // console.error("Error updating bulletin:", bulletinError);
       throw bulletinError;
     }
 
@@ -178,14 +178,14 @@ export async function updateBulletin(user: User, bulletin: Bulletin) {
         .eq("phone_number", user.phone_number);
 
       if (userError) {
-        console.error("Error updating user images:", userError);
+        // console.error("Error updating user images:", userError);
         throw userError;
       }
     }
 
     return { success: true, bulletinId: bulletin.id, bulletinData };
   } catch (error) {
-    console.error("Error in updateBulletin:", error);
+    // console.error("Error in updateBulletin:", error);
     return { success: false, error };
   }
 }
@@ -263,7 +263,7 @@ export async function removeRecipient({
     .select();
 
   if (userError) {
-    console.error("Error removing recipient:", userError);
+    // console.error("Error removing recipient:", userError);
     throw userError;
   }
   return userData;
@@ -278,7 +278,7 @@ export async function submitFeedback(feedback: {
     .insert(feedback);
 
   if (feedbackError) {
-    console.error("Error submitting feedback:", feedbackError);
+    // console.error("Error submitting feedback:", feedbackError);
     throw feedbackError;
   }
 
@@ -305,7 +305,7 @@ export async function connectWithFriendRequest({
         });
       });
   } catch (error) {
-    console.error("Error in connectWithFriendRequest:", error);
+    // console.error("Error in connectWithFriendRequest:", error);
     return { success: false, error };
   }
 }
@@ -317,7 +317,7 @@ export async function getForeignUserImages(id: string) {
     .eq("id", id);
 
   if (error) {
-    console.error("Error getting foreign user images:", error);
+    // console.error("Error getting foreign user images:", error);
     throw error;
   }
   return data;
@@ -344,8 +344,8 @@ export const createNewBulletin = createAsyncThunk(
         })
         .select("*")
         .then(async (item) => {
-          console.log("::*", item);
-          console.log("OG Created Bulletin:", item);
+          // console.log("::*", item);
+          // console.log("OG Created Bulletin:", item);
           try {
             if (item.data) {
               createdBulletin = [item.data[0]][0] as unknown as Bulletin;
@@ -359,12 +359,12 @@ export const createNewBulletin = createAsyncThunk(
               .eq("phone_number", user.phone_number)
               .select("*");
 
-            console.log("Created bulletin:", createdBulletin);
+            // console.log("Created bulletin:", createdBulletin);
             dispatch(addBulletin(createdBulletin));
-            console.log("User data:", userData);
+            // console.log("User data:", userData);
             newUserData = userData as unknown as User;
             if (userError) {
-              console.error("Error creating user:", userError);
+              // console.error("Error creating user:", userError);
               sendError(user.phone_number, "createNewBulletin", userError, {
                 id: createdBulletin.id,
                 blurb: "",
@@ -379,7 +379,7 @@ export const createNewBulletin = createAsyncThunk(
               blurb: "",
               images: [],
             });
-            console.error("Error creating user:", error);
+            // console.error("Error creating user:", error);
           }
         });
 
@@ -391,15 +391,15 @@ export const createNewBulletin = createAsyncThunk(
           owner: user.phone_number,
           saved_notes: "",
         });
-        console.error("Error creating bulletin:", bulletinError);
+        // console.error("Error creating bulletin:", bulletinError);
         throw bulletinError;
       }
 
       const bulletinId = createdBulletin.id;
-      console.log("::*", { success: true, bulletinId, newUserData });
+      // console.log("::*", { success: true, bulletinId, newUserData });
       return { success: true, bulletinId, newUserData };
     } catch (error) {
-      console.error("Error in createNewUser:", error);
+      // console.error("Error in createNewUser:", error);
       return { success: false, error };
     }
   }
@@ -440,7 +440,7 @@ export const addFriendViaPhoneNumber = createAsyncThunk(
 
       return { success: true, response };
     } catch (error) {
-      console.error("Error in addFriendViaPhoneNumber:", error);
+      // console.error("Error in addFriendViaPhoneNumber:", error);
       return { success: false, error };
     }
   }

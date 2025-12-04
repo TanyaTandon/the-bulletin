@@ -13,6 +13,7 @@ import { setUser } from "@/redux/user";
 import {
   ChangeCategory,
   getDetailedDifferences,
+  getFourRandomIndices,
   handleCategoryChange,
 } from "@/lib/utils";
 import axios from "axios";
@@ -30,6 +31,7 @@ import FriendModalContent from "@/components/FriendModalContent";
 import { Bulletin, createNewBulletin } from "@/lib/api";
 import { useStytch } from "@stytch/react";
 import { tourSteps } from "@/lib/tour-steps";
+import BulletinPreview from "@/components/BulletinPreview";
 
 export enum EditState {
   IMAGES = "images",
@@ -126,6 +128,8 @@ const BulletinPage: React.FC<{
     initializeTour,
     tour,
     isInitialized,
+    updateCurrentStepTarget,
+    updatePositions
   } = useTourGuideWithInit();
 
   const { dialog, close } = useDialog();
@@ -137,7 +141,7 @@ const BulletinPage: React.FC<{
     await dispatch(createNewBulletin({ user }))
       .unwrap()
       .then((res) => {
-        console.log("::*", res);
+        // console.log("::*", res);
         if (res.success) {
           navigate(`/bulletin/${res.bulletinId}`);
         } else {
@@ -149,15 +153,45 @@ const BulletinPage: React.FC<{
   useEffect(() => {
     const onboarding = searchParams.get("onboarding");
     if (onboarding && !isVisible && !isInitialized) {
-      initializeTour(tourSteps);
+      initializeTour(tourSteps as TourGuideStep[]);
       startTour();
       onBeforeStepChange((currentStep) => {
-        console.log("currentStep", currentStep);
+        // console.log("currentStep", currentStep);
         if (currentStep == 1) {
           setPreviewHover(true);
+          const bodyEl = document.querySelector("body");
+        if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
+          console.log("removing tg-no-interaction");
+          
+          bodyEl.classList.remove("tg-no-interaction");
         }
-        if (currentStep == 5) {
-          setTabValue("notes");
+          setTimeout(() => {
+            setEditState(EditState.BLURB);
+          }, 900);
+          
+          setTimeout(() => {
+            updateCurrentStepTarget("[data-tg-title='data-blurb-input']");
+          }, 1650);
+          setTimeout(() => {
+            updatePositions();
+          }, 1700);
+        }
+        if(currentStep == 2){
+          if(editState == null){
+            setEditState(EditState.TEMPLATE);
+          }
+        }
+        if(currentStep == 5){
+          const friendButton = document.querySelector(".friendButton");
+          setTimeout(() => {
+            if(friendButton){
+              console.log("clicking friend button");
+              (friendButton as HTMLElement).click();
+            }
+          }, 800);
+          setTimeout(() => {
+            updateCurrentStepTarget("[data-tg-title='friend_modal_content']");
+          }, 1000);
         }
       });
     }
@@ -166,13 +200,19 @@ const BulletinPage: React.FC<{
       dialog(
         <div>
           <h1>It's a new month! Let's create a new bulletin.</h1>
+          <br />
+          <br />
+          <BulletinPreview images={getFourRandomIndices(user.images).map((num) => `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${user.images[num]}.png`)} firstName={user?.firstName ?? "nick"} />
+          <br />
+          <br />
           <Button
+            className="block mx-auto"
             onClick={() => {
               getStartedFunc();
               close(true);
             }}
           >
-            Get Started
+            Get Started!
           </Button>
         </div>,
         {
@@ -189,6 +229,9 @@ const BulletinPage: React.FC<{
     isInitialized,
     editState,
     tourSteps,
+    updateCurrentStepTarget,
+    updatePositions,
+    dialog
   ]);
 
   const today = new Date();
@@ -232,7 +275,7 @@ const BulletinPage: React.FC<{
       await tour.updatePositions();
     }
     if (isOnboarding && tabValue === "notes") {
-      console.log("updating positions");
+      // console.log("updating positions");
       setTimeout(() => {
         syncPostions();
       }, 100);
@@ -244,12 +287,12 @@ const BulletinPage: React.FC<{
       setImages(existingBulletin.images);
       setBlurb(existingBulletin.blurb);
       setSavedNotes(existingBulletin.saved_notes);
-      console.log(existingBulletin.saved_notes);
+      // console.log(existingBulletin.saved_notes);
       const template = templates.find(
         (template) => template.id === existingBulletin.template
       );
       setSelectedTemplate(template);
-      console.log("loaded");
+      // console.log("loaded");
       setLoaded(true);
     }
   }, [existingBulletin]);
@@ -260,7 +303,7 @@ const BulletinPage: React.FC<{
   const tokens = stytch.session.getTokens();
 
   useEffect(() => {
-    console.log();
+    // console.log();
     const diff = getDetailedDifferences(
       {
         images: refereenceBulletinData?.images,
@@ -276,9 +319,9 @@ const BulletinPage: React.FC<{
       }
     );
 
-    console.log(existingBulletin, diff.unequal, loaded);
+    // console.log(existingBulletin, diff.unequal, loaded);
     if (existingBulletin && diff.unequal && loaded) {
-      console.log("❤️",diff.differences);
+      // console.log("❤️",diff.differences);
       handleCategoryChange(
         Object.keys(diff.differences)[0] as ChangeCategory,
         {
@@ -291,10 +334,10 @@ const BulletinPage: React.FC<{
         tokens,
         imageIndex + 1
       ).then((arg) => {
-        console.log("arg", arg);
+        // console.log("arg", arg);
 
         const bulletin = JSON.parse(arg.payload.data[0].bulletin);
-        console.log(bulletin);
+        // console.log(bulletin);
         setImages(
           bulletin.images.map((item) => ({
             id: item.id,
@@ -339,7 +382,7 @@ const BulletinPage: React.FC<{
                 if (isOnboarding && e === "notes") {
                   // tour?.nextStep();
                   // setTimeout(async () => {
-                  //   console.log("updating positions");
+                    // console.log("updating positions");
                   //   await tour?.updatePositions();
                   // }, 500);
                 }

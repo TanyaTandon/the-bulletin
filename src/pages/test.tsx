@@ -8,17 +8,18 @@ import axios from "axios";
 import { staticGetUser } from "@/redux/user/selectors";
 import { useStytch, useStytchUser } from "@stytch/react";
 import { quickValidation, supabase } from "@/lib/api";
+import { useNavigate } from "react-router-dom";
 
 const Test: React.FC = () => {
   const stytch = useStytch();
-
+  const navigate = useNavigate();
   const user = useAppSelector(staticGetUser);
   const userData = useStytchUser();
   const dispatch = useAppDispatch();
-  console.log(user);
-  console.log(userData);
+  // console.log(user);
+  // console.log(userData);
   const tokens = stytch.session.getTokens();
-  console.log(tokens);
+  // console.log(tokens);
 
   const signOut = async () => {
     await stytch.session.revoke();
@@ -28,12 +29,7 @@ const Test: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-screen">
         <button
           onClick={async () => {
-            await fetch("http://localhost:8080/protected/profile", {
-              method: "GET",
-              headers: {
-                Authorization: `Bearer ${tokens.session_jwt}`,
-              },
-            });
+           navigate("/bulletin?monthAlert=true");
           }}
         >
           Click me
@@ -48,7 +44,7 @@ const Test: React.FC = () => {
           onClick={async () => {
             const response = await quickValidation("+12535149837");
 
-            console.log(response);
+            // console.log(response);
           }}
         >
           quick val

@@ -247,7 +247,7 @@ export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
 
   const refreshDialog = useCallback(async () => {
     if (!tour) return;
-    console.log("happening");
+    // console.log("happening");
     return await tour.refreshDialog();
   }, [tour]);
 
@@ -267,14 +267,14 @@ export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
   // Step management
   const updateCurrentStepTarget = useCallback(
     async (target: string | HTMLElement) => {
-      console.log("target", target);
-      console.log("tour", tour);
+      // console.log("target", target);
+      // console.log("tour", tour);
       if (!tour) return;
 
       // Get the current step
       const currentStep = tour.tourSteps[tour.activeStep];
 
-      console.log("currentStep", currentStep);
+      // console.log("currentStep", currentStep);
       if (currentStep) {
         // Update the target
         currentStep.target =

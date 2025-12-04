@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useState } from "react";
 import {
+  ClosureDirection,
   Dialog,
   DialogContent,
   DialogFooter,
@@ -10,6 +11,7 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { QuestionIcon } from "@phosphor-icons/react";
 
 type DialogOptions = {
+  closureCondition?: ClosureDirection;
   header?: React.ReactNode;
   headerOptions?: {
     className?: string;
@@ -48,6 +50,7 @@ export const DialogProvider: React.FC<{
   const [content, setContent] = useState<React.ReactNode | null>(null);
 
   const dialog = (children: React.ReactNode, options?: DialogOptions) => {
+    console.log("dialog", children, options);
     setIsOpen(true);
     setOptions(options ?? null);
     setContent(children);
@@ -74,7 +77,7 @@ export const DialogProvider: React.FC<{
 
   const isMobile = useIsMobile();
 
-  console.log(isMobile);
+
   return (
     <DialogContext.Provider value={value}>
       <Dialog open={isOpen} onOpenChange={() => close()}>

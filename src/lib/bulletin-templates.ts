@@ -38,7 +38,7 @@ export const calculateFontSize = (
 
   // If it fits at base size, return base size
   if (textWidthAtBaseSize <= maxWidth) {
-    console.log(`Using base font size: ${baseFontSize}px`);
+    // console.log(`Using base font size: ${baseFontSize}px`);
     return baseFontSize;
   }
 

@@ -345,14 +345,14 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       return;
     }
 
-    console.log("imageIndex", imageIndex);
+    // console.log("imageIndex", imageIndex);
     if (files.length === 1 && imageIndex !== null) {
       const newImage = {
         id: crypto.randomUUID(),
         url: URL.createObjectURL(files[0]),
         file: files[0],
       };
-      console.log("setting image", newImage, imageIndex);
+      // console.log("setting image", newImage, imageIndex);
       setImages(newImage, imageIndex);
     // INSERT_YOUR_CODE
     const iframe = document.querySelector('iframe');

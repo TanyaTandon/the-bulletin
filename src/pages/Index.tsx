@@ -7,7 +7,6 @@ import { staticGetUser } from "@/redux/user/selectors";
 import AnimatedButton from "@/components/AnimatedButton";
 import { useDialog } from "@/providers/dialog-provider";
 import AuthModalContent from "@/components/AuthModalContent";
-import { useAuth } from "@/providers/contexts/AuthContext";
 
 const Index = () => {
   const { dialog, close } = useDialog();

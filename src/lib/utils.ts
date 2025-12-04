@@ -90,7 +90,7 @@ export async function handleCategoryChange(
       {
         const images = bulletinData.images;
 
-        console.log(images);
+        // console.log(images);
 
         const result = await store
           .dispatch(
@@ -137,4 +137,14 @@ export function getDetailedDifferences<T>(
     unequal: Object.keys(differences).length > 0,
     differences,
   };
+}
+
+
+export function getFourRandomIndices<T>(array: T[]): number[] {
+  const indices = Array.from(array.keys());
+  for (let i = indices.length - 1; i > 0; i--) {
+    const j = Math.floor(Math.random() * (i + 1));
+    [indices[i], indices[j]] = [indices[j], indices[i]];
+  }
+  return indices.slice(0, 4);
 }

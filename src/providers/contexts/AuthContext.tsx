@@ -50,7 +50,8 @@ interface AuthContextType {
   handleSignIn: () => Promise<void>;
   handleVerifySignIn: (
     code: string,
-    navigate: NavigateFunction
+    navigate: NavigateFunction,
+additionalClosingAction?: () => void
   ) => Promise<void>;
   handleSignUp: () => Promise<void>;
   handleVerifySignUp: (
@@ -78,6 +79,7 @@ export const useAuth = () => {
 export const AuthContext: React.FC<{ children: ReactNode }> = ({
   children,
 }) => {
+
   const stytch = useStytch();
   const dispatch = useAppDispatch();
   // State
@@ -148,7 +150,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
           }
         });
     } catch (error) {
-      console.error("Sign in error:", error);
+      // console.error("Sign in error:", error);
       toast.error(
         "We couldn't send the code. Please check your phone number and try again."
       );
@@ -158,7 +160,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
   }, [phoneNumber, stytch.otps.sms]);
 
   const handleVerifySignIn = useCallback(
-    async (code: string, navigate: NavigateFunction) => {
+    async (code: string, navigate: NavigateFunction, additionalClosingAction?: () => void) => {
       if (code.includes("·")) return;
       setIsProcessing(true);
       try {
@@ -172,7 +174,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
               await dispatch(fetchUser(phone)).then(
                 async (userDispatchResponse) => {
                   const userRes: User = userDispatchResponse.payload as User;
-                  console.log(userRes);
+                  // console.log(userRes);
                   dispatch(
                     setTokens({
                       session_token: result.session_token,
@@ -182,8 +184,10 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                   if (userRes.bulletins.length > 0) {
                     const bulletins = await dispatch(
                       fetchAllBulletins(phone)
-                    ).unwrap();
-
+                    ).unwrap()
+                    if(additionalClosingAction){
+                      additionalClosingAction();
+                    } 
                     const currentMonth = new Date().getMonth() + 1;
 
                     if (
@@ -205,12 +209,6 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                   } else {
                     navigate("/bulletin");
                   }
-                  // Close any open dialogs
-                  const closeDialogButton =
-                    document.getElementById("close-dialog");
-                  if (closeDialogButton) {
-                    closeDialogButton.click();
-                  }
                   toast.success("Welcome back! You're now signed in.");
                 }
               );
@@ -218,7 +216,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
             return result;
           });
       } catch (error) {
-        console.error("Code verification error:", error);
+        // console.error("Code verification error:", error);
         toast.error(
           "That code didn't work. Double-check and try again, or request a new one."
         );
@@ -251,7 +249,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
       const response = await stytch.otps.sms.loginOrCreate(phoneNumber, {
         expiration_minutes: 10,
       });
-      console.log(response);
+      // console.log(response);
       if (response.status_code == 200) {
         setAuthResponse(response);
         setReceivedCode(true);
@@ -271,8 +269,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
         );
       }
     } catch (error) {
-      console.error("Sign up error:", error.message);
-      console.error(JSON.stringify(error.e));
+      // console.error("Sign up error:", error.message);
+      // console.error(JSON.stringify(error.e));
       if (error.message.includes("phone_number must be a valid phone number")) {
         toast.error("Please enter a valid phone number");
       } else if (error.message.includes("That phone number is taken")) {
@@ -304,7 +302,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
 
   const handleVerifySignUp = useCallback(
     async (code: string, navigate: NavigateFunction, close: () => void) => {
-      console.log(code);
+      // console.log(code);
       const trueCode = code.replace("·", "");
       if (code.includes("·")) return;
       if (!code || code.trim() === "") {
@@ -368,7 +366,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
           state,
           zipCode,
         });
-        console.error("Code verification error:", error);
+        // console.error("Code verification error:", error);
         toast.error(
           "That code didn't work. Double-check and try again, or request a new one."
         );

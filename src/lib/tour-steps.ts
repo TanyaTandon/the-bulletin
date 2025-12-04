@@ -1,10 +1,10 @@
 import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
 import { useMemo } from "react";
 
-export const tourSteps = [
+export const tourSteps: TourGuideStep[] = [
   {
-    title: "hi and welcome to the Bulletin!",
-    content: "let's get familiar with how to get started!",
+    title: "Hi and welcome to the Bulletin!",
+    content: `The Bulletin is social media in the real world! Once a month, your close friends or family members will receive a physical copy of your monthly update in the mail alongside anyone else who's added them as a recipient. Let's get started!`
   },
   {
     title: "let's start by adding an image!",
@@ -14,8 +14,9 @@ export const tourSteps = [
   {
     title: "next let's add a description about your month",
     content:
-      "just tap or click on the text between the images, then talk about your month! everything gets saved as you type!",
-    target: "[data-tg-title='Bulletin Preview']",
+      "just tap or click on the text between the images, then write about your month! everything gets saved as you type!",
+    target: "[data-tg-title='Bulletin Preview']"
+
   },
   {
     title: "now, let's check out some different templates",
@@ -31,13 +32,13 @@ export const tourSteps = [
     target: "[data-tg-title='tab housing']",
   },
   {
-    title: "now we'll add some recipients!",
-    
+    title: "now that we've filled out our bulletin, we'll add some recipients!",
+    content:"",
   },
   {
-    title: "lastly, let's add some dates",
-    content: "select the right tab to check out the calendar",
-    target: "[data-tg-title='tab housing']",
+    title: "there're a couple ways to send out your bulletin!",
+    content: "",
+    target: "[data-tg-title='friend_modal_trigger']",
   },
   {
     title: "add some upcoming events to your calendar for next month",

@@ -8,22 +8,21 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
 }) => {
   const { user } = useStytch();
   const { pathname } = useLocation();
-  console.log(pathname);
   const navigate = useNavigate();
   useEffect(() => {
     async function callUser() {
       try {
         const details = await user.get();
-        console.log();
+        // console.log();
         if (details.user_id) {
           if (pathname == "/") {
             navigate("/bulletin");
           }
         }
       } catch (error) {
-        console.log(typeof error);
-        console.log(Object.keys(error));
-        console.log(error.status_code);
+        // console.log(typeof error);
+        // console.log(Object.keys(error));
+        // console.log(error.status_code);
         if (
           error.status_code &&
           error.status_code == 401 &&

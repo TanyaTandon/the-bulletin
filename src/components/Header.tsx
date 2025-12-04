@@ -74,7 +74,7 @@ const Header: React.FC = () => {
                 <div className="flex items-center space-x-2">
                   <Button
                     onClick={async () => {
-                      console.log("signing out");
+                      // console.log("signing out");
                       await signOut().then(() => {
                         dispatch(resetAllSlices);
                         navigate("/");

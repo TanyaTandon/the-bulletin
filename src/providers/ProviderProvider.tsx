@@ -37,7 +37,7 @@ const ProviderProvider: React.FC<{
   const dummyBulletinAll = 0;
 
   useEffect(() => {
-    console.log("ProviderProvider");
+    // console.log("ProviderProvider");
     if (
       (pathname === "/" || pathname === "/bulletin") &&
       user &&

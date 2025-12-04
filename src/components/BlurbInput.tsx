@@ -68,20 +68,15 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
 
   const user = useAppSelector(staticGetUser);
 
-  console.log(user);
+  // console.log(user);
 
   const { tour, updateCurrentStepTarget } = useTourGuideWithInit();
 
   useEffect(() => {
-    if (tour && editState === EditState.BLURB) {
-      setTimeout(() => {
-        updateCurrentStepTarget("[data-tg-title='data-blurb-input']");
-      }, 1000);
-    }
     if (tour && editState === EditState.TEMPLATE) {
       setTimeout(() => {
         updateCurrentStepTarget("[data-tg-title='template-selection']");
-      }, 750);
+      }, 1500);
     }
   }, [tour, updateCurrentStepTarget, editState]);
 
@@ -147,7 +142,7 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
                     <Checkbox
                       checked={selectedTemplate.id === template.id}
                       onCheckedChange={(e) => {
-                        console.log("template", template);
+                        // console.log("template", template);
                         setSelectedTemplate(template);
                         if (isMobile) {
                           setTimeout(() => {

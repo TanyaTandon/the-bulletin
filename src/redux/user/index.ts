@@ -3,6 +3,8 @@ import { Bulletin, supabase } from "@/lib/api.ts";
 import { RESET_ALL_SLICES } from "../constants.ts";
 import { toast } from "sonner";
 import { UploadedImage } from "@/components/ImageUploadGrid.tsx";
+import { RecipientState } from "@/components/FriendModalContent.tsx";
+import { v4 } from "uuid";
 
 export type User = {
   id: number;
@@ -28,14 +30,14 @@ const initialState: UserState = {
 export const fetchUser = createAsyncThunk(
   "user/fetchUser",
   async (phoneNumber: string, { dispatch }) => {
-    console.log("fetching user", phoneNumber);
+    // console.log("fetching user", phoneNumber);
     try {
       const { data: res, error } = await supabase
         .from("user_record")
         .select("*")
         .eq("phone_number", phoneNumber);
 
-      console.log(res);
+      // console.log(res);
 
       const userResponse: User = res[0];
 
@@ -44,7 +46,7 @@ export const fetchUser = createAsyncThunk(
       return userResponse;
     } catch (error) {
       alert("Error fetching user");
-      console.log(error);
+      // console.log(error);
       return null;
     }
   }
@@ -62,7 +64,7 @@ export const fetchAllBulletins = createAsyncThunk(
       .from("bulletins")
       .select("*")
       .eq("owner", user?.phone_number ?? phoneNumber);
-    console.log(res);
+    // console.log(res);
     dispatch(setBulletins(res));
     return res;
   }
@@ -73,12 +75,12 @@ export const fetchBulletins = createAsyncThunk(
   async (_, { dispatch, getState }) => {
     const state = getState() as { userUpdater: UserState };
     const user: User = state.userUpdater.user;
-    console.log(getState());
+    // console.log(getState());
     const { data: res, error } = await supabase
       .from("bulletins")
       .select("*")
       .in("id", user.bulletins);
-    console.log(res);
+    // console.log(res);
     dispatch(setBulletins(res));
   }
 );
@@ -87,14 +89,14 @@ export const updateSavedNotes = createAsyncThunk(
   "user/updateSavedNotes",
   async (bulletin: Partial<Bulletin>, { dispatch }) => {
     try {
-      console.log(bulletin.saved_notes);
+      // console.log(bulletin.saved_notes);
       const { error, data: res } = await supabase
         .from("bulletins")
         .update({ saved_notes: bulletin.saved_notes })
         .eq("id", bulletin.id)
         .select("*")
         .then((res) => {
-          console.log(res.data);
+          // console.log(res.data);
           const updatedBulletin = res.data[0];
           const setData = {
             ...updatedBulletin,
@@ -108,13 +110,13 @@ export const updateSavedNotes = createAsyncThunk(
         });
 
       if (error) {
-        console.error("Error updating saved notes:", error);
+        // console.error("Error updating saved notes:", error);
         return error;
       }
       toast.success("Date saved!");
       return { success: true, data: res[0].data };
     } catch (error) {
-      console.error("Error updating saved notes:", error);
+      // console.error("Error updating saved notes:", error);
       return error;
     }
   }
@@ -124,7 +126,7 @@ export const updateTemplate = createAsyncThunk(
   "user/updateTemplate",
   async (bulletin: Partial<Bulletin>, { dispatch }) => {
     try {
-      console.log(bulletin.template);
+      // console.log(bulletin.template);
       const { error, data: res } = await supabase
         .from("bulletins")
         .update({ template: bulletin.template })
@@ -144,13 +146,13 @@ export const updateTemplate = createAsyncThunk(
         });
 
       if (error) {
-        console.error("Error updating saved notes:", error);
+        // console.error("Error updating saved notes:", error);
         return error;
       }
       toast.success("Template saved!");
       return { success: true, data: res[0].data };
     } catch (error) {
-      console.error("Error updating saved notes:", error);
+      // console.error("Error updating saved notes:", error);
       return error;
     }
   }
@@ -160,7 +162,7 @@ export const updateBlurb = createAsyncThunk(
   "user/updateBlurb",
   async (bulletin: Partial<Bulletin>, { dispatch }) => {
     try {
-      console.log(bulletin.blurb);
+      // console.log(bulletin.blurb);
       const { error, data: res } = await supabase
         .from("bulletins")
         .update({ blurb: bulletin.blurb })
@@ -180,13 +182,13 @@ export const updateBlurb = createAsyncThunk(
         });
 
       if (error) {
-        console.error("Error updating saved notes:", error);
+        // console.error("Error updating saved notes:", error);
         return error;
       }
       toast.success("Template saved!");
       return { success: true, data: res[0].data };
     } catch (error) {
-      console.error("Error updating saved notes:", error);
+      // console.error("Error updating saved notes:", error);
       return error;
     }
   }
@@ -249,13 +251,49 @@ export const updateImage = createAsyncThunk(
         dispatch(updateBulletin(setData));
         return { success: true, data: uploads };
       } catch (error) {
-        console.error("Error updating image:", error);
+        // console.error("Error updating image:", error);
         return error;
       }
     } catch (error) {
-      console.error("Error updating image:", error);
+      // console.error("Error updating image:", error);
       return error;
     }
+  }
+);
+
+export const addRecipient = createAsyncThunk(
+  "user/addRecipient",
+  async ({recipient, user}: {recipient: RecipientState, user: User}, { dispatch }) => {
+
+    const id = v4();
+
+    return await supabase.from("fractional_user_record").insert({
+      id: id,
+      suggested_name: recipient.firstName + recipient.lastName,
+      suggested_addresses: recipient.address + " " + recipient.city + " " + recipient.zip,
+      added_by: user.phone_number,
+      suggested_phone_number: recipient.phone,
+    }).then(async (res) => {
+
+      if (res.error) {
+        throw res.error;
+      }
+
+      const { data: dbResponse, error } = await supabase
+        .from("user_record")
+        .update({ recipients: [...user.recipients, id] })
+        .eq("phone_number", user.phone_number).select().single()
+
+      if (error) {
+        throw error;
+      }
+
+      if(dbResponse) {
+        dispatch(setUser(dbResponse as User));        
+        return { success: true, data: dbResponse };
+      }
+
+    })
   }
 );
 
