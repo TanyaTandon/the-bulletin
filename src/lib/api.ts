@@ -30,10 +30,14 @@ export type Bulletin = {
   saved_notes: CalendarNote[];
   template: number;
   month: number;
+  created_at: string;
+  firstName?: string;
 };
 
 export type NewBulletinItem = {
   user: User;
+  month?: number;
+  year?: number;
 };
 
 export async function createNewUser({
@@ -323,14 +327,26 @@ export async function getForeignUserImages(id: string) {
   return data;
 }
 
+const getFirstOfNextMonth = () => {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth() + 1, 1);
+};
+
 export const createNewBulletin = createAsyncThunk(
   "user/createNewBulletin",
-  async ({ user }: NewBulletinItem, { dispatch }) => {
+  async ({ user, month, year }: NewBulletinItem, { dispatch }) => {
     try {
       let newUserData: User;
       // Create a new bulletin item with UUID
 
       let createdBulletin: Bulletin;
+
+      const firstOfNextMonth = getFirstOfNextMonth();
+      const insertMonth = month ?? firstOfNextMonth.getMonth() + 1;
+      const insertYear = year ?? firstOfNextMonth.getFullYear();
+      
+      // Set created_at to the first day of the target month/year
+      const created_at = new Date(insertYear, insertMonth - 1, 1).toISOString();
 
       const { error: bulletinError } = await supabase
         .from("bulletins")
@@ -340,7 +356,8 @@ export const createNewBulletin = createAsyncThunk(
           owner: user.phone_number,
           saved_notes: [],
           template: 0,
-          month: new Date().getMonth() + 1,
+          month: insertMonth,
+          created_at: created_at,
         })
         .select("*")
         .then(async (item) => {

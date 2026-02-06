@@ -33,7 +33,15 @@ export function switchMonth(month: number) {
       return "";
   }
 }
-const MonthCard: React.FC<{ month: number }> = ({ month }) => {
+const getFirstOfNextMonth = () => {
+  const today = new Date();
+  return new Date(today.getFullYear(), today.getMonth() + 1, 1);
+};
+
+const MonthCard: React.FC<{ month: number; year: number }> = ({
+  month,
+  year,
+}) => {
   const monthTextStyle = {
     color: "#FFF8EB",
     position: "relative" as const,
@@ -43,14 +51,10 @@ const MonthCard: React.FC<{ month: number }> = ({ month }) => {
     "--month-number": `"${month}"`,
   } as React.CSSProperties & { "--month-number": string };
 
-  const today = new Date();
-  const firstOfNextMonth = new Date(
-    today.getFullYear(),
-    today.getMonth() + 1,
-    1
-  );
-
-  const currentMonth = firstOfNextMonth.getMonth();
+  const firstOfNextMonth = getFirstOfNextMonth();
+  const nextMonth1Based = firstOfNextMonth.getMonth() + 1;
+  const nextYear = firstOfNextMonth.getFullYear();
+  const isAddMonth = year === nextYear && month === nextMonth1Based;
 
   const dispatch = useAppDispatch();
 
@@ -58,12 +62,11 @@ const MonthCard: React.FC<{ month: number }> = ({ month }) => {
 
   return (
     <Card
-      className={` ${
-        currentMonth === month ? "month-add-hover" : ""
-      }  w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none`}
+      className={` ${isAddMonth ? "month-add-hover" : ""
+        }  w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none`}
       onClick={() => {
-        if (currentMonth === month) {
-          dispatch(createNewBulletin({ user }));
+        if (isAddMonth) {
+          dispatch(createNewBulletin({ user, month, year }));
         }
       }}
     >
@@ -102,7 +105,7 @@ const MonthCard: React.FC<{ month: number }> = ({ month }) => {
             }
           `}</style>
           <p
-            className={`${currentMonth === month ? "month-text-hover" : ""} `}
+            className={`${isAddMonth ? "month-text-hover" : ""} `}
             style={{ fontFamily: "Welcome Web" }}
           >
             {switchMonth(month)}

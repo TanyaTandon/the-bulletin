@@ -48,7 +48,10 @@ const Index = () => {
               <AnimatedButton
                 onClick={() => {
                   dialog(
-                    <AuthModalContent close={close} signInState={false} />
+                    <AuthModalContent close={close} signInState={false} />,
+                    {
+                      
+                    }
                   );
                 }}
               >

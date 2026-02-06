@@ -129,10 +129,26 @@ const BulletinPage: React.FC<{
     tour,
     isInitialized,
     updateCurrentStepTarget,
-    updatePositions
+    updatePositions,
   } = useTourGuideWithInit();
 
   const { dialog, close } = useDialog();
+
+  if (existingBulletin === null || existingBulletin === undefined) {
+    const onboarding = searchParams.get("onboarding");
+    if (onboarding) {
+      dispatch(createNewBulletin({ user }))
+        .unwrap()
+        .then((res) => {
+          // console.log("::*", res);
+          if (res.success) {
+            navigate(`/bulletin/${res.bulletinId}?onboarding=true`);
+          } else {
+            toast.error("We couldn't create a new bulletin. Please try again.");
+          }
+        });
+    }
+  }
 
   const getStartedFunc = async () => {
     const url = new URL(window.location.href);
@@ -141,7 +157,6 @@ const BulletinPage: React.FC<{
     await dispatch(createNewBulletin({ user }))
       .unwrap()
       .then((res) => {
-        // console.log("::*", res);
         if (res.success) {
           navigate(`/bulletin/${res.bulletinId}`);
         } else {
@@ -152,7 +167,13 @@ const BulletinPage: React.FC<{
 
   useEffect(() => {
     const onboarding = searchParams.get("onboarding");
-    if (onboarding && !isVisible && !isInitialized) {
+    if (
+      onboarding &&
+      !isVisible &&
+      !isInitialized &&
+      existingBulletin !== null &&
+      loaded
+    ) {
       initializeTour(tourSteps as TourGuideStep[]);
       startTour();
       onBeforeStepChange((currentStep) => {
@@ -160,15 +181,15 @@ const BulletinPage: React.FC<{
         if (currentStep == 1) {
           setPreviewHover(true);
           const bodyEl = document.querySelector("body");
-        if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
-          console.log("removing tg-no-interaction");
-          
-          bodyEl.classList.remove("tg-no-interaction");
-        }
+          if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
+            console.log("removing tg-no-interaction");
+
+            bodyEl.classList.remove("tg-no-interaction");
+          }
           setTimeout(() => {
             setEditState(EditState.BLURB);
           }, 900);
-          
+
           setTimeout(() => {
             updateCurrentStepTarget("[data-tg-title='data-blurb-input']");
           }, 1650);
@@ -176,15 +197,15 @@ const BulletinPage: React.FC<{
             updatePositions();
           }, 1700);
         }
-        if(currentStep == 2){
-          if(editState == null){
+        if (currentStep == 2) {
+          if (editState == null) {
             setEditState(EditState.TEMPLATE);
           }
         }
-        if(currentStep == 5){
+        if (currentStep == 5) {
           const friendButton = document.querySelector(".friendButton");
           setTimeout(() => {
-            if(friendButton){
+            if (friendButton) {
               console.log("clicking friend button");
               (friendButton as HTMLElement).click();
             }
@@ -202,7 +223,13 @@ const BulletinPage: React.FC<{
           <h1>It's a new month! Let's create a new bulletin.</h1>
           <br />
           <br />
-          <BulletinPreview images={getFourRandomIndices(user.images).map((num) => `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${user.images[num]}.png`)} firstName={user?.firstName ?? "nick"} />
+          <BulletinPreview
+            images={getFourRandomIndices(user.images).map(
+              (num) =>
+                `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${user.images[num]}.png`
+            )}
+            firstName={user?.firstName ?? "nick"}
+          />
           <br />
           <br />
           <Button
@@ -231,7 +258,9 @@ const BulletinPage: React.FC<{
     tourSteps,
     updateCurrentStepTarget,
     updatePositions,
-    dialog
+    dialog,
+    loaded,
+    existingBulletin,
   ]);
 
   const today = new Date();
@@ -382,7 +411,7 @@ const BulletinPage: React.FC<{
                 if (isOnboarding && e === "notes") {
                   // tour?.nextStep();
                   // setTimeout(async () => {
-                    // console.log("updating positions");
+                  // console.log("updating positions");
                   //   await tour?.updatePositions();
                   // }, 500);
                 }

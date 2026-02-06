@@ -3,7 +3,7 @@ import React from "react";
 const BulletinPreview: React.FC<{
   images: string[];
   firstName: string;
-  className?: React.CSSProperties;
+  className?: string;
 }> = ({ images, firstName, className }) => {
   return (
     <section

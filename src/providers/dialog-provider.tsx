@@ -81,10 +81,9 @@ export const DialogProvider: React.FC<{
   return (
     <DialogContext.Provider value={value}>
       <Dialog open={isOpen} onOpenChange={() => close()}>
-        <DialogContent
-          className={`w-[${isMobile ? "90vw" : "50vw"}] max-w-[90%] ${
-            isMobile ? "max-h-[85%]" : "max-h-auto"
-          } ${isMobile ? "overflow-y-scroll" : "overflow-y-hidden"}`}
+        <DialogContent closureCondition={options?.closureCondition}
+          className={`w-[${isMobile ? "95vw" : "50vw"}] max-w-[95vw] ${isMobile ? "max-h-[85%]" : "max-h-auto"
+            } ${isMobile ? "overflow-y-scroll" : "overflow-y-hidden"}`}
         >
           {options?.helpContent && (
             <QuestionIcon className="absolute top-2 right-2" size={18} />

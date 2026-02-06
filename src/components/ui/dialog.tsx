@@ -33,10 +33,11 @@ export enum ClosureDirection {
   RIGHT = "right",
   BOTTOM = "bottom",
   LEFT = "left",
+  NONE = "none",
 }
 
 export const closureSwitcher = (direction: ClosureDirection) => {
-  switch(direction){
+  switch (direction) {
     case ClosureDirection.TOP:
       return <ArrowUpIcon size={32} />
     case ClosureDirection.RIGHT:
@@ -45,14 +46,16 @@ export const closureSwitcher = (direction: ClosureDirection) => {
       return <ArrowDownIcon size={32} />
     case ClosureDirection.LEFT:
       return <ArrowLeftIcon size={32} />
+    case ClosureDirection.NONE:
+      return <div></div>;
   }
 }
 
 
 const DialogContent = React.forwardRef<
   React.ElementRef<typeof DialogPrimitive.Content>,
-  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content>
->(({ className, children, ...props }, ref, closureCondition?: ClosureDirection ) => (
+  React.ComponentPropsWithoutRef<typeof DialogPrimitive.Content> & { closureCondition?: ClosureDirection }
+>(({ className, children, closureCondition, ...props }, ref) => (
   <DialogPortal>
     <DialogOverlay />
     <DialogPrimitive.Content
@@ -61,14 +64,19 @@ const DialogContent = React.forwardRef<
         "fixed left-[50%] top-[50%] z-50 grid w-full max-w-lg translate-x-[-50%] translate-y-[-50%] gap-4 border bg-background p-6 shadow-lg duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 data-[state=closed]:slide-out-to-left-1/2 data-[state=closed]:slide-out-to-top-[48%] data-[state=open]:slide-in-from-left-1/2 data-[state=open]:slide-in-from-top-[48%] sm:rounded-lg",
         className
       )}
+      onInteractOutside={(e) => {
+        if (closureCondition === ClosureDirection.NONE) {
+          e.preventDefault();
+        }
+      }}
       {...props}
     >
       {children}
       <DialogPrimitive.Close
         id="close-dialog"
-        className="absolute left-2 top-2 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
+        className="absolute left-1 top-1 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground"
       >
-        {closureCondition ? closureSwitcher(closureCondition) : <X className="h-4 w-4 ml-1 mt-1" /> }
+        {closureCondition ? closureSwitcher(closureCondition) : <X className="h-4 w-4" />}
         <span className="sr-only">Close</span>
       </DialogPrimitive.Close>
     </DialogPrimitive.Content>

@@ -68,8 +68,6 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
 
   const user = useAppSelector(staticGetUser);
 
-  // console.log(user);
-
   const { tour, updateCurrentStepTarget } = useTourGuideWithInit();
 
   useEffect(() => {

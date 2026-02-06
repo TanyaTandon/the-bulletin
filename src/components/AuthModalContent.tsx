@@ -85,7 +85,7 @@ const AuthModalContent: React.FC<{
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
               <span style={isMobile ? { transform: "scale(0.6)" } : {}}>
                 <OPTVerification
-                  onComplete={(code) => handleVerifySignIn(code, navigate)}
+                  onComplete={(code) => handleVerifySignIn(code, navigate, close)}
                 />
               </span>
             </section>
@@ -106,20 +106,19 @@ const AuthModalContent: React.FC<{
                   signInStep === 0
                     ? handleSignIn
                     : (event) => {
-                        if (code) handleVerifySignIn(code, navigate, close);
-                      }
+                      if (code) handleVerifySignIn(code, navigate, close);
+                    }
                 }
                 size="lg"
-                className={`bg-gradient-to-r from-accent to-primary hover:opacity-90 ${
-                  isMobile ? "w-auto" : "w-full"
-                }`}
+                className={`bg-gradient-to-r from-accent to-primary hover:opacity-90 ${isMobile ? "w-auto" : "w-full"
+                  }`}
                 disabled={isProcessing}
               >
                 {isProcessing
                   ? "Processing..."
                   : signInStep === 0
-                  ? "Sign In"
-                  : "Verify"}
+                    ? "Sign In"
+                    : "Verify"}
               </Button>
             )}
           </div>
@@ -127,7 +126,6 @@ const AuthModalContent: React.FC<{
       ) : (
         <>
           {signInStep === 0 ? (
-            // <Card className="w-full">
             <>
               <h1 className=" text-2xl font-semibold mb-8 text-center">
                 Create your account
@@ -274,9 +272,8 @@ const AuthModalContent: React.FC<{
             </>
           ) : (
             <section
-              className={`flex flex-col items-center justify-center ${
-                isMobile ? "w-[85vw]" : "w-[30vw]"
-              }`}
+              className={`flex flex-col items-center justify-center ${isMobile ? "w-[85vw]" : "w-[30vw]"
+                }`}
             >
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
               <span

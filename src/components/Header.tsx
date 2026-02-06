@@ -9,7 +9,7 @@ import { resetAllSlices, resetStore, softReset, useAppDispatch } from "@/redux";
 import { useStytch, useStytchSession } from "@stytch/react";
 import FeedbackCard from "./FeedbackContent";
 import { useDialog } from "@/providers/dialog-provider";
-import { ListIcon } from "@phosphor-icons/react";
+import { BookOpenIcon, ChatTextIcon, ListIcon } from "@phosphor-icons/react";
 import { useSheet } from "@/providers/sheet-provider";
 import NavSheetContent from "./NavSheetContent";
 
@@ -44,77 +44,53 @@ const Header: React.FC = () => {
         >
           the bulletin.
         </Link>
-        {!isMobile ? (
-          <div className="flex items-center space-x-2">
-            <Button variant="ghost" onClick={() => navigate("/catalogue")}>
-              Your Bulletins
-            </Button>
-            <Button
-              onClick={async () => {
-                dialog(
-                  <FeedbackCard
-                    inline
-                    closure={() => setFeedback(false)}
-                    feedback={feedbackContent}
-                    setFeedback={setFeedbackContent}
-                  />
-                );
-              }}
-              variant="ghost"
-              size="icon"
-              className="w-[7.5rem] hover:text-red-700 hover:bg-red-50"
-              aria-label="Sign Out"
-              title="Sign Out"
-            >
-              Feedback
-            </Button>
-            {session && (
-              <>
-                <FriendRequests />
-                <div className="flex items-center space-x-2">
-                  <Button
-                    onClick={async () => {
-                      // console.log("signing out");
-                      await signOut().then(() => {
-                        dispatch(resetAllSlices);
-                        navigate("/");
-                      });
-                    }}
-                    variant="ghost"
-                    size="icon"
-                    className="text-red-600 hover:text-red-700 hover:bg-red-50"
-                    aria-label="Sign Out"
-                    title="Sign Out"
-                  >
-                    <LogOut className="h-5 w-5" />
-                  </Button>
-                </div>
-              </>
-            )}
-          </div>
-        ) : (
-          <ListIcon
-            size={22}
-            onClick={() => {
-              sheet(<NavSheetContent />, {
-                footer: (
-                  <Button
-                    onClick={async () => {
-                      await signOut().then(() => {
-                        dispatch(resetAllSlices);
-                        navigate("/");
-                        close();
-                      });
-                    }}
-                    variant="ghost"
-                  >
-                    Sign Out
-                  </Button>
-                ),
-              });
+
+        <div className={`flex items-center space-x-2 ${ isMobile &&  "max-w-[60%]"}`}>
+          <Button variant="ghost" onClick={() => navigate("/catalogue")}>
+            {isMobile ? <BookOpenIcon size={22} /> : "Your Bulletins"}
+          </Button>
+          <Button
+            onClick={async () => {
+              dialog(
+                <FeedbackCard
+                  inline
+                  closure={() => setFeedback(false)}
+                  feedback={feedbackContent}
+                  setFeedback={setFeedbackContent}
+                />
+              );
             }}
-          />
-        )}
+            variant="ghost"
+            size="icon"
+            className="w-[7.5rem] hover:text-red-700 hover:bg-red-50"
+            aria-label="Sign Out"
+            title="Sign Out"
+          >
+            {isMobile ? <ChatTextIcon size={22} /> : "Feedback"}
+          </Button>
+          {session && (
+            <>
+              <FriendRequests />
+              <div className="flex items-center space-x-2">
+                <Button
+                  onClick={async () => {
+                    await signOut().then(() => {
+                      dispatch(resetAllSlices);
+                      navigate("/");
+                    });
+                  }}
+                  variant="ghost"
+                  size="icon"
+                  className="text-red-600 hover:text-red-700 hover:bg-red-50"
+                  aria-label="Sign Out"
+                  title="Sign Out"
+                >
+                  <LogOut className="h-5 w-5" />
+                </Button>
+              </div>
+            </>
+          )}
+        </div>
       </div>
     </header>
   );

@@ -9,6 +9,7 @@ import { staticGetUser } from "@/redux/user/selectors";
 import { useStytch, useStytchUser } from "@stytch/react";
 import { quickValidation, supabase } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
+import Layout from "@/components/Layout";
 
 const Test: React.FC = () => {
   const stytch = useStytch();
@@ -25,7 +26,7 @@ const Test: React.FC = () => {
     await stytch.session.revoke();
   };
   return (
-    <>
+    <Layout>
       <div className="flex flex-col items-center justify-center h-screen">
         <button
           onClick={async () => {
@@ -65,7 +66,7 @@ const Test: React.FC = () => {
           click try remote array_append
         </button>
       </div>
-    </>
+    </Layout>
   );
 };
 

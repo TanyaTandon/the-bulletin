@@ -51,7 +51,7 @@ interface AuthContextType {
   handleVerifySignIn: (
     code: string,
     navigate: NavigateFunction,
-additionalClosingAction?: () => void
+    additionalClosingAction?: () => void
   ) => Promise<void>;
   handleSignUp: () => Promise<void>;
   handleVerifySignUp: (
@@ -185,9 +185,9 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                     const bulletins = await dispatch(
                       fetchAllBulletins(phone)
                     ).unwrap()
-                    if(additionalClosingAction){
+                    if (additionalClosingAction) {
                       additionalClosingAction();
-                    } 
+                    }
                     const currentMonth = new Date().getMonth() + 1;
 
                     if (
@@ -196,14 +196,15 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                         (bulletin) => bulletin.month === currentMonth
                       )
                     ) {
+                      additionalClosingAction()
                       navigate(
-                        `/bulletin/${
-                          bulletins.find(
-                            (bulletin) => bulletin.month === currentMonth
-                          )?.id
+                        `/bulletin/${bulletins.find(
+                          (bulletin) => bulletin.month === currentMonth
+                        )?.id
                         }`
                       );
                     } else {
+                      additionalClosingAction()
                       navigate("/bulletin?monthAlert=true");
                     }
                   } else {

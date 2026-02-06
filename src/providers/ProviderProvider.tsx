@@ -5,13 +5,14 @@ import { BrowserRouter, useLocation, useNavigate } from "react-router-dom";
 import { TourGuideProvider } from "@/providers/contexts/TourGuideContext";
 import { AuthContext } from "@/providers/contexts/AuthContext";
 import { ToastContext } from "../providers/contexts/toastcontextTP";
-import { DialogProvider } from "../providers/dialog-provider";
+import { DialogProvider, useDialog } from "../providers/dialog-provider";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { showToast } from "../main";
 import { SheetProvider } from "./sheet-provider";
 import { getBulletins, staticGetUser } from "@/redux/user/selectors";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { useStytchUser } from "@stytch/react";
+import Controller from "./Controller";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -30,14 +31,10 @@ const ProviderProvider: React.FC<{
   const searchParams = window.location.search;
   const allBulletins = useAppSelector(getBulletins);
   const user = useAppSelector(staticGetUser);
-  const dispatch = useAppDispatch();
 
   const stytchUser = useStytchUser();
 
-  const dummyBulletinAll = 0;
-
   useEffect(() => {
-    // console.log("ProviderProvider");
     if (
       (pathname === "/" || pathname === "/bulletin") &&
       user &&
@@ -50,11 +47,10 @@ const ProviderProvider: React.FC<{
         ) &&
         !searchParams.includes("onboarding")
       ) {
-        window.location.href = `/bulletin/${
-          allBulletins.find(
-            (bulletin) => bulletin.month === new Date().getMonth() + 1
-          )?.id
-        }`;
+        window.location.href = `/bulletin/${allBulletins.find(
+          (bulletin) => bulletin.month === new Date().getMonth() + 1
+        )?.id
+          }`;
       }
     }
   }, [pathname]);
@@ -71,7 +67,10 @@ const ProviderProvider: React.FC<{
                     <TourGuideProvider
                       initialOptions={{ exitOnClickOutside: false }}
                     >
-                      {children}
+                      <Controller>
+
+                        {children}
+                      </Controller>
                     </TourGuideProvider>
                   </SheetProvider>
                 </DialogProvider>
