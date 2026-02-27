@@ -1,0 +1,212 @@
+<!DOCTYPE html>
+  <html>
+  <head>
+  <link rel="preload" as="font" crossorigin>
+    <style>
+      /* Ensure fonts load inside the iframe */
+      @font-face {
+        font-family: "Welcome Web";
+        src: url('/fonts/Welcomeweb-Regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Delight";
+        src: url('/fonts/delight-regular.woff2') format('woff2');
+        font-weight: 400;
+        font-style: normal;
+        font-display: block;
+      }
+      @font-face {
+        font-family: "Delight";
+        src: url('/fonts/delight-black.woff2') format('woff2');
+        font-weight: 900;
+        font-style: normal;
+        font-display: block;
+      }
+      body {
+        margin: 0;
+        padding: 30px;
+        background: #f5f1eb;
+        font-family: "Welcome Web", sans-serif;
+        height: 100vh;
+        overflow: hidden;
+        box-sizing: border-box;
+      }
+      h1 {
+        font-family: "Delight", sans-serif;
+        font-weight: 400;
+      }
+      .container {
+        max-width: 600px;
+        margin: 0 auto;
+        height: calc(100vh - 60px);
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+      }
+      .main-content {
+        display: flex;
+        gap: 20px;
+        flex: 1;
+        margin-bottom: 30px;
+      }
+      .left-column {
+        flex: 3;
+        display: flex;
+        flex-direction: column;
+      }
+      .right-column {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+        gap: 15px;
+      }
+      .large-photo {
+        width: 240px;
+        height: 240px;
+        background: #666;
+        border-radius: 8px;
+        margin-bottom: 20px;
+        align-self: flex-start;
+        background-size: cover;
+        background-position: center;
+      }
+      .photo {
+        width: 100%;
+        height: 100px;
+        background: #666;
+        border-radius: 8px;
+        aspect-ratio: 1;
+        background-size: cover;
+        background-position: center;
+      }
+      .text {
+        font-size: 14px;
+        line-height: 1.5;
+        color: #333;
+        text-align: right;
+        flex: 1;
+        overflow: hidden;
+      }
+      .name {
+        font-size: ${fontSize}px;
+        font-weight: 900;
+        color: #000;
+        text-align: center;
+        margin: 0;
+        letter-spacing: -0.02em;
+        line-height: 0.8;
+        white-space: nowrap;
+      }
+        /* Button Arc Styles */
+        .arc-button {
+          position: absolute;
+          width: 75px;
+          height: 75px;
+          background: white;
+          border-radius: 50%;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.15);
+          border: 1px solid #e5e7eb;
+          display: flex;
+          align-items: center;
+          justify-content: center;
+          cursor: pointer;
+          pointer-events: auto;
+          font-size: 20px;
+          opacity: 0;
+          transform-origin: center;
+          transition: transform 0.4s ease-in-out; 
+        }
+  
+        .arc-button:hover {
+          box-shadow: 0 6px 20px rgba(0, 0, 0, 0.2);
+          transform: scale(1.1) translate(var(--to-x), var(--to-y));
+        }
+  
+        .arc-button.close-button {
+          font-size: 28px;
+          font-weight: 300;
+          color: #374151;
+        }
+  
+        .arc-button.animate-in {
+          animation: buttonSlideIn 300ms cubic-bezier(0.34, 1.56, 0.64, 1) forwards;
+        }
+  
+        .arc-button.animate-out {
+          animation: buttonSlideOut 300ms cubic-bezier(0.25, 0, 1, 2) forwards;
+        }
+
+        .arc-button:not(.animate-in):not(.animate-out) {
+          transform: translate(var(--to-x), var(--to-y)) scale(1);
+        }
+  
+        @keyframes buttonSlideIn {
+          from {
+            opacity: 0;
+            transform: translate(var(--from-x), var(--from-y)) scale(0.8);
+          }
+          to {
+            opacity: 1;
+            transform: translate(var(--to-x), var(--to-y)) scale(1);
+          }
+        }
+  
+        @keyframes buttonSlideOut {
+          from {
+            opacity: 1;
+            transform: translate(var(--to-x), var(--to-y)) scale(1);
+          }
+          to {
+            opacity: 0;
+            transform: translate(var(--from-x), var(--from-y)) scale(0.8);
+          }
+        }
+  
+        #button-arc-container {
+          position: fixed;
+          pointer-events: none;
+          z-index: 10000;
+          top: 0;
+          left: 0;
+          width: 100%;
+          height: 100%;
+        }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1 class="name" id="nameElement">${name.toLowerCase()}</h1>
+
+      <div class="main-content">
+        <div class="left-column">
+          <div class="large-photo img" data-image-index="0" style="background-image: url('${
+            images[0]
+          }')" />
+          <div class="text">
+            ${bodyText}
+          </div>
+        </div>
+        <div class="right-column">
+          <div class="photo img" data-image-index="1" style="background-image: url('${
+            images[1]
+          }')"></div>
+          <div class="photo img" data-image-index="2" style="background-image: url('${
+            images[2]
+          }')"></div>
+          <div class="photo img" data-image-index="3" style="background-image: url('${
+            images[3]
+          }')"></div>
+          <div class="photo img" data-image-index="4" style="background-image: url('${
+            images[4]
+          }')"></div>
+        </div>
+      </div>
+    </div>
+    <div id="button-arc-container"></div>
+
+
+  </body>
+  </html>

@@ -1,4 +1,4 @@
-import React, { useEffect, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSpring, animated, useTransition, update } from "@react-spring/web";
 import Layout from "@/components/Layout";
@@ -27,7 +27,7 @@ import PageDesignPreview from "@/components/pageDesignPreview";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BigCalendar from "@/components/BigCalendar";
 import { useDialog } from "@/providers/dialog-provider";
-import FriendModalContent from "@/components/FriendModalContent";
+import FriendModalContent from "@/components/modalContent/FriendModalContent";
 import { Bulletin, createNewBulletin } from "@/lib/api";
 import { useStytch } from "@stytch/react";
 import { tourSteps } from "@/lib/tour-steps";
@@ -44,6 +44,7 @@ export const templateTypes = {
   0: "nick",
   1: "lila",
   2: "tanya",
+  3: "jackson",
 };
 
 export const templates = [
@@ -67,6 +68,13 @@ export const templates = [
     images: 5,
     description:
       "Capture the big picture, and play with some variety. Tanya will tell the story right here.",
+  },
+  {
+    id: 3,
+    name: "Jackson",
+    images: 6,
+    description:
+      "You've got a lot to show, a lot to tell as well! Jackson is a good fit.",
   },
 ];
 
@@ -118,6 +126,8 @@ const BulletinPage: React.FC<{
     "April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. !!";
 
   const [searchParams] = useSearchParams();
+  const monthAlertShownRef = useRef(false);
+  const onboardingNavigateRef = useRef(false);
 
   const {
     currentStep,
@@ -134,21 +144,29 @@ const BulletinPage: React.FC<{
 
   const { dialog, close } = useDialog();
 
-  if (existingBulletin === null || existingBulletin === undefined) {
+  useEffect(() => {
     const onboarding = searchParams.get("onboarding");
-    if (onboarding) {
+    if (
+      (existingBulletin === null || existingBulletin === undefined) &&
+      onboarding &&
+      !onboardingNavigateRef.current
+    ) {
+      onboardingNavigateRef.current = true;
       dispatch(createNewBulletin({ user }))
         .unwrap()
         .then((res) => {
-          // console.log("::*", res);
           if (res.success) {
             navigate(`/bulletin/${res.bulletinId}?onboarding=true`);
           } else {
             toast.error("We couldn't create a new bulletin. Please try again.");
+            onboardingNavigateRef.current = false;
           }
+        })
+        .catch(() => {
+          onboardingNavigateRef.current = false;
         });
     }
-  }
+  }, [searchParams, existingBulletin, dispatch, user, navigate]);
 
   const getStartedFunc = async () => {
     const url = new URL(window.location.href);
@@ -216,37 +234,6 @@ const BulletinPage: React.FC<{
         }
       });
     }
-    const monthAlert = searchParams.get("monthAlert");
-    if (monthAlert) {
-      dialog(
-        <div>
-          <h1>It's a new month! Let's create a new bulletin.</h1>
-          <br />
-          <br />
-          <BulletinPreview
-            images={getFourRandomIndices(user.images).map(
-              (num) =>
-                `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${user.images[num]}.png`
-            )}
-            firstName={user?.firstName ?? "nick"}
-          />
-          <br />
-          <br />
-          <Button
-            className="block mx-auto"
-            onClick={() => {
-              getStartedFunc();
-              close(true);
-            }}
-          >
-            Get Started!
-          </Button>
-        </div>,
-        {
-          additionalClosingAction: getStartedFunc,
-        }
-      );
-    }
   }, [
     searchParams,
     startTour,
@@ -258,19 +245,49 @@ const BulletinPage: React.FC<{
     tourSteps,
     updateCurrentStepTarget,
     updatePositions,
-    dialog,
     loaded,
     existingBulletin,
   ]);
+
+  useEffect(() => {
+    const monthAlert = searchParams.get("monthAlert");
+    if (!monthAlert || !user || monthAlertShownRef.current) return;
+    monthAlertShownRef.current = true;
+    dialog(
+      <div>
+        <h1>It's a new month! Let's create a new bulletin.</h1>
+        <br />
+        <br />
+        <BulletinPreview
+          images={getFourRandomIndices(user.images).map(
+            (num) =>
+              `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${user.images[num]}.png`
+          )}
+          firstName={user?.firstName ?? "nick"}
+        />
+        <br />
+        <br />
+        <Button
+          className="block mx-auto"
+          onClick={() => {
+            getStartedFunc();
+            close(true);
+          }}
+        >
+          Get Started!
+        </Button>
+      </div>,
+      {
+        additionalClosingAction: getStartedFunc,
+      }
+    );
+  }, [searchParams, user, dialog, close]);
 
   const today = new Date();
 
   const firstOfNextMonth = new Date(today.getFullYear(), today.getMonth());
 
   const previewAnimation = useSpring({
-    // transform: editState
-    //   ? `translateX(${isMobile ? "-10px" : "-20px"})`
-    //   : "translateX(0px)",
     width: editState ? (isMobile ? "45%" : "50%") : isMobile ? "100%" : "100%",
     config: {
       tension: 280,

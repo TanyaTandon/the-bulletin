@@ -5,14 +5,14 @@ import {
   CardContent,
   CardTitle,
   CardHeader,
-} from "./ui/card";
-import { Textarea } from "./ui/textarea";
+} from "../ui/card";
+import { Textarea } from "../ui/textarea";
 import { toast } from "sonner";
 import { staticGetUser } from "@/redux/user/selectors";
 import { useAppSelector } from "@/redux";
 import { submitFeedback } from "@/lib/api";
-import { Input } from "./ui/input";
-import { Button } from "./ui/button";
+import { Input } from "../ui/input";
+import { Button } from "../ui/button";
 
 const FeedbackCard: React.FC<{
   feedback: string;

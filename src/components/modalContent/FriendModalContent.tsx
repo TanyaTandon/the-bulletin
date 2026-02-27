@@ -1,7 +1,7 @@
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import {
   Check,
   Ellipsis,
@@ -16,17 +16,17 @@ import {
   supabase,
 } from "@/lib/api";
 import { toast } from "sonner";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import { setShowFriendsModal } from "@/redux/nonpersistent/controllers";
 import { useSelector } from "react-redux";
-import "../App.css";
+import "../../App.css";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { useToast } from "@/hooks/use-toast";
-import { Separator } from "./ui/separator";
+import { Separator } from "../ui/separator";
 import { animated, useSpring } from "@react-spring/web";
 import PhoneInput from "react-phone-number-input";
 import { useDialog } from "@/providers/dialog-provider";
-  import { useReducer } from "react";
+import { useReducer } from "react";
 import { addRecipient } from "@/redux/user";
 import { TourGuideClient } from "@sjmc11/tourguidejs/src/Tour";
 
@@ -41,12 +41,12 @@ export type RecipientState = {
   fullAddress: string;
 };
 
-const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean) => void, updatePositions?:()=>void, tour?:TourGuideClient  }> = ({ full, setState ,updatePositions, tour}) => {
+const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean) => void, updatePositions?: () => void, tour?: TourGuideClient }> = ({ full, setState, updatePositions, tour }) => {
   const { toast } = useToast();
 
 
   const user = useSelector(staticGetUser);
-  const availableRecipients = 2- user.recipients.length;
+  const availableRecipients = 2 - user.recipients.length;
   // console.log(user);
   const uniqueLink = `${window.location.origin}/register/${user.id}?name=${user.firstName}`;
 
@@ -117,7 +117,7 @@ const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean)
   function recipientReducer(state: RecipientState, action: RecipientAction): RecipientState {
     switch (action.type) {
       case "SET_FIRST_NAME":
-        return{ ...state, firstName: action.payload };
+        return { ...state, firstName: action.payload };
       case "SET_LAST_NAME":
         return { ...state, lastName: action.payload };
       case "SET_PHONE":
@@ -147,11 +147,11 @@ const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean)
   const [recipient, setRecipient] = useReducer(recipientReducer, initialRecipientState);
 
 
- 
+
   console.log(recipient);
 
   function switchStep(step: number) {
-    
+
     switch (step) {
       case 0:
         return (
@@ -214,7 +214,7 @@ const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean)
                   await dispatch(
                     addFriendViaPhoneNumber({ user, friendPhoneNumber })
                   ).then((res) => {
-                    if(res.payload.response.success){
+                    if (res.payload.response.success) {
                       toast({
                         title: "Friend added!",
                       });
@@ -262,9 +262,9 @@ const FriendModalContent: React.FC<{ full?: boolean, setState?: (state: boolean)
             <button
               className="absolute top-5 left-5"
               onClick={() => {
-setStep(0)
+                setStep(0)
                 setTimeout(() => {
-                    
+
                   updatePositions?.();
                 }, 200);
               }}
@@ -281,15 +281,15 @@ setStep(0)
               You can currently add {availableRecipients} recipients
             </h3>
             <section className="flex gap-2">
-              <Input 
+              <Input
                 value={recipient.firstName}
-                onChange={(e) => setRecipient({ type: "SET_FIRST_NAME", payload: e.target.value })} 
-                placeholder="Recipient First Name" 
+                onChange={(e) => setRecipient({ type: "SET_FIRST_NAME", payload: e.target.value })}
+                placeholder="Recipient First Name"
               />
-              <Input 
+              <Input
                 value={recipient.lastName}
-                onChange={(e) => setRecipient({ type: "SET_LAST_NAME", payload: e.target.value })} 
-                placeholder="Recipient Last Name" 
+                onChange={(e) => setRecipient({ type: "SET_LAST_NAME", payload: e.target.value })}
+                placeholder="Recipient Last Name"
               />
             </section>
             <PhoneInput
@@ -304,34 +304,34 @@ setStep(0)
               onChange={(e) => setRecipient({ type: "SET_PHONE", payload: e ?? "" })}
               required
             />
-            <Input 
+            <Input
               value={recipient.address}
-              onChange={(e) => setRecipient({ type: "SET_ADDRESS", payload: e.target.value })} 
-              placeholder="Recipient address" 
+              onChange={(e) => setRecipient({ type: "SET_ADDRESS", payload: e.target.value })}
+              placeholder="Recipient address"
             />
             <section className="flex gap-2">
-              <Input 
+              <Input
                 value={recipient.city}
-                onChange={(e) => setRecipient({ type: "SET_CITY", payload: e.target.value })} 
-                placeholder="Recipient city" 
+                onChange={(e) => setRecipient({ type: "SET_CITY", payload: e.target.value })}
+                placeholder="Recipient city"
               />
-              <Input 
+              <Input
                 value={recipient.zip}
-                onChange={(e) => setRecipient({ type: "SET_ZIP", payload: e.target.value })} 
-                placeholder="Recipient zip code" 
+                onChange={(e) => setRecipient({ type: "SET_ZIP", payload: e.target.value })}
+                placeholder="Recipient zip code"
               />
             </section>
             <Separator />
-            <Button  onClick={()=>{
-              dispatch(addRecipient({recipient, user})).then((res)=>{
+            <Button onClick={() => {
+              dispatch(addRecipient({ recipient, user })).then((res) => {
                 console.log(res);
-                if(res.payload.success){
+                if (res.payload.success) {
                   toast({
                     title: "Recipient added!",
                   });
                   setRecipient({ type: "RESET" });
                   setStep(0);
-                  if(tour &&!tour.isFinished) {
+                  if (tour && !tour.isFinished) {
                     tour.nextStep();
                   }
                   setTimeout(() => {

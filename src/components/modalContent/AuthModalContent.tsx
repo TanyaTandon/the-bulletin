@@ -1,16 +1,16 @@
 import React, { useEffect, useRef, useState } from "react";
 import PhoneInput from "react-phone-number-input";
-import { Button } from "./ui/button";
+import { Button } from "../ui/button";
 import ReactInputVerificationCode from "react-input-verification-code";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Building, Home, LoaderCircle, Mail, MapPin } from "lucide-react";
-import { Label } from "./ui/label";
+import { Label } from "../ui/label";
 import { UserIcon } from "@phosphor-icons/react";
-import { Input } from "./ui/input";
+import { Input } from "../ui/input";
 import { useAuth } from "@/providers/contexts/AuthContext";
 import "react-phone-number-input/style.css";
 import { useNavigate } from "react-router";
-import OPTVerification from "./OPTVerification";
+import OPTVerification from "../OPTVerification";
 
 const AuthModalContent: React.FC<{
   signInState: boolean;

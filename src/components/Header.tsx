@@ -7,11 +7,11 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import FriendRequests from "./FriendRequests";
 import { resetAllSlices, resetStore, softReset, useAppDispatch } from "@/redux";
 import { useStytch, useStytchSession } from "@stytch/react";
-import FeedbackCard from "./FeedbackContent";
+import FeedbackCard from "./modalContent/FeedbackContent";
 import { useDialog } from "@/providers/dialog-provider";
 import { BookOpenIcon, ChatTextIcon, ListIcon } from "@phosphor-icons/react";
 import { useSheet } from "@/providers/sheet-provider";
-import NavSheetContent from "./NavSheetContent";
+import NavSheetContent from "./modalContent/NavSheetContent";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
@@ -37,15 +37,14 @@ const Header: React.FC = () => {
       <div className="container mx-auto flex justify-between items-center px-1">
         <Link
           to="/"
-          className={`font-bold text-black lowercase ${
-            isMobile ? "text-1xl text-left" : "text-3xl"
-          }`}
+          className={`font-bold text-black lowercase ${isMobile ? "text-1xl text-left" : "text-3xl"
+            }`}
           style={{ fontFamily: "Sometype Mono, monospace" }}
         >
           the bulletin.
         </Link>
 
-        <div className={`flex items-center space-x-2 ${ isMobile &&  "max-w-[60%]"}`}>
+        <div className={`flex items-center space-x-2 ${isMobile && "max-w-[60%]"}`}>
           <Button variant="ghost" onClick={() => navigate("/catalogue")}>
             {isMobile ? <BookOpenIcon size={22} /> : "Your Bulletins"}
           </Button>

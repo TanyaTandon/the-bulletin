@@ -10,7 +10,7 @@ import {
   AccordionItem,
   AccordionTrigger,
 } from "./ui/accordion";
-import FriendModalContent from "./FriendModalContent";
+import FriendModalContent from "./modalContent/FriendModalContent";
 
 interface LayoutProps {
   children: React.ReactNode;

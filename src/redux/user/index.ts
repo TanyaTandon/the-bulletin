@@ -1,14 +1,15 @@
 import { PayloadAction, createSlice, createAsyncThunk } from "@reduxjs/toolkit";
-import { Bulletin, supabase } from "@/lib/api.ts";
+import { Bulletin, mapUserRecordFromDb, supabase } from "@/lib/api.ts";
 import { RESET_ALL_SLICES } from "../constants.ts";
 import { toast } from "sonner";
 import { UploadedImage } from "@/components/ImageUploadGrid.tsx";
-import { RecipientState } from "@/components/FriendModalContent.tsx";
+import { RecipientState } from "@/components/modalContent/FriendModalContent.tsx";
 import { v4 } from "uuid";
 
 export type User = {
   id: number;
   firstName: string;
+  lastName: string;
   images: string[];
   bulletins: string[];
   phone_number: string;
@@ -39,7 +40,7 @@ export const fetchUser = createAsyncThunk(
 
       // console.log(res);
 
-      const userResponse: User = res[0];
+      const userResponse: User = res?.[0] ? mapUserRecordFromDb(res[0]) as User : res[0];
 
       dispatch(setUser(userResponse));
 
@@ -263,7 +264,7 @@ export const updateImage = createAsyncThunk(
 
 export const addRecipient = createAsyncThunk(
   "user/addRecipient",
-  async ({recipient, user}: {recipient: RecipientState, user: User}, { dispatch }) => {
+  async ({ recipient, user }: { recipient: RecipientState, user: User }, { dispatch }) => {
 
     const id = v4();
 
@@ -282,15 +283,16 @@ export const addRecipient = createAsyncThunk(
       const { data: dbResponse, error } = await supabase
         .from("user_record")
         .update({ recipients: [...user.recipients, id] })
-        .eq("phone_number", user.phone_number).select().single()
+        .eq("phone_number", user.phone_number).select().single();
 
       if (error) {
         throw error;
       }
 
-      if(dbResponse) {
-        dispatch(setUser(dbResponse as User));        
-        return { success: true, data: dbResponse };
+      if (dbResponse) {
+        const mapped = mapUserRecordFromDb(dbResponse) as User;
+        dispatch(setUser(mapped));
+        return { success: true, data: mapped };
       }
 
     })

@@ -1,0 +1,128 @@
+[
+  {
+    "id": "dd5ec7b7-233f-4b8c-9ab9-983c2af29a73",
+    "created_at": "2026-02-06 21:46:47.848392+00",
+    "images": ["04ede62d-b65c-4fcd-b778-f4dec98374da", "0693cf64-e9d5-4b8f-b3f3-45f4ea7385da", "06fa5aee-ecb8-4639-a80e-24d760a1c51a", "0967dfc2-3d82-4fe5-b31d-6f0d7ad2fc3b", "0b18ce4b-e151-43a0-a1eb-af11946dc652", "112c404a-2b15-4e16-b9d1-0fba58cf6dde"],
+    "blurb": "February was full of cozy moments and big changes. Spent the first week snowed in with hot cocoa and good books. Mid-month brought a surprise visit from old friends—we laughed until 2am. Wrapped up with a weekend getaway to the mountains. So grateful for this month.",
+    "owner": "+12535349031",
+    "month": "2",
+    "saved_notes": [
+      { "date": "2026-03-01T10:00:00.000Z", "note": "Started the new novel from book club list" },
+      { "date": "2026-03-05T14:00:00.000Z", "note": "Coffee catch-up with Sarah at the new café downtown" },
+      { "date": "2026-03-08T11:30:00.000Z", "note": "Museum visit—new photography exhibit" },
+      { "date": "2026-03-12T09:00:00.000Z", "note": "Morning walk at the arboretum" },
+      { "date": "2026-03-15T18:00:00.000Z", "note": "Dinner with Alex—catching up after the trip" },
+      { "date": "2026-03-19T16:00:00.000Z", "note": "Book club meeting—discussing this month's pick" },
+      { "date": "2026-03-22T18:00:00.000Z", "note": "Birthday dinner for Mom at her favorite Italian spot" },
+      { "date": "2026-03-26T12:00:00.000Z", "note": "Lunch with the team to plan Q2" },
+      { "date": "2026-03-28T15:00:00.000Z", "note": "Garden center run—picking up seedlings" },
+      { "date": "2026-03-30T19:00:00.000Z", "note": "Quiet night in—meal prep for the week" }
+    ],
+    "template": 0
+  },
+  {
+    "id": "062adab2-aee3-4e7f-88aa-fe1977509924",
+    "created_at": "2026-02-06 21:43:35.764576+00",
+    "images": ["04ede62d-b65c-4fcd-b778-f4dec98374da", "0693cf64-e9d5-4b8f-b3f3-45f4ea7385da"],
+    "blurb": "A quieter month but meaningful. Focused on finishing the pottery class I started in January. Made a set of mugs I'm actually proud of. Lots of long walks and thinking. Sometimes less is more.",
+    "owner": "+17194327546",
+    "month": "2",
+    "saved_notes": [
+      { "date": "2026-03-02T08:00:00.000Z", "note": "Sunrise meditation on the porch" },
+      { "date": "2026-03-05T09:30:00.000Z", "note": "Pottery studio—glazing the last pieces" },
+      { "date": "2026-03-09T14:00:00.000Z", "note": "Picked up finished mugs from the kiln" },
+      { "date": "2026-03-12T10:00:00.000Z", "note": "Morning yoga session at the park" },
+      { "date": "2026-03-16T15:00:00.000Z", "note": "Pottery studio open house—showing my new pieces" },
+      { "date": "2026-03-19T11:00:00.000Z", "note": "Long walk by the river—thinking time" },
+      { "date": "2026-03-23T17:00:00.000Z", "note": "Tea with a friend—tried the new place" },
+      { "date": "2026-03-26T08:30:00.000Z", "note": "Journaling and coffee at home" },
+      { "date": "2026-03-28T12:00:00.000Z", "note": "Brunch with the girls before everyone scatters for spring" },
+      { "date": "2026-03-29T16:00:00.000Z", "note": "Cleaning the studio and organizing supplies" }
+    ],
+    "template": 1
+  },
+  {
+    "id": "03b344fe-8ef2-44f9-aedd-513692f289d4",
+    "created_at": "2026-02-06 21:40:15.631122+00",
+    "images": ["06fa5aee-ecb8-4639-a80e-24d760a1c51a", "0967dfc2-3d82-4fe5-b31d-6f0d7ad2fc3b", "0b18ce4b-e151-43a0-a1eb-af11946dc652", "112c404a-2b15-4e16-b9d1-0fba58cf6dde", "1ce8c33f-4ec0-4deb-a8c2-60ec366a580c"],
+    "blurb": "February flew by. Highlights: promoted at work (finally!), adopted a rescue pup named Biscuit, and hosted game night that turned into an impromptu karaoke session. The snowstorm gave us three unexpected days off—best surprise ever.",
+    "owner": "+12138549945",
+    "month": "2",
+    "saved_notes": [
+      { "date": "2026-03-03T11:00:00.000Z", "note": "Biscuit's first obedience class" },
+      { "date": "2026-03-05T18:00:00.000Z", "note": "Happy hour with coworkers after the promotion" },
+      { "date": "2026-03-10T09:00:00.000Z", "note": "Dog park with Biscuit—made new friends" },
+      { "date": "2026-03-12T19:00:00.000Z", "note": "Team dinner celebrating the Q1 launch" },
+      { "date": "2026-03-17T14:00:00.000Z", "note": "Vet checkup for Biscuit—all clear" },
+      { "date": "2026-03-19T20:00:00.000Z", "note": "Game night at our place—karaoke round two" },
+      { "date": "2026-03-24T10:00:00.000Z", "note": "Hiking with Biscuit at the state park" },
+      { "date": "2026-03-26T17:30:00.000Z", "note": "Networking event downtown" },
+      { "date": "2026-03-28T11:00:00.000Z", "note": "Brunch with the crew—planning summer trip" },
+      { "date": "2026-03-31T15:00:00.000Z", "note": "Quarter-end wrap and April planning" }
+    ],
+    "template": 2
+  },
+  {
+    "id": "f153d2e7-deaa-4485-96e3-f1247cefc116",
+    "created_at": "2026-02-06 21:37:11.755517+00",
+    "images": ["04ede62d-b65c-4fcd-b778-f4dec98374da", "0693cf64-e9d5-4b8f-b3f3-45f4ea7385da"],
+    "blurb": "Short month, big feelings. Said goodbye to my childhood home as my parents downsized. Found a box of letters from high school—couldn't stop reading. Also ran my first half marathon. Emotional but proud.",
+    "owner": "+19331835889",
+    "month": "2",
+    "saved_notes": [
+      { "date": "2026-03-04T07:00:00.000Z", "note": "Long run along the river—half marathon training" },
+      { "date": "2026-03-05T12:00:00.000Z", "note": "Helped Mom pack the last boxes" },
+      { "date": "2026-03-07T08:00:00.000Z", "note": "Sunday farmers market—stocking up on spring produce" },
+      { "date": "2026-03-12T14:00:00.000Z", "note": "Re-reading old letters from the box" },
+      { "date": "2026-03-15T20:00:00.000Z", "note": "Concert at the Ryman with old college friends" },
+      { "date": "2026-03-19T09:00:00.000Z", "note": "Morning run—taper week begins" },
+      { "date": "2026-03-21T16:00:00.000Z", "note": "Dad's new place—helping hang pictures" },
+      { "date": "2026-03-24T14:00:00.000Z", "note": "Helping Dad set up his new garden" },
+      { "date": "2026-03-26T10:00:00.000Z", "note": "Half marathon race day!" },
+      { "date": "2026-03-28T18:00:00.000Z", "note": "Celebratory dinner with the family" }
+    ],
+    "template": 1
+  },
+  {
+    "id": "9beac5c6-2476-4b03-acca-0f6da97de7d9",
+    "created_at": "2026-02-06 21:30:31.140764+00",
+    "images": ["06fa5aee-ecb8-4639-a80e-24d760a1c51a", "0967dfc2-3d82-4fe5-b31d-6f0d7ad2fc3b", "0b18ce4b-e151-43a0-a1eb-af11946dc652", "112c404a-2b15-4e16-b9d1-0fba58cf6dde", "1ce8c33f-4ec0-4deb-a8c2-60ec366a580c"],
+    "blurb": "Wedding planning chaos in the best way. Cake tastings, venue visits, and too many Pinterest boards. Also squeezed in a ski trip with the bridal party. February was a blur of love and logistics.",
+    "owner": "+18910321998",
+    "month": "2",
+    "saved_notes": [
+      { "date": "2026-03-06T13:00:00.000Z", "note": "Final dress fitting with Mom and bridesmaids" },
+      { "date": "2026-03-05T16:00:00.000Z", "note": "Cake tasting appointment—narrowed to two" },
+      { "date": "2026-03-11T14:00:00.000Z", "note": "Florist consultation" },
+      { "date": "2026-03-12T11:00:00.000Z", "note": "Invitation proof review with fiancé" },
+      { "date": "2026-03-18T17:00:00.000Z", "note": "Menu tasting at the reception venue" },
+      { "date": "2026-03-19T14:00:00.000Z", "note": "Bridesmaid dress pickup" },
+      { "date": "2026-03-20T10:00:00.000Z", "note": "Hair and makeup trial" },
+      { "date": "2026-03-26T15:00:00.000Z", "note": "Final venue walk-through" },
+      { "date": "2026-03-28T10:00:00.000Z", "note": "Bachelorette weekend begins!" },
+      { "date": "2026-03-30T12:00:00.000Z", "note": "Last-minute checklist with wedding planner" }
+    ],
+    "template": 2
+  },
+  {
+    "id": "b878db19-5859-43e6-89d9-19bd19260217",
+    "created_at": "2026-02-06 21:29:34.297001+00",
+    "images": ["04ede62d-b65c-4fcd-b778-f4dec98374da", "0693cf64-e9d5-4b8f-b3f3-45f4ea7385da", "06fa5aee-ecb8-4639-a80e-24d760a1c51a", "0967dfc2-3d82-4fe5-b31d-6f0d7ad2fc3b", "0b18ce4b-e151-43a0-a1eb-af11946dc652"],
+    "blurb": "Kept it simple. Lots of cooking new recipes—finally mastered sourdough. Weekly calls with Grandma. Tried ice fishing for the first time (cold but fun). February reminded me to slow down and enjoy the small stuff.",
+    "owner": "+13327437789",
+    "month": "2",
+    "saved_notes": [
+      { "date": "2026-03-01T07:30:00.000Z", "note": "Early morning run—training for 10K" },
+      { "date": "2026-03-05T08:00:00.000Z", "note": "Weekly call with Grandma" },
+      { "date": "2026-03-09T18:30:00.000Z", "note": "Tried new sourdough variation—rye blend" },
+      { "date": "2026-03-12T12:00:00.000Z", "note": "Community garden work day" },
+      { "date": "2026-03-18T19:00:00.000Z", "note": "Neighbor's birthday potluck" },
+      { "date": "2026-03-19T18:30:00.000Z", "note": "Dinner party—hosting the neighbors" },
+      { "date": "2026-03-23T09:00:00.000Z", "note": "Farmers market and meal prep" },
+      { "date": "2026-03-26T09:00:00.000Z", "note": "Grandma's recipe—making her famous soup" },
+      { "date": "2026-03-27T09:00:00.000Z", "note": "Planting the vegetable garden for spring" },
+      { "date": "2026-03-28T14:00:00.000Z", "note": "Quiet afternoon—bread baking and reading" }
+    ],
+    "template": 2
+  }
+]

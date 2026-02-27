@@ -8,6 +8,19 @@ import { v4 as uuidv4 } from "uuid";
 import { arrayToDict } from "./utils";
 import { toast } from "sonner";
 
+/** Maps user_record row from DB (first_name, last_name) to app shape (firstName, lastName). */
+export function mapUserRecordFromDb<T extends { first_name?: string; last_name?: string }>(
+  row: T
+): Omit<T, "first_name" | "last_name"> & { firstName: string; lastName: string } {
+  if (!row) return row as any;
+  const { first_name, last_name, ...rest } = row;
+  return {
+    ...rest,
+    firstName: first_name ?? "",
+    lastName: last_name ?? "",
+  } as Omit<T, "first_name" | "last_name"> & { firstName: string; lastName: string };
+}
+
 export const supabase = createClient(
   "https://voiuicuaujbhkkljtjfw.supabase.co",
   "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InZvaXVpY3VhdWpiaGtrbGp0amZ3Iiwicm9sZSI6InNlcnZpY2Vfcm9sZSIsImlhdCI6MTc0NDQxNzYwMSwiZXhwIjoyMDU5OTkzNjAxfQ.6OC835cAwInmVOpG2yJknezG1RUQnOMT0tAlewWFv5E"
@@ -53,8 +66,8 @@ export async function createNewUser({
     const { error: userError } = await supabase.from("user_record").insert({
       created_user_id: created_user_id,
       id: created_user_id,
-      firstName: firstName,
-      lastName: lastName,
+      first_name: firstName,
+      last_name: lastName,
       images: [],
       bulletins: [],
       phone_number: phoneNumber,
@@ -218,7 +231,7 @@ export async function addFriendToSupabase({
           .eq("phone_number", user.phone_number)
           .select();
 
-        return userData.data as User[];
+        return (userData.data ?? []).map(mapUserRecordFromDb) as User[];
       });
   } else if (fractionalUser == 0) {
     return await supabase
@@ -236,7 +249,7 @@ export async function addFriendToSupabase({
           .eq("phone_number", user.phone_number)
           .select();
 
-        return userData.data as User[];
+        return (userData.data ?? []).map(mapUserRecordFromDb) as User[];
       });
   } else if (fractionalUser == 1) {
     const userData = await supabase
@@ -247,7 +260,7 @@ export async function addFriendToSupabase({
       .eq("phone_number", user.phone_number)
       .select();
 
-    return userData.data as User[];
+    return (userData.data ?? []).map(mapUserRecordFromDb) as User[];
   }
 }
 
@@ -270,7 +283,7 @@ export async function removeRecipient({
     // console.error("Error removing recipient:", userError);
     throw userError;
   }
-  return userData;
+  return userData?.map(mapUserRecordFromDb) ?? userData;
 }
 
 export async function submitFeedback(feedback: {
@@ -344,7 +357,7 @@ export const createNewBulletin = createAsyncThunk(
       const firstOfNextMonth = getFirstOfNextMonth();
       const insertMonth = month ?? firstOfNextMonth.getMonth() + 1;
       const insertYear = year ?? firstOfNextMonth.getFullYear();
-      
+
       // Set created_at to the first day of the target month/year
       const created_at = new Date(insertYear, insertMonth - 1, 1).toISOString();
 
@@ -357,7 +370,6 @@ export const createNewBulletin = createAsyncThunk(
           saved_notes: [],
           template: 0,
           month: insertMonth,
-          created_at: created_at,
         })
         .select("*")
         .then(async (item) => {
@@ -379,7 +391,9 @@ export const createNewBulletin = createAsyncThunk(
             // console.log("Created bulletin:", createdBulletin);
             dispatch(addBulletin(createdBulletin));
             // console.log("User data:", userData);
-            newUserData = userData as unknown as User;
+            newUserData = userData?.[0]
+              ? (mapUserRecordFromDb(userData[0]) as User)
+              : (userData as unknown as User);
             if (userError) {
               // console.error("Error creating user:", userError);
               sendError(user.phone_number, "createNewBulletin", userError, {
@@ -467,7 +481,7 @@ export const quickValidation = async (phoneNumber: string) => {
   const { data, error } = await supabase
     .from("user_record")
     .select("*")
-    .eq("phone_number", phoneNumber)
+    .eq("phone_number", phoneNumber);
 
-  return data;
+  return (data ?? []).map(mapUserRecordFromDb);
 };

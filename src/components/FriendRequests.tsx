@@ -3,7 +3,7 @@ import { Popover } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { UserPlus } from "lucide-react";
 import { useDialog } from "@/providers/dialog-provider";
-import FriendModalContent from "./FriendModalContent";
+import FriendModalContent from "./modalContent/FriendModalContent";
 import { ClosureDirection } from "./ui/dialog";
 import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
 
@@ -14,7 +14,7 @@ const FriendRequests: React.FC = () => {
 
   const [state, setState] = useState<boolean>(false);
 
-  const {updatePositions, tour } = useTourGuideWithInit();
+  const { updatePositions, tour } = useTourGuideWithInit();
 
   return (
     <Popover open={open} onOpenChange={setOpen}>
@@ -24,8 +24,8 @@ const FriendRequests: React.FC = () => {
         size="icon"
         className="friendButton relative text-black hover:text-black/70 hover:bg-gray-50"
         onClick={() =>
-          dialog(<FriendModalContent setState={setState} updatePositions={updatePositions} tour={tour}/>, {
-          closureCondition: state ? ClosureDirection.TOP : undefined,
+          dialog(<FriendModalContent setState={setState} updatePositions={updatePositions} tour={tour} />, {
+            closureCondition: state ? ClosureDirection.TOP : undefined,
           })
         }
       >

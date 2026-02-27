@@ -1,5 +1,5 @@
 import AnimatedButton from "@/components/AnimatedButton";
-import AuthModalContent from "@/components/AuthModalContent";
+import AuthModalContent from "@/components/modalContent/AuthModalContent";
 import BulletinPreview from "@/components/BulletinPreview";
 import { Button } from "@/components/ui/button";
 import { connectWithFriendRequest, getForeignUserImages } from "@/lib/api";

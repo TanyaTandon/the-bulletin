@@ -15,7 +15,7 @@ import {
   TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
-import { Lila, Nick, Tanya, calculateFontSize } from "@/lib/bulletin-templates";
+import { Lila, Nick, Tanya, Jackson, calculateFontSize } from "@/lib/bulletin-templates";
 import { TourGuideClient } from "@sjmc11/tourguidejs";
 import {
   useTourGuide,
@@ -180,6 +180,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       0: Nick(images, bodyText, name, fontSize),
       1: Lila(images, bodyText, name, fontSize),
       2: Tanya(images, bodyText, name, fontSize),
+      3: Jackson(images, bodyText, name, fontSize),
     };
   }, [images, bodyText, user?.firstName]);
 
