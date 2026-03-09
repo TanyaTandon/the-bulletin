@@ -71,7 +71,7 @@ const Test: React.FC = () => {
             // });
             // const myq = await new myQApi().login("jacobcarter5550@gmail.com", "MSammyDOG!1")
             // console.log('myq', myq);
-            const isLoggedIn = await fetch("http://localhost:3000/api/hello")
+            const isLoggedIn = await fetch(`${import.meta.env.VITE_BE_URL}/api/hello`)
             console.log('islogg', isLoggedIn);
             // signOut();
           }}

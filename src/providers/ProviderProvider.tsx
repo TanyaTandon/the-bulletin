@@ -70,7 +70,7 @@ const ProviderProvider: React.FC<{
   const tokens = useAppSelector(getTokens);
 
   async function fetchClientSecret() {
-    const response = await fetch('http://localhost:8080/api/checkout/stripe', {
+    const response = await fetch(`${import.meta.env.VITE_BE_URL}/api/checkout/stripe`, {
       method: 'POST',
       headers: {
         Authorization: `Bearer ${tokens.session_jwt}`,
