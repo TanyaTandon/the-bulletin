@@ -4,7 +4,7 @@ import { useMemo } from "react";
 export const tourSteps: TourGuideStep[] = [
   {
     title: "Hi and welcome to the Bulletin!",
-    content: `The Bulletin is social media in the real world! Once a month, your close friends or family members will receive a physical copy of your monthly update in the mail alongside anyone else who's added them as a recipient. Let's get started!`
+    content: `The Bulletin is social media in the real world! Once a month, your close friends or family members will receive a physical copy of your monthly life update in the mail alongside anyone else who's added them! Let's get started!`
   },
   {
     title: "let's start by adding an image!",
@@ -33,7 +33,7 @@ export const tourSteps: TourGuideStep[] = [
   },
   {
     title: "now that we've filled out our bulletin, we'll add some recipients!",
-    content:"",
+    content: "",
   },
   {
     title: "there're a couple ways to send out your bulletin!",
@@ -41,19 +41,7 @@ export const tourSteps: TourGuideStep[] = [
     target: "[data-tg-title='friend_modal_trigger']",
   },
   {
-    title: "add some upcoming events to your calendar for next month",
-    content:
-      "select a date cell, enter a short note for the day, and your friends can see what you're looking forward to",
-    target: "[data-tg-title='calendar housing']",
-  },
-  {
-    title: "tea! your bulletin is ready",
-    content: "click the submit button to save your bulletin",
-    target: "[data-tg-title='submit button']",
-  },
-  {
-    title: "lastly let's add some friends to your bulletin for the month",
-    content: "click the submit button to save your bulletin",
-    target: "[data-tg-title='friend modal']",
+    title: "amazing! last order of business is your subscribtion!",
+    content: "once you've subscribed, your bulletin will be sent out to your recipients at the end of the month!",
   },
 ];

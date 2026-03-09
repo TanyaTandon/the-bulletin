@@ -1,7 +1,7 @@
 import { CalendarNote } from "@/components/BlurbInput";
 import { UploadedImage } from "@/components/ImageUploadGrid";
 import sendError from "@/hooks/use-sendError";
-import { addBulletin, updateUserConnections, User } from "@/redux/user";
+import { addBulletin, setUser, updateUserConnections, User } from "@/redux/user";
 import { createAsyncThunk } from "@reduxjs/toolkit";
 import { createClient } from "@supabase/supabase-js";
 import { v4 as uuidv4 } from "uuid";
@@ -304,21 +304,21 @@ export async function submitFeedback(feedback: {
 
 export async function connectWithFriendRequest({
   user,
-  friendId,
+  friend,
 }: {
   user: User;
-  friendId: string;
+  friend: User;
 }) {
   try {
     await supabase
       .rpc("append_to_connections", {
         user_id: user.id,
-        new_connection: friendId,
+        new_connection: friend.phone_number,
       })
       .then(async () => {
         await supabase.rpc("append_to_connections", {
-          user_id: friendId,
-          new_connection: user.id,
+          user_id: friend.id,
+          new_connection: user.phone_number,
         });
       });
   } catch (error) {
@@ -328,16 +328,30 @@ export async function connectWithFriendRequest({
 }
 
 export async function getForeignUserImages(id: string) {
+  console.log('id', id);
   const { data, error } = await supabase
     .from("user_record")
     .select("images")
     .eq("id", id);
-
+  console.log('data', data);
   if (error) {
     // console.error("Error getting foreign user images:", error);
     throw error;
   }
   return data;
+}
+
+export async function getForeignUser(id: string) {
+  const { data, error } = await supabase
+    .from("user_record")
+    .select("*")
+    .eq("id", id);
+  if (error) {
+    // console.error("Error getting foreign user:", error);
+    throw error;
+  }
+  return data?.[0];
+
 }
 
 const getFirstOfNextMonth = () => {
@@ -355,11 +369,27 @@ export const createNewBulletin = createAsyncThunk(
       let createdBulletin: Bulletin;
 
       const firstOfNextMonth = getFirstOfNextMonth();
-      const insertMonth = month ?? firstOfNextMonth.getMonth() + 1;
+      const insertMonth = month ?? firstOfNextMonth.getMonth();
       const insertYear = year ?? firstOfNextMonth.getFullYear();
 
       // Set created_at to the first day of the target month/year
       const created_at = new Date(insertYear, insertMonth - 1, 1).toISOString();
+
+      // Validate: only one bulletin per month per user
+      const monthStart = new Date(insertYear, insertMonth - 1, 1).toISOString();
+      const monthEnd = new Date(insertYear, insertMonth, 1).toISOString();
+      const { data: existing } = await supabase
+        .from("bulletins")
+        .select("id")
+        .eq("owner", user.phone_number)
+        .eq("month", insertMonth)
+        .gte("created_at", monthStart)
+        .lt("created_at", monthEnd)
+        .limit(1);
+
+      if (existing && existing.length > 0) {
+        return { success: false, error: "A bulletin already exists for this month." };
+      }
 
       const { error: bulletinError } = await supabase
         .from("bulletins")
@@ -472,6 +502,39 @@ export const addFriendViaPhoneNumber = createAsyncThunk(
       return { success: true, response };
     } catch (error) {
       // console.error("Error in addFriendViaPhoneNumber:", error);
+      return { success: false, error };
+    }
+  }
+);
+
+export type UpdateUserProfileArgs = {
+  user: User;
+  firstName?: string;
+  lastName?: string;
+  phoneNumber?: string; // reserved for future use
+};
+
+export const updateUserProfile = createAsyncThunk(
+  "user/updateUserProfile",
+  async ({ user, firstName, lastName }: UpdateUserProfileArgs, { dispatch }) => {
+    try {
+      const updates: Record<string, string> = {};
+      if (firstName !== undefined) updates.first_name = firstName;
+      if (lastName !== undefined) updates.last_name = lastName;
+
+      const { data, error } = await supabase
+        .from("user_record")
+        .update(updates)
+        .eq("phone_number", user.phone_number)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      const updated = mapUserRecordFromDb(data) as User;
+      dispatch(setUser(updated));
+      return { success: true, user: updated };
+    } catch (error) {
       return { success: false, error };
     }
   }

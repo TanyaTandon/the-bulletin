@@ -60,7 +60,8 @@ interface AuthContextType {
     close: () => void
   ) => Promise<void>;
   resetAuthState: () => void;
-  setAdditionalAction: (action: () => Promise<void> | null) => void;
+  setAdditionalAction: (action: () => (arg?: User) => Promise<void> | null) => void;
+  codeError: boolean;
 
   // Validation
   validatePhoneNumber: (phone: string) => boolean;
@@ -99,7 +100,9 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
   const [zipCode, setZipCode] = useState<string>("");
 
   const [additionalAction, setAdditionalAction] =
-    useState<() => Promise<void> | null>(null);
+    useState<(arg?: User) => Promise<void> | null>(null);
+  const [codeError, setCodeError] = useState<boolean>(false);
+  const [wrongAttempts, setWrongAttempts] = useState<number>(0);
 
   const validatePhoneNumber = (phone: string) => {
     return phone && phone.trim() !== "";
@@ -116,6 +119,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     setZipCode("");
     setReceivedCode(false);
     setAuthResponse(null);
+    setCodeError(false);
+    setWrongAttempts(0);
   }, []);
 
   const handleSignIn = useCallback(async () => {
@@ -162,6 +167,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
   const handleVerifySignIn = useCallback(
     async (code: string, navigate: NavigateFunction, additionalClosingAction?: () => void) => {
       if (code.includes("·")) return;
+      setCodeError(false);
+      setWrongAttempts(0);
       setIsProcessing(true);
       try {
         await stytch.otps
@@ -205,11 +212,13 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                       );
                     } else {
                       additionalClosingAction()
-                      navigate("/bulletin?monthAlert=true");
+                      const needsOnboarding = userRes.onboarding_completed === false;
+                      navigate(`/catalogue?monthAlert=true${needsOnboarding ? "&onboarding=true" : ""}`);
                     }
                   } else {
                     navigate("/bulletin");
                   }
+                  resetAuthState();
                   toast.success("Welcome back! You're now signed in.");
                 }
               );
@@ -217,10 +226,20 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
             return result;
           });
       } catch (error) {
-        // console.error("Code verification error:", error);
-        toast.error(
-          "That code didn't work. Double-check and try again, or request a new one."
-        );
+        if (error?.status_code === 401) {
+          setCodeError(true);
+        } else if (error?.status_code === 404) {
+          setWrongAttempts((prev) => {
+            const next = prev + 1;
+            if (next >= 2) setCodeError(true);
+            return next;
+          });
+          toast.error("That code didn't work. Double-check and try again.");
+        } else {
+          toast.error(
+            "That code didn't work. Double-check and try again, or request a new one."
+          );
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -311,6 +330,8 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
         return;
       }
 
+      setCodeError(false);
+      setWrongAttempts(0);
       setIsProcessing(true);
       try {
         await stytch.otps
@@ -327,6 +348,12 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                   last_name: lastName,
                 },
               });
+              dispatch(
+                setTokens({
+                  session_token: res.session_token,
+                  session_jwt: res.session_jwt,
+                })
+              );
               await createNewUser({
                 firstName: firstName,
                 lastName: lastName,
@@ -335,17 +362,19 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
                 phoneNumber: phoneNumber,
                 fullAddress: fullAddress,
               }).then(async (res) => {
-                await dispatch(fetchUser(phoneNumber));
-
+                const userRes = await dispatch(fetchUser(phoneNumber)).unwrap();
+                console.log('HERE', res, userRes);
                 if (res.success) {
                   close();
+                  console.log('happenine here',);
                   if (additionalAction !== null) {
-                    await additionalAction();
+                    await additionalAction(userRes);
                   }
                   toast.success(
                     "Welcome to the bulletin! Your account is ready to go."
                   );
-                  navigate("/bulletin?onboarding=true");
+                  resetAuthState();
+                  navigate("/catalogue?monthAlert=true&onboarding=true");
                 } else {
                   sendError(phoneNumber, "handleSignUp", JSON.stringify(res), {
                     firstName,
@@ -360,17 +389,27 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
             }
           });
       } catch (error) {
-        sendError(phoneNumber, "handleSignUp", error, {
-          firstName,
-          streetAddress,
-          city,
-          state,
-          zipCode,
-        });
-        // console.error("Code verification error:", error);
-        toast.error(
-          "That code didn't work. Double-check and try again, or request a new one."
-        );
+        if (error?.status_code === 401) {
+          setCodeError(true);
+        } else if (error?.status_code === 404) {
+          setWrongAttempts((prev) => {
+            const next = prev + 1;
+            if (next >= 2) setCodeError(true);
+            return next;
+          });
+          toast.error("That code didn't work. Double-check and try again.");
+        } else {
+          sendError(phoneNumber, "handleSignUp", error, {
+            firstName,
+            streetAddress,
+            city,
+            state,
+            zipCode,
+          });
+          toast.error(
+            "That code didn't work. Double-check and try again, or request a new one."
+          );
+        }
       } finally {
         setIsProcessing(false);
       }
@@ -422,6 +461,7 @@ export const AuthContext: React.FC<{ children: ReactNode }> = ({
     handleVerifySignUp,
     resetAuthState,
     setAdditionalAction,
+    codeError,
     // Validation
     validatePhoneNumber,
   };

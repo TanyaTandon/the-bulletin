@@ -22,3 +22,10 @@ dist-ssr
 *.njsproj
 *.sln
 *.sw?
+/imgs
+
+dummyUsers.csv
+dummyBulletins.csv
+dummyUsers200.csv
+dummyBulletins200.csv
+phone_numbers.json

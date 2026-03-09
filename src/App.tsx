@@ -13,11 +13,15 @@ import Register from "./pages/Register";
 import ProviderProvider from "./providers/ProviderProvider";
 import { Route, Routes } from "react-router";
 import Catalogue from "./pages/catalogue";
+import TestCheckout from "./pages/testCheckout";
+import CheckoutReturn from "./pages/checkoutReturn";
 
 const App = () => {
+console.log('stripePromise',import.meta.env.STRIPE_PUBLIC_KEY);
 
-  window.addEventListener('load', function() {
-    setTimeout(function() {
+
+  window.addEventListener('load', function () {
+    setTimeout(function () {
       window.scrollTo(0, 1);
     }, 0);
   });
@@ -30,7 +34,7 @@ const App = () => {
           name="viewport"
           content="width=device-width, initial-scale=1.0, viewport-fit=cover"
         ></meta>
-        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover"/>
+        <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
         <meta
           name="description"
           content="Share your moments with friends and family through our monthly bulletin service"
@@ -51,7 +55,10 @@ const App = () => {
           element={<FilledBulletin key="filled-bulletin" />}
         />
         <Route path="/catalogue" element={<Catalogue key="catalogue" />} />
+        <Route path="/checkout/return" element={<CheckoutReturn key="catalogue" />} />
         <Route path="/test" element={<Test key="test" />} />
+        <Route path="/testCheckout" element={<TestCheckout key="testCheckout" />} />
+        <Route path="/checkout" element={<TestCheckout key="testCheckout" />} />
         <Route path="*" element={<NotFound key="not-found" />} />
       </Routes>
     </ProviderProvider>

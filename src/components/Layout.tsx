@@ -2,15 +2,6 @@ import React, { useState } from "react";
 import { useLocation, useNavigate } from "react-router-dom";
 import Header from "./Header";
 import { useIsMobile } from "@/hooks/use-mobile";
-import { selectShowFriendsModal } from "@/redux/nonpersistent/controllers/selectors";
-import { useAppSelector } from "@/redux";
-import {
-  Accordion,
-  AccordionContent,
-  AccordionItem,
-  AccordionTrigger,
-} from "./ui/accordion";
-import FriendModalContent from "./modalContent/FriendModalContent";
 
 interface LayoutProps {
   children: React.ReactNode;

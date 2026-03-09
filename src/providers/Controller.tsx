@@ -16,7 +16,7 @@ const Controller: React.FC<{ children: React.ReactNode }> = ({ children }) => {
     const dispatch = useAppDispatch();
     const stytchUser = useStytchUser();
 
-    console.log('stytchUser', stytchUser);
+    // console.log('stytchUser', stytchUser, );
 
     const signOut = async () => {
         await stytch.session.revoke();

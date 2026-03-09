@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useLayoutEffect, useState } from "react";
+import React, { useEffect, useLayoutEffect, useState } from "react";
 import { X, Heart } from "lucide-react";
 import { Textarea } from "@/components/ui/textarea";
 import { Button } from "@/components/ui/button";
@@ -9,6 +9,8 @@ import { store } from "@/redux";
 import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
 import { useLocation } from "react-router";
 import { useSearchParams } from "react-router-dom";
+import { useDialog } from "@/providers/dialog-provider";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 export interface CalendarNote {
   date: Date;
@@ -16,43 +18,43 @@ export interface CalendarNote {
   example?: boolean;
 }
 
+const NoteModalContent: React.FC<{
+  selectedDate: Date;
+  onSave: (note: string) => void;
+}> = ({ selectedDate, onSave }) => {
+  const [note, setNote] = useState("");
+  return (
+    <section className="w-full h-[200px]">
+      <div className="flex justify-between items-center mb-4">
+        <h3 className="text-lg font-semibold">
+          Add Note for {format(selectedDate, "MMMM d, yyyy")}
+        </h3>
+      </div>
+      <div className="space-y-4">
+        <Textarea
+          value={note}
+          onChange={(e) => setNote(e.target.value)}
+          placeholder="What's happening on this day?"
+          className="min-h-[100px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
+        />
+        <div className="flex justify-end space-x-2">
+          <Button onClick={() => onSave(note)} disabled={!note.trim()}>
+            Save Note
+          </Button>
+        </div>
+      </div>
+    </section>
+  );
+};
+
 const BigCalendar: React.FC<{
   savedNotes: CalendarNote[];
   setSavedNotes: React.Dispatch<React.SetStateAction<CalendarNote[]>>;
 }> = ({ savedNotes, setSavedNotes }) => {
   const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-  const [showNoteModal, setShowNoteModal] = useState(false);
-  const [calendarNote, setCalendarNote] = useState("");
 
   const [queryParams] = useSearchParams();
 
-  // Calendar functionality
-  const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
-    setShowNoteModal(true);
-    setCalendarNote("");
-  };
-
-  const handleSaveNote = () => {
-    if (selectedDate && calendarNote.trim()) {
-      setSavedNotes((prevState) => {
-        const filteredNotes = prevState.filter((note) => !note.example);
-        return [
-          ...filteredNotes,
-          { date: selectedDate, note: calendarNote.trim() },
-        ];
-      });
-      setCalendarNote("");
-      setShowNoteModal(false);
-      setSelectedDate(null);
-    }
-  };
-
-  const handleCloseModal = () => {
-    setShowNoteModal(false);
-    setSelectedDate(null);
-    setCalendarNote("");
-  };
 
   // console.log(savedNotes);
   const getNoteForDate = (date: Date) => {
@@ -61,7 +63,10 @@ const BigCalendar: React.FC<{
     );
   };
 
-  const weekDays = ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
+  const isMobile = useIsMobile();
+  const weekDays = isMobile
+    ? ["S", "M", "T", "W", "T", "F", "S"]
+    : ["SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT"];
 
   // Calculate first of next month
   const today = new Date();
@@ -86,12 +91,31 @@ const BigCalendar: React.FC<{
         const bodyEl = document.querySelector("body");
         if (bodyEl && bodyEl.classList.contains("tg-no-interaction")) {
           console.log("removing tg-no-interaction");
-          
+
           bodyEl.classList.remove("tg-no-interaction");
         }
       }, 750);
     }
   }, [tour, queryParams, updateCurrentStepTarget, updatePositions]);
+
+  const { dialog, close } = useDialog();
+
+  const handleDateClick = (date: Date) => {
+    setSelectedDate(date);
+    dialog(
+      <NoteModalContent
+        selectedDate={date}
+        onSave={(note) => {
+          setSavedNotes((prev) => [
+            ...prev.filter((n) => !n.example),
+            { date, note },
+          ]);
+          close();
+        }}
+      />
+    );
+  };
+
 
   return (
     <div className="relative  w-full overflow-hidden">
@@ -106,9 +130,9 @@ const BigCalendar: React.FC<{
                 {weekDays.map((day, i) => (
                   <div
                     key={i}
-                    className="p-4 text-center border-r last:border-r-0"
+                    className={`${isMobile ? "p-1" : "p-4"} text-center border-r last:border-r-0`}
                   >
-                    <div className="text-sm font-medium text-black">{day}</div>
+                    <div className={`${isMobile ? "text-xs" : "text-sm"} font-medium text-black`}>{day}</div>
                   </div>
                 ))}
               </div>
@@ -130,23 +154,15 @@ const BigCalendar: React.FC<{
                   return (
                     <div
                       key={index}
-                      className={`border-r border-b border-white/10 last:border-r-0 p-1 min-h-[70px] flex flex-col ${
-                        !isCurrentMonth ? "opacity-30" : ""
-                      } ${
-                        isCurrentMonth ? "cursor-pointer hover:bg-gray-50" : ""
-                      }`}
+                      className={`border-r border-b border-white/10 last:border-r-0 p-1 flex flex-col ${isMobile ? "min-h-[45px]" : "min-h-[70px]"} ${!isCurrentMonth ? "opacity-30" : ""} ${isCurrentMonth ? "cursor-pointer hover:bg-gray-50" : ""}`}
                       onClick={() =>
                         isCurrentMonth && handleDateClick(currentDate)
                       }
                     >
-                      <div className="flex justify-between flex-row items-start mb-2">
+                      <div className="flex justify-between flex-row items-start mb-1">
                         <div className="relative">
                           <span
-                            className={`text-sm font-medium px-3 ${
-                              isToday
-                                ? "bg-blue-500 text-black w-6 h-6 rounded-full flex items-center justify-center"
-                                : "text-black"
-                            }`}
+                            className={`font-medium ${isMobile ? "text-xs px-0.5" : "text-sm px-3"} ${isToday ? "bg-blue-500 text-black w-6 h-6 rounded-full flex items-center justify-center" : "text-black"}`}
                           >
                             {isCurrentMonth ? dayNumber : ""}
                           </span>
@@ -156,8 +172,8 @@ const BigCalendar: React.FC<{
                         </div>
                       </div>
 
-                      {/* Show note for this day, if any */}
-                      {hasNote && (
+                      {/* On desktop show note text; on mobile just the heart icon is enough */}
+                      {hasNote && !isMobile && (
                         <div className="text-xs text-pink-700 mb-1 break-words max-h-10 overflow-hidden">
                           {hasNote.note.length > 40
                             ? hasNote.note.slice(0, 40) + "..."
@@ -171,45 +187,44 @@ const BigCalendar: React.FC<{
             </div>
           </div>
         </div>
-        {showNoteModal && selectedDate && (
-          <div className="fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50">
-            <div className="bg-white p-6 rounded-lg shadow-xl max-w-md w-full mx-4">
-              <div className="flex justify-between items-center mb-4">
-                <h3 className="text-lg font-semibold">
-                  Add Note for {format(selectedDate, "MMMM d, yyyy")}
-                </h3>
-                <button
-                  onClick={handleCloseModal}
-                  className="text-gray-500 hover:text-gray-700"
-                >
-                  <X className="h-5 w-5" />
-                </button>
-              </div>
 
-              <div className="space-y-4">
-                <Textarea
-                  value={calendarNote}
-                  onChange={(e) => setCalendarNote(e.target.value)}
-                  placeholder="What's happening on this day?"
-                  className="min-h-[100px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
-                />
-
-                <div className="flex justify-end space-x-2">
-                  <Button variant="outline" onClick={handleCloseModal}>
-                    Cancel
-                  </Button>
-                  <Button
-                    onClick={handleSaveNote}
-                    disabled={!calendarNote.trim()}
-                  >
-                    Save Note
-                  </Button>
-                </div>
-              </div>
-            </div>
-          </div>
-        )}
       </main>
+
+      {isMobile && (() => {
+        const sorted = [...savedNotes]
+          .filter((n) => !n.example)
+          .sort((a, b) => new Date(a.date).getTime() - new Date(b.date).getTime());
+
+        if (sorted.length === 0) return null;
+
+        return (
+          <div className="px-4 pb-6 pt-2 flex flex-col gap-2">
+            <p className="text-xs font-medium text-muted-foreground uppercase tracking-wide mb-1">
+              Saved dates
+            </p>
+            {sorted.map((note, i) => (
+              <div
+                key={i}
+                className="flex items-start gap-3 bg-white rounded-lg border px-3 py-2 shadow-sm cursor-pointer"
+                onClick={() => handleDateClick(new Date(note.date))}
+              >
+                <div className="flex flex-col items-center min-w-[36px]">
+                  <span className="text-[10px] font-medium text-muted-foreground uppercase">
+                    {format(new Date(note.date), "MMM")}
+                  </span>
+                  <span className="text-lg font-semibold leading-none">
+                    {format(new Date(note.date), "d")}
+                  </span>
+                </div>
+                <div className="flex-1 min-w-0 pt-0.5">
+                  <p className="text-sm text-pink-700 truncate">{note.note}</p>
+                </div>
+                <Heart className="h-3.5 w-3.5 text-pink-400 mt-1 shrink-0" />
+              </div>
+            ))}
+          </div>
+        );
+      })()}
     </div>
   );
 };

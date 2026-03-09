@@ -2,6 +2,8 @@ import { useAppDispatch, useAppSelector } from "@/redux";
 import { Card } from "./ui/card";
 import { createNewBulletin } from "@/lib/api";
 import { staticGetUser } from "@/redux/user/selectors";
+import { toast } from "sonner";
+import { cn } from "@/lib/utils";
 
 export function switchMonth(month: number) {
   switch (month) {
@@ -38,10 +40,11 @@ const getFirstOfNextMonth = () => {
   return new Date(today.getFullYear(), today.getMonth() + 1, 1);
 };
 
-const MonthCard: React.FC<{ month: number; year: number }> = ({
-  month,
-  year,
-}) => {
+const MonthCard: React.FC<{
+  month: number;
+  year: number;
+  className?: string;
+}> = ({ month, year, className }) => {
   const monthTextStyle = {
     color: "#FFF8EB",
     position: "relative" as const,
@@ -52,7 +55,7 @@ const MonthCard: React.FC<{ month: number; year: number }> = ({
   } as React.CSSProperties & { "--month-number": string };
 
   const firstOfNextMonth = getFirstOfNextMonth();
-  const nextMonth1Based = firstOfNextMonth.getMonth() + 1;
+  const nextMonth1Based = firstOfNextMonth.getMonth() ;
   const nextYear = firstOfNextMonth.getFullYear();
   const isAddMonth = year === nextYear && month === nextMonth1Based;
 
@@ -62,11 +65,17 @@ const MonthCard: React.FC<{ month: number; year: number }> = ({
 
   return (
     <Card
-      className={` ${isAddMonth ? "month-add-hover" : ""
-        }  w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none`}
-      onClick={() => {
+      className={cn(
+        "mx-auto w-[175px] h-[175px] bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none",
+        isAddMonth && "month-add-hover",
+        className
+      )}
+      onClick={async () => {
         if (isAddMonth) {
-          dispatch(createNewBulletin({ user, month, year }));
+          const res = await dispatch(createNewBulletin({ user, month, year })).unwrap();
+          if (!res.success) {
+            toast.error(typeof res.error === "string" ? res.error : "Could not create bulletin.");
+          }
         }
       }}
     >

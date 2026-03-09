@@ -10,7 +10,7 @@ const buttonVariants = cva("", {
       primary: "bg-[#9DBD99] text-[#FCE5BA] rounded-[100px]",
       default: "bg-primary text-primary-foreground hover:bg-primary/90",
       destructive:
-        "bg-destructive text-destructive-foreground hover:bg-destructive/90",
+        "bg-destructive text-destructive-foreground hover:bg-destructive/90 disabled:opacity-50 disabled:cursor-not-allowed",
       outline:
         "border border-input bg-background hover:bg-accent hover:text-accent-foreground",
       secondary: "bg-secondary text-secondary-foreground hover:bg-secondary/80",
@@ -32,15 +32,16 @@ const buttonVariants = cva("", {
 
 export interface ButtonProps
   extends React.ButtonHTMLAttributes<HTMLButtonElement>,
-    VariantProps<typeof buttonVariants> {
+  VariantProps<typeof buttonVariants> {
   asChild?: boolean;
 }
 
 const Button = React.forwardRef<HTMLButtonElement, ButtonProps>(
-  ({ style, className, variant, size, asChild = false, ...props }, ref) => {
+  ({ style, className, variant, size, asChild = false, disabled = false, ...props }, ref) => {
     const Comp = asChild ? Slot : "button";
     return (
       <Comp
+        disabled={disabled}
         style={style}
         className={cn(
           buttonVariants({ variant, size, className }),

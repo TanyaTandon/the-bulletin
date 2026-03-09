@@ -7,8 +7,6 @@ import {
   DialogHeader,
   DialogTitle,
 } from "@/components/ui/dialog";
-import { useIsMobile } from "@/hooks/use-mobile";
-import { QuestionIcon } from "@phosphor-icons/react";
 
 type DialogOptions = {
   closureCondition?: ClosureDirection;
@@ -29,7 +27,11 @@ type DialogOptions = {
     className?: string;
   };
   helpContent?: React.ReactNode;
+  topLeftIcon?: React.ReactNode;
   additionalClosingAction?: () => void;
+  parentOptions?: {
+    className?: string;
+  }
 };
 
 type DialogContextType = {
@@ -75,32 +77,29 @@ export const DialogProvider: React.FC<{
     content,
   };
 
-  const isMobile = useIsMobile();
-
-
   return (
     <DialogContext.Provider value={value}>
       <Dialog open={isOpen} onOpenChange={() => close()}>
-        <DialogContent closureCondition={options?.closureCondition}
-          className={`w-[${isMobile ? "95vw" : "50vw"}] max-w-[95vw] ${isMobile ? "max-h-[85%]" : "max-h-auto"
-            } ${isMobile ? "overflow-y-scroll" : "overflow-y-hidden"}`}
+        <DialogContent
+          closureCondition={options?.closureCondition}
+          topLeftIcon={options?.topLeftIcon}
+          className={`${options?.parentOptions?.className} w-[95vw] sm:w-[50vw] max-w-[95vw] max-h-[85vh] sm:max-h-[90vh] flex flex-col overflow-visible top-[20%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]`}
         >
-          {options?.helpContent && (
-            <QuestionIcon className="absolute top-2 right-2" size={18} />
-          )}
-          {options?.title && (
-            <DialogHeader>
-              <DialogTitle className={options.titleOptions?.className}>
-                {options.title}
-              </DialogTitle>
-            </DialogHeader>
-          )}
-          {content}
-          {options?.footer && (
-            <DialogFooter className={options.footerOptions?.className}>
-              {options.footer}
-            </DialogFooter>
-          )}
+          <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto">
+            {options?.title && (
+              <DialogHeader>
+                <DialogTitle className={options.titleOptions?.className}>
+                  {options.title}
+                </DialogTitle>
+              </DialogHeader>
+            )}
+            {content}
+            {options?.footer && (
+              <DialogFooter className={options.footerOptions?.className}>
+                {options.footer}
+              </DialogFooter>
+            )}
+          </div>
         </DialogContent>
       </Dialog>
       {children}

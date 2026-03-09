@@ -2,7 +2,7 @@ import AnimatedButton from "@/components/AnimatedButton";
 import AuthModalContent from "@/components/modalContent/AuthModalContent";
 import BulletinPreview from "@/components/BulletinPreview";
 import { Button } from "@/components/ui/button";
-import { connectWithFriendRequest, getForeignUserImages } from "@/lib/api";
+import { connectWithFriendRequest, getForeignUser, getForeignUserImages } from "@/lib/api";
 import { useAuth } from "@/providers/contexts/AuthContext";
 import { useDialog } from "@/providers/dialog-provider";
 import { useAppDispatch } from "@/redux";
@@ -25,16 +25,20 @@ const Register: React.FC = () => {
   const name = searchParams.get("name")?.split("_").join(" ");
 
   const [friendImages, setFriendImages] = useState<string[]>([]);
+  const [friendInfo, setFriendInfo] = useState<User | null>(null);
 
   useEffect(() => {
     if (id) {
+      getForeignUser(id).then((user: User) => {
+        setFriendInfo(user);
+      });
       getForeignUserImages(id).then((images) => {
-        // console.log(images);
+        console.log(images);
         setFriendImages(
           images[0].images.map(
             (image) =>
-              `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images//${image}.jpeg`
-          )
+              `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`
+          ).slice(0, 4)
         );
       });
     }
@@ -43,7 +47,7 @@ const Register: React.FC = () => {
   const { dialog, close } = useDialog();
   const { setAdditionalAction } = useAuth();
 
-  // console.log(friendImages);
+  console.log(friendImages);
   function renderScenario(userInfo: User) {
     switch (true) {
       case userInfo && userInfo.id !== null:
@@ -84,9 +88,9 @@ const Register: React.FC = () => {
               onClick={() => {
                 connectWithFriendRequest({
                   user: user,
-                  friendId: id,
+                  friend: friendInfo,
                 }).then(async (res) => {
-                  // console.log(res);
+                  console.log(res);
                   toast.success("Connected!");
                   await dispatch(fetchUser(user.phone_number)).then(() => {
                     navigate("/bulletin");
@@ -134,14 +138,14 @@ const Register: React.FC = () => {
             <AnimatedButton
               onClick={() => {
                 dialog(<AuthModalContent close={close} signInState={false} />);
-                setAdditionalAction(async () => {
+                setAdditionalAction(() => async (arg: User) => {
                   await connectWithFriendRequest({
-                    user: user,
-                    friendId: id,
+                    user: arg,
+                    friend: friendInfo,
                   }).then(async (res) => {
-                    // console.log(res);
+                    console.log(res);
                     toast.success("Connected!");
-                    await dispatch(fetchUser(user.phone_number));
+                    await dispatch(fetchUser(arg.phone_number));
                   });
                 });
               }}

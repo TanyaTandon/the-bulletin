@@ -36,18 +36,10 @@ const FeedbackCard: React.FC<{
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          className="w-full"
-          placeholder="Enter your name"
-        />
-        <br />
-        <br />
         <Textarea
           value={feedback}
           onChange={(e) => setFeedback(e.target.value)}
-          placeholder="we'd love to hear anything and everything: comments, critiques, suggestions, requests?"
+          placeholder="whatcha wanna say?"
           className="min-h-[120px]"
         />
       </CardContent>
@@ -68,7 +60,7 @@ const FeedbackCard: React.FC<{
           }}
           className="w-full"
         >
-          Submit Feedback
+          submit feedback
         </Button>
       </CardFooter>
     </Card>

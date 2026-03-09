@@ -36,6 +36,7 @@ const AuthModalContent: React.FC<{
     setCity,
     setState,
     setZipCode,
+    codeError,
   } = useAuth();
 
   const navigate = useNavigate();
@@ -47,6 +48,8 @@ const AuthModalContent: React.FC<{
       setDisabled(false);
     }, 100);
   }, []);
+
+  console.log('errorcde',codeError);
 
   return (
     <>
@@ -85,9 +88,17 @@ const AuthModalContent: React.FC<{
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
               <span style={isMobile ? { transform: "scale(0.6)" } : {}}>
                 <OPTVerification
-                  onComplete={(code) => handleVerifySignIn(code, navigate, close)}
+                  onComplete={(code) => handleVerifySignIn(code, navigate, close).then(()=>{})}
                 />
               </span>
+              {codeError && (
+                <div className="flex flex-col items-center gap-1 mt-2">
+                  <p className="text-sm text-destructive">Your code has expired.</p>
+                  <Button variant="outline" size="sm" onClick={handleSignIn} disabled={isProcessing}>
+                    Resend code
+                  </Button>
+                </div>
+              )}
             </section>
           )}
           <div className="flex justify-center w-full">
@@ -105,7 +116,7 @@ const AuthModalContent: React.FC<{
                 onClick={
                   signInStep === 0
                     ? handleSignIn
-                    : (event) => {
+                    : () => {
                       if (code) handleVerifySignIn(code, navigate, close);
                     }
                 }
@@ -291,15 +302,14 @@ const AuthModalContent: React.FC<{
                   }
                 />
               </span>
-              <Button
-                onClick={async () => {
-                  // await signUp.preparePhoneNumberVerification({
-                  //   strategy: "phone_code",
-                  // });
-                }}
-              >
-                Try Again
-              </Button>
+              {codeError && (
+                <div className="flex flex-col items-center gap-1 mt-2">
+                  <p className="text-sm text-destructive">Your code has expired.</p>
+                  <Button variant="outline" size="sm" onClick={handleSignUp} disabled={isProcessing}>
+                    Resend code
+                  </Button>
+                </div>
+              )}
             </section>
           )}
         </>

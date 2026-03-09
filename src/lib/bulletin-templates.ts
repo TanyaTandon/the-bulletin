@@ -1044,6 +1044,7 @@ export const Jackson = (
         color: #000;
         text-align: center;
         margin: 0;
+        margin-bottom: 25px;
         letter-spacing: -0.02em;
         line-height: 0.8;
         white-space: nowrap;

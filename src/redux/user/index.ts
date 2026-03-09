@@ -6,6 +6,12 @@ import { UploadedImage } from "@/components/ImageUploadGrid.tsx";
 import { RecipientState } from "@/components/modalContent/FriendModalContent.tsx";
 import { v4 } from "uuid";
 
+export enum SubscriptionStatus {
+  Basic = "Basic",
+  Pro = "Pro",
+  Inactive = "Inactive",
+}
+
 export type User = {
   id: number;
   firstName: string;
@@ -16,6 +22,11 @@ export type User = {
   address: string;
   recipients: string[];
   connections: string[];
+  onboarding_completed?: boolean;
+  subscription_status?: SubscriptionStatus | null;
+  subscription_id?: string | null;
+  customer_id?: string | null;
+  subscription_interval?: string | null;
 };
 
 export type UserState = {
@@ -270,7 +281,7 @@ export const addRecipient = createAsyncThunk(
 
     return await supabase.from("fractional_user_record").insert({
       id: id,
-      suggested_name: recipient.firstName + recipient.lastName,
+      suggested_name: recipient.firstName + " " + recipient.lastName,
       suggested_addresses: recipient.address + " " + recipient.city + " " + recipient.zip,
       added_by: user.phone_number,
       suggested_phone_number: recipient.phone,

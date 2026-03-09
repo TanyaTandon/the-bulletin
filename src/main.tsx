@@ -11,7 +11,7 @@ import { store } from "./redux/index.ts";
 
 // Import your Publishable Key
 const stytch = createStytchUIClient(
-  "public-token-live-f10fc60c-b80c-4303-9fc2-9bc732d36f4c"
+  import.meta.env.VITE_PUBLIC_STYTCH_TOKEN
 );
 
 export const showToast = (message: string) => {

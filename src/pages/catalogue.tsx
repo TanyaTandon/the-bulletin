@@ -1,13 +1,14 @@
 import BulletinPreview from "@/components/BulletinPreview";
 import Layout from "@/components/Layout";
-import MonthCard, { switchMonth } from "@/components/MonthCard";
+import MonthCard from "@/components/MonthCard";
 import { Card } from "@/components/ui/card";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bulletin, getAllBulletins } from "@/lib/api";
-import { useAppSelector } from "@/redux";
+import { Button } from "@/components/ui/button";
+import { Bulletin, createNewBulletin, getAllBulletins } from "@/lib/api";
+import { useAppDispatch, useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import React, { useEffect, useState } from "react";
-import { useNavigate } from "react-router";
+import { useNavigate, useSearchParams } from "react-router-dom";
 
 const getFirstOfNextMonth = () => {
   const today = new Date();
@@ -16,6 +17,11 @@ const getFirstOfNextMonth = () => {
 
 const Catalogue: React.FC = () => {
   const user = useAppSelector(staticGetUser);
+  const dispatch = useAppDispatch();
+  const [searchParams] = useSearchParams();
+  const [isCreating, setIsCreating] = useState(false);
+  const focusMonthMode = searchParams.get("monthAlert") === "true";
+  const onboardingMode = searchParams.get("onboarding") === "true";
 
   const [catalogue, setCatalogue] = useState<Bulletin[] | null>(null);
 
@@ -34,7 +40,7 @@ const Catalogue: React.FC = () => {
   const currentYear = new Date().getFullYear();
   const nextMonthYear = firstOfNextMonth.getFullYear();
 
-  // Extract year from created_at timestamp
+
   const getYearFromCreatedAt = (createdAt: string): number => {
     return new Date(createdAt).getFullYear();
   };
@@ -77,11 +83,90 @@ const Catalogue: React.FC = () => {
   const navigate = useNavigate();
 
   const getBulletinForMonth = (month: number) =>
-    catalogueForYear.find((bulletin) => bulletin.month === month);
+    catalogueForYear.find((bulletin) => Number(bulletin.month) === month);
+
+  const focusMonth = firstOfNextMonth.getMonth();
+  const focusYear = firstOfNextMonth.getFullYear();
+  const focusBulletin = catalogue?.find(
+    (b) =>
+      b.created_at &&
+      getYearFromCreatedAt(b.created_at) === focusYear &&
+      Number(b.month) === focusMonth
+  );
+
+  if (focusMonthMode) {
+    return (
+      <Layout>
+        <main className="flex min-h-[60vh] flex-col items-center justify-center px-4">
+          <section className="flex flex-col items-center gap-4">
+            {onboardingMode && !focusBulletin && (
+              <div className="flex flex-col items-center gap-3 mb-2">
+                <p className="text-center text-[22px] font-medium">
+                  welcome! let's make your first bulletin.
+                </p>
+                <p className="text-center text-muted-foreground text-[16px] max-w-xs">
+                  we'll walk you through everything — it only takes a few minutes.
+                </p>
+                <Button
+                  variant="primary"
+                  disabled={isCreating}
+                  onClick={async () => {
+                    setIsCreating(true);
+                    const res = await dispatch(createNewBulletin({ user })).unwrap();
+                    if (res.success) {
+                      navigate(`/bulletin/${res.bulletinId}?onboarding=true`);
+                    } else {
+                      setIsCreating(false);
+                    }
+                  }}
+                >
+                  {isCreating ? "creating your bulletin..." : "get started"}
+                </Button>
+              </div>
+            )}
+            {!onboardingMode && (
+              <p className="text-center text-muted-foreground text-[20px]">
+                {focusBulletin
+                  ? "you have a bulletin for this month — tap to open it"
+                  : "it's a new month! start a new Bulletin to share with your friends at the end of the month."}
+              </p>
+            )}
+            {focusBulletin ? (
+              <Card
+                className="h-[320px] w-[320px] cursor-pointer rounded-2xl bg-[#9DBD99]  transition-shadow hover:shadow-xl"
+                onClick={() => navigate(`/bulletin/${focusBulletin.id}`)}
+              >
+                <BulletinPreview
+                  className="mx-auto scale-[0.8]"
+                  images={
+                    focusBulletin.images
+                      ?.map(
+                        (image) =>
+                          `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`
+                      )
+                      .slice(0, 4) || []
+                  }
+                  firstName={focusBulletin.firstName || ""}
+                />
+              </Card>
+            ) : (
+              !onboardingMode && (
+                <MonthCard
+                  month={focusMonth}
+                  year={focusYear}
+                  className="h-[250px] w-[250px] rounded-2xl ring-4 ring-primary/50 ring-offset-4 shadow-lg"
+                />
+              )
+            )}
+          </section>
+        </main>
+      </Layout>
+    );
+  }
 
   return (
     <Layout>
-      <main>
+      <main className="px-3 md:px-[10vw] pt-2">
         <Tabs
           className="flex justify-start"
           value={selectedYear}
@@ -96,37 +181,40 @@ const Catalogue: React.FC = () => {
             ))}
           </TabsList>
         </Tabs>
-        <section className="mx-[10vw] grid grid-cols-3 gap-4">
+        <section className="grid grid-cols-2 md:grid-cols-3 gap-3 mt-3">
           {months.map((month) => {
             const bulletin = getBulletinForMonth(month);
             if (bulletin) {
               return (
-                <Card
-                  key={month}
-                  className="w-[175px] h-[175px] mx-auto bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none shadow-none cursor-pointer"
-                  onClick={() => navigate(`/bulletin/${bulletin.id}`)}
-                >
-                  <BulletinPreview
-                    className={"scale-[.5] mx-auto"}
-                    images={
-                      bulletin.images
-                        ?.map(
-                          (image) =>
-                            `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`
-                        )
-                        .slice(0, 4) || []
-                    }
-                    firstName={bulletin.firstName || ""}
-                  />
-                </Card>
+                <div key={month} className="w-full aspect-square md:w-[175px] md:h-[175px] mx-auto">
+                  <Card
+                    className="w-full h-full bg-[#9DBD99] flex items-center justify-center rounded-2xl border-none shadow-none cursor-pointer overflow-hidden"
+                    onClick={() => navigate(`/bulletin/${bulletin.id}`)}
+                  >
+                    <BulletinPreview
+                      className={"scale-[.5] mx-auto"}
+                      images={
+                        bulletin.images
+                          ?.map(
+                            (image) =>
+                              `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${image}.jpeg`
+                          )
+                          .slice(0, 4) || []
+                      }
+                      firstName={bulletin.firstName || ""}
+                    />
+                  </Card>
+                </div>
               );
             }
             return (
-              <MonthCard
-                key={month}
-                month={month}
-                year={Number(selectedYear)}
-              />
+              <div key={month} className="w-full aspect-square md:w-[175px] md:h-[175px] mx-auto">
+                <MonthCard
+                  month={month}
+                  year={Number(selectedYear)}
+                  className="w-full h-full"
+                />
+              </div>
             );
           })}
         </section>

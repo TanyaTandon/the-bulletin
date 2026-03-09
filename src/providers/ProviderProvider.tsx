@@ -13,6 +13,12 @@ import { getBulletins, staticGetUser } from "@/redux/user/selectors";
 import { useAppDispatch, useAppSelector } from "@/redux";
 import { useStytchUser } from "@stytch/react";
 import Controller from "./Controller";
+import { loadStripe } from '@stripe/stripe-js';
+import {
+  EmbeddedCheckoutProvider,
+  EmbeddedCheckout
+} from '@stripe/react-stripe-js';
+import { getTokens } from "@/redux/tokens/selectors";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -24,6 +30,14 @@ const queryClient = new QueryClient({
   },
 });
 
+
+
+// Make sure to call `loadStripe` outside of a component's render to avoid
+// recreating the `Stripe` object on every render.
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLIC_KEY, {
+});
+
+
 const ProviderProvider: React.FC<{
   children: React.ReactNode;
 }> = ({ children }) => {
@@ -31,7 +45,6 @@ const ProviderProvider: React.FC<{
   const searchParams = window.location.search;
   const allBulletins = useAppSelector(getBulletins);
   const user = useAppSelector(staticGetUser);
-
   const stytchUser = useStytchUser();
 
   useEffect(() => {
@@ -54,30 +67,50 @@ const ProviderProvider: React.FC<{
       }
     }
   }, [pathname]);
+  const tokens = useAppSelector(getTokens);
+
+  async function fetchClientSecret() {
+    const response = await fetch('http://localhost:8080/api/checkout/stripe', {
+      method: 'POST',
+      headers: {
+        Authorization: `Bearer ${tokens.session_jwt}`,
+      },
+    });
+    const data = await response.json();
+    return data.clientSecret;
+  }
+
+  const options = { fetchClientSecret };
 
   return (
     <QueryClientProvider client={queryClient}>
       <ToastContext.Provider value={{ showToast }}>
-        <TooltipProvider>
-          <AuthContext>
-            <BrowserRouter>
-              <AuthProvider>
-                <DialogProvider>
-                  <SheetProvider>
-                    <TourGuideProvider
-                      initialOptions={{ exitOnClickOutside: false }}
-                    >
-                      <Controller>
+        <EmbeddedCheckoutProvider
+          stripe={stripePromise}
+          options={options}
+        >
 
-                        {children}
-                      </Controller>
-                    </TourGuideProvider>
-                  </SheetProvider>
-                </DialogProvider>
-              </AuthProvider>
-            </BrowserRouter>
-          </AuthContext>
-        </TooltipProvider>
+          <TooltipProvider>
+            <AuthContext>
+              <BrowserRouter>
+                <AuthProvider>
+                  <DialogProvider>
+                    <SheetProvider>
+                      <TourGuideProvider
+                        initialOptions={{ exitOnClickOutside: false }}
+                      >
+                        <Controller>
+
+                          {children}
+                        </Controller>
+                      </TourGuideProvider>
+                    </SheetProvider>
+                  </DialogProvider>
+                </AuthProvider>
+              </BrowserRouter>
+            </AuthContext>
+          </TooltipProvider>
+        </EmbeddedCheckoutProvider>
       </ToastContext.Provider>
     </QueryClientProvider>
   );

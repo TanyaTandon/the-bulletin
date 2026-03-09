@@ -355,11 +355,11 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       };
       // console.log("setting image", newImage, imageIndex);
       setImages(newImage, imageIndex);
-    // INSERT_YOUR_CODE
-    const iframe = document.querySelector('iframe');
-    if (iframe && iframe.contentWindow) {
-      iframe.contentWindow.postMessage({ type: "HIDE_BUTTONS" }, "*");
-    }
+      // INSERT_YOUR_CODE
+      const iframe = document.querySelector('iframe');
+      if (iframe && iframe.contentWindow) {
+        iframe.contentWindow.postMessage({ type: "HIDE_BUTTONS" }, "*");
+      }
     }
 
     if (event.target.value) {
@@ -398,14 +398,14 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   }, []);
 
   return (
-    <section className="w-full max-w-6xl mx-auto p-6">
+    <section className={`w-full max-w-6xl mx-auto p-6 ${isMobile && "pt-[0px]"}`}>
       <div
         style={
           isMobile
             ? {
-                paddingRight: "0px",
-                paddingLeft: "0px",
-              }
+              paddingRight: "0px",
+              paddingLeft: "0px",
+            }
             : {}
         }
         className="container relative templateHolder"
@@ -417,8 +417,8 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
           data-tg-title="Bulletin Preview"
           ref={containerRef}
           onMouseEnter={!isMobile ? handlePreviewMouseEnter : undefined}
-          className="bg-white rounded-lg shadow-lg mx-auto flex relative wrap"
-          style={containerStyle}
+          className="rounded-lg mx-auto flex relative wrap"
+          style={{ ...containerStyle, flexDirection: isMobile ? "column" : undefined }}
           onMouseLeave={handlePreviewMouseLeave}
         >
           <input
@@ -426,12 +426,12 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
             type="file"
             accept="image/png, image/jpeg, image/jpg"
             multiple={false}
-            className="hidden"
+            className="hidden "
             onChange={handleFileSelect}
           />
           <iframe
             ref={iframeRef}
-            className="iframeHERE border-0"
+            className="iframeHERE border-0 rounded-lg shadow-lg"
             style={{
               width: "100%",
               aspectRatio: `${aspectRatio}`, // Browser calculates height automatically
@@ -445,16 +445,20 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
               position: "relative",
               zIndex: 1,
               height: "auto",
-              display: "block",
-              maxHeight: "110px",
+              order: isMobile ? -1 : 0,
+              display: isMobile ? "flex" : "block",
+              flexDirection: isMobile ? "row-reverse" : undefined,
+              alignItems: isMobile ? "center" : undefined,
+              gap: isMobile ? "8px" : undefined,
+              padding: isMobile ? "6px 8px" : undefined,
+              maxHeight: isMobile ? undefined : "110px",
             }}
           >
             {xButtonTransition((styles, show) =>
               show ? (
                 <animated.div
                   style={{
-                    // overflow: "hidden",
-                    height: styles.h,
+                    height: isMobile ? undefined : styles.h,
                     opacity: styles.opacity,
                   }}
                 >
@@ -471,7 +475,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
               data-tg-title="template-button"
               style={
                 mO || editState || isMobile
-                  ? { opacity: 1, cursor: "pointer", marginTop: "10px" }
+                  ? { opacity: 1, cursor: "pointer", marginTop: isMobile ? "0px" : "10px" }
                   : { opacity: 0, cursor: "default", marginTop: "0px" }
               }
               className="templateButton"

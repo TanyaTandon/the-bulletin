@@ -90,7 +90,7 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
   return (
     <section
       data-tg-title="Image Housing"
-      className="flex flex-col items-center space-y-8 w-full mt-3 pt-7"
+      className={`flex flex-col items-center space-y-8 w-full ${!isMobile && "mt-3 pt-7"}`}
     >
       <div className="editStateWrapper flex w-full justify-between">
         {editState === EditState.IMAGES && (
@@ -115,7 +115,7 @@ const BlurbInput: React.FC<BlurbInputProps> = ({
                   "e.g. April filled my heart with so much joy. I ordained my best friend's wedding, and everybody laughed and cried (as God and my speech intended). I loved building the bulletin with my best friends all day, every day, when I wasn't working at my big-girl job. I'm trying to build a cult of people who don't sleep with their phones in their rooms — and honestly, I'm kinda succeeding. I am terrified of all the FUN that May will bring!!"
                 }
                 className={`data-blurb-input resize-none w-full max-w-3xl border-violet-200 bg-[#fcffef] focus:border-violet-400 focus:ring-violet-400 text-sm ${
-                  isMobile ? "min-h-[250px] text-[17px]" : "min-h-[300px]"
+                  isMobile ? "min-h-[225px] text-[17px]" : "min-h-[300px]"
                 }`}
                 maxLength={MAX_CHARS}
               />

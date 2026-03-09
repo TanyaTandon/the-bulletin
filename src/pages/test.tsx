@@ -31,7 +31,7 @@ const Test: React.FC = () => {
       <div className="flex flex-col items-center justify-center h-screen">
         <button
           onClick={async () => {
-            navigate("/bulletin?monthAlert=true");
+            navigate("/catalogue?monthAlert=true");
           }}
         >
           Click me

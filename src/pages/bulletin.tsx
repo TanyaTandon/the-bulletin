@@ -6,8 +6,7 @@ import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { toast } from "sonner";
-import { useAppDispatch, useAppSelector } from "@/redux";
+import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
 import {
@@ -26,12 +25,9 @@ import {
 import PageDesignPreview from "@/components/pageDesignPreview";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BigCalendar from "@/components/BigCalendar";
-import { useDialog } from "@/providers/dialog-provider";
-import FriendModalContent from "@/components/modalContent/FriendModalContent";
-import { Bulletin, createNewBulletin } from "@/lib/api";
+import { Bulletin } from "@/lib/api";
 import { useStytch } from "@stytch/react";
 import { tourSteps } from "@/lib/tour-steps";
-import BulletinPreview from "@/components/BulletinPreview";
 
 export enum EditState {
   IMAGES = "images",
@@ -81,7 +77,6 @@ export const templates = [
 const BulletinPage: React.FC<{
   existingBulletin?: Bulletin;
 }> = ({ existingBulletin }) => {
-  const dispatch = useAppDispatch();
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const user = useAppSelector(staticGetUser);
@@ -127,13 +122,13 @@ const BulletinPage: React.FC<{
 
   const [searchParams] = useSearchParams();
   const monthAlertShownRef = useRef(false);
-  const onboardingNavigateRef = useRef(false);
 
   const {
     currentStep,
     isOnboarding,
     startTour,
     onBeforeStepChange,
+    onFinish,
     isVisible,
     initializeTour,
     tour,
@@ -142,46 +137,7 @@ const BulletinPage: React.FC<{
     updatePositions,
   } = useTourGuideWithInit();
 
-  const { dialog, close } = useDialog();
 
-  useEffect(() => {
-    const onboarding = searchParams.get("onboarding");
-    if (
-      (existingBulletin === null || existingBulletin === undefined) &&
-      onboarding &&
-      !onboardingNavigateRef.current
-    ) {
-      onboardingNavigateRef.current = true;
-      dispatch(createNewBulletin({ user }))
-        .unwrap()
-        .then((res) => {
-          if (res.success) {
-            navigate(`/bulletin/${res.bulletinId}?onboarding=true`);
-          } else {
-            toast.error("We couldn't create a new bulletin. Please try again.");
-            onboardingNavigateRef.current = false;
-          }
-        })
-        .catch(() => {
-          onboardingNavigateRef.current = false;
-        });
-    }
-  }, [searchParams, existingBulletin, dispatch, user, navigate]);
-
-  const getStartedFunc = async () => {
-    const url = new URL(window.location.href);
-    url.searchParams.delete("monthAlert");
-    window.history.replaceState(null, "", url.toString());
-    await dispatch(createNewBulletin({ user }))
-      .unwrap()
-      .then((res) => {
-        if (res.success) {
-          navigate(`/bulletin/${res.bulletinId}`);
-        } else {
-          toast.error("We couldn't create a new bulletin. Please try again.");
-        }
-      });
-  };
 
   useEffect(() => {
     const onboarding = searchParams.get("onboarding");
@@ -194,6 +150,9 @@ const BulletinPage: React.FC<{
     ) {
       initializeTour(tourSteps as TourGuideStep[]);
       startTour();
+      onFinish(() => {
+        navigate("/checkout");
+      });
       onBeforeStepChange((currentStep) => {
         // console.log("currentStep", currentStep);
         if (currentStep == 1) {
@@ -239,6 +198,7 @@ const BulletinPage: React.FC<{
     startTour,
     isVisible,
     onBeforeStepChange,
+    onFinish,
     initializeTour,
     isInitialized,
     editState,
@@ -253,35 +213,8 @@ const BulletinPage: React.FC<{
     const monthAlert = searchParams.get("monthAlert");
     if (!monthAlert || !user || monthAlertShownRef.current) return;
     monthAlertShownRef.current = true;
-    dialog(
-      <div>
-        <h1>It's a new month! Let's create a new bulletin.</h1>
-        <br />
-        <br />
-        <BulletinPreview
-          images={getFourRandomIndices(user.images).map(
-            (num) =>
-              `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-preview/${user.images[num]}.png`
-          )}
-          firstName={user?.firstName ?? "nick"}
-        />
-        <br />
-        <br />
-        <Button
-          className="block mx-auto"
-          onClick={() => {
-            getStartedFunc();
-            close(true);
-          }}
-        >
-          Get Started!
-        </Button>
-      </div>,
-      {
-        additionalClosingAction: getStartedFunc,
-      }
-    );
-  }, [searchParams, user, dialog, close]);
+    navigate("/catalogue?monthAlert=true");
+  }, [searchParams, user, navigate]);
 
   const today = new Date();
 
@@ -385,7 +318,7 @@ const BulletinPage: React.FC<{
         const bulletin = JSON.parse(arg.payload.data[0].bulletin);
         // console.log(bulletin);
         setImages(
-          bulletin.images.map((item) => ({
+          bulletin.images.map((item: string) => ({
             id: item.id,
             url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
           }))
@@ -441,26 +374,6 @@ const BulletinPage: React.FC<{
                 <TabsTrigger value="notes">Dates</TabsTrigger>
               </TabsList>
             </Tabs>
-            <Button
-              data-tg-title="submit button"
-              variant="primary"
-              onClick={() => {
-                if (existingBulletin) {
-                  toast.loading("saving bulletin");
-                  // saveBulletin();
-                  toast.dismiss();
-                } else {
-                  if (isOnboarding) {
-                    dialog(<FriendModalContent />);
-                    setTimeout(() => {
-                      tour?.nextStep();
-                    }, 500);
-                  }
-                }
-              }}
-            >
-              {existingBulletin ? "Save" : "Submit"}
-            </Button>
           </section>
         </aside>
 

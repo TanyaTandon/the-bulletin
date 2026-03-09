@@ -7,31 +7,34 @@ import { staticGetUser } from "@/redux/user/selectors";
 import AnimatedButton from "@/components/AnimatedButton";
 import { useDialog } from "@/providers/dialog-provider";
 import AuthModalContent from "@/components/modalContent/AuthModalContent";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Index = () => {
   const { dialog, close } = useDialog();
 
   const user = useAppSelector(staticGetUser);
 
+  const isMobile = useIsMobile();
+
   return (
     <Layout>
-      <div className="flex flex-col items-center justify-center min-h-[80vh] space-y-8 px-6 md:px-12 py-12 pb-0">
+      <div className={`flex flex-col items-center justify-center min-h-[80vh] space-y-8 px-6 md:px-2 pb-0 ${isMobile ? "p-2" : "p-12"}`}>
         <div className="text-left space-y-4">
           <img
             src="/BulletinLogo.svg"
             alt="logo"
-            className="w-20 h-20 ml-[auto] mr-[auto]"
+            className={` ml-[auto] mr-[auto] ${isMobile ? "w-10 h-10" : "w-20 h-20"}`}
           />
         </div>
         <Link
           to="/"
-          className={`lowercase text-5xl`}
+          className={`lowercase text-5xl ${isMobile ? "text-2xl" : "text-5xl"}`}
           style={{ fontFamily: "Delight, monospace", fontWeight: "600" }}
         >
           the bulletin
         </Link>
 
-        <p className="text-left w-[50%]">
+        <p className={`text-left w-[${isMobile ? "100%" : "50%"}] ${isMobile ? "text-sm" : "text-base"}`}>
           hi!
           <br />
           we're tanya, jacob, and jackson, from turby in the mission, right here in sf.
@@ -63,17 +66,6 @@ const Index = () => {
         <div className="gap-4">
           {user == null && (
             <section className="flex flex-col items-center">
-              <Button
-                variant="primary"
-                size="lg"
-                onClick={() => {
-                  dialog(<AuthModalContent close={close} signInState={true} />);
-                }}
-                className="block w-[10rem] text-[#FCE5BA] rounded-[100px] hover:opacity-90"
-              >
-                sign in
-              </Button>
-              <br />
               <AnimatedButton
                 onClick={() => {
                   dialog(
@@ -85,6 +77,17 @@ const Index = () => {
               >
                 sign up
               </AnimatedButton>
+              <br />
+              <Button
+                variant="primary"
+                size="lg"
+                onClick={() => {
+                  dialog(<AuthModalContent close={close} signInState={true} />);
+                }}
+                className="block w-[10rem] text-[#FCE5BA] rounded-[100px] hover:opacity-90"
+              >
+                sign in
+              </Button>
             </section>
           )}
         </div>

@@ -27,7 +27,9 @@ const AuthProvider: React.FC<{ children: React.ReactNode }> = ({
           error.status_code &&
           error.status_code == 401 &&
           pathname !== "/" &&
-          pathname !== "/test"
+          pathname !== "/testCheckout" &&
+          pathname !== "/test" &&
+          !pathname.includes("/register")
         ) {
           window.location.href = "/";
         }
