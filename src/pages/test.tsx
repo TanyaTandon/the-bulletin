@@ -9,7 +9,7 @@ import { useStytch, useStytchUser } from "@stytch/react";
 import { quickValidation, supabase } from "@/lib/api";
 import { useNavigate } from "react-router-dom";
 import Layout from "@/components/Layout";
-import phoneNumbers from "../../phone_numbers.json";
+// import phoneNumbers from "../../phone_numbers.json";
 // import { myQApi } from "@hjdhjd/myq"
 
 const Test: React.FC = () => {
@@ -44,15 +44,15 @@ const Test: React.FC = () => {
         <br />
         <button
           onClick={async () => {
-            await fetch("http://localhost:8080/api/zine/generate", {
-              method: "POST",
-              body: JSON.stringify({
-                "phone_numbers": phoneNumbers,
-              }),
-              headers: {
-                Authorization: `Bearer ${tokens.session_jwt}`,
-              },
-            })
+            // await fetch("http://localhost:8080/api/zine/generate", {
+            //   method: "POST",
+            //   body: JSON.stringify({
+            //     "phone_numbers": phoneNumbers,
+            //   }),
+            //   headers: {
+            //     Authorization: `Bearer ${tokens.session_jwt}`,
+            //   },
+            // })
 
             // console.log(response);
           }}
