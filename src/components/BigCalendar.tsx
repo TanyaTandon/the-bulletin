@@ -51,8 +51,6 @@ const BigCalendar: React.FC<{
   savedNotes: CalendarNote[];
   setSavedNotes: React.Dispatch<React.SetStateAction<CalendarNote[]>>;
 }> = ({ savedNotes, setSavedNotes }) => {
-  const [selectedDate, setSelectedDate] = useState<Date | null>(null);
-
   const [queryParams] = useSearchParams();
 
 
@@ -101,7 +99,6 @@ const BigCalendar: React.FC<{
   const { dialog, close } = useDialog();
 
   const handleDateClick = (date: Date) => {
-    setSelectedDate(date);
     dialog(
       <NoteModalContent
         selectedDate={date}

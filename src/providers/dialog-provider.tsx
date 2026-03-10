@@ -83,7 +83,7 @@ export const DialogProvider: React.FC<{
         <DialogContent
           closureCondition={options?.closureCondition}
           topLeftIcon={options?.topLeftIcon}
-          className={`${options?.parentOptions?.className} w-[95vw] sm:w-[50vw] max-w-[95vw] max-h-[85vh] sm:max-h-[90vh] flex flex-col overflow-visible top-[20%] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]`}
+          className={`${options?.parentOptions?.className} w-[95vw] sm:w-[50vw] max-w-[95vw] max-h-[97.5vh] sm:max-h-[90vh] flex flex-col overflow-visible top-[2.5vh] translate-y-0 sm:top-[50%] sm:translate-y-[-50%]`}
         >
           <div className="flex flex-col gap-4 flex-1 min-h-0 overflow-y-auto">
             {options?.title && (
