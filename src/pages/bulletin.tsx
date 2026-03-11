@@ -16,8 +16,6 @@ import {
   handleCategoryChange,
 } from "@/lib/utils";
 import axios from "axios";
-import "@sjmc11/tourguidejs/src/scss/tour.scss"; // Styles
-import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
 import {
   useTourGuide,
   useTourGuideWithInit,
@@ -148,7 +146,7 @@ const BulletinPage: React.FC<{
       existingBulletin !== null &&
       loaded
     ) {
-      initializeTour(tourSteps as TourGuideStep[]);
+      initializeTour(tourSteps);
       startTour();
       onFinish(() => {
         navigate("/checkout");

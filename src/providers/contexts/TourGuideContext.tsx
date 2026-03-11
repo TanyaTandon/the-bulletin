@@ -5,14 +5,30 @@ import React, {
   useState,
   ReactNode,
   useCallback,
+  useRef,
+  useMemo,
 } from "react";
-import { TourGuideClient } from "@sjmc11/tourguidejs/src/Tour";
-import { TourGuideOptions } from "@sjmc11/tourguidejs/src/core/options";
-import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
+import Shepherd from "shepherd.js";
+import type { Tour, Step, StepOptionsButton } from "shepherd.js";
+import "shepherd.js/dist/css/shepherd.css";
+
+// The tour instance interface exposed to consumers
+export type TourInstance = {
+  isFinished: boolean;
+  activeStep: number;
+  nextStep: () => void;
+} | null;
+
+// Simplified step type for our usage
+export type TourStep = {
+  title?: string;
+  content?: string;
+  target?: string;
+};
 
 interface TourGuideContextType {
-  // Tour instance
-  tour: TourGuideClient | null;
+  // Tour instance adapter
+  tour: TourInstance;
 
   // State
   isVisible: boolean;
@@ -21,20 +37,17 @@ interface TourGuideContextType {
   isInitialized: boolean;
 
   // Actions
-  startTour: (group?: string) => Promise<unknown>;
-  stopTour: () => Promise<unknown>;
-  nextStep: () => Promise<unknown>;
-  prevStep: () => Promise<unknown>;
-  visitStep: (stepIndex: number | "next" | "prev") => Promise<unknown>;
-  finishTour: (exit?: boolean, tourGroup?: string) => Promise<boolean>;
+  startTour: () => Promise<void>;
+  stopTour: () => void;
+  nextStep: () => void;
+  prevStep: () => void;
+  visitStep: (stepIndex: number | "next" | "prev") => void;
+  finishTour: () => void;
 
   // Configuration
-  setSteps: (steps: TourGuideStep[]) => Promise<void>;
-  setOptions: (options: TourGuideOptions) => Promise<TourGuideClient>;
-  initializeTour: (
-    steps: TourGuideStep[],
-    options?: TourGuideOptions
-  ) => Promise<void>;
+  setSteps: (steps: TourStep[]) => void;
+  setOptions: (options: object) => void;
+  initializeTour: (steps: TourStep[], options?: object) => Promise<void>;
 
   // Event handlers
   onBeforeStepChange: (callback: (currentStep: number) => void) => void;
@@ -44,10 +57,10 @@ interface TourGuideContextType {
   onAfterExit: (callback: () => void) => void;
 
   // Utility
-  refresh: () => Promise<unknown>;
-  refreshDialog: () => Promise<unknown>;
-  updatePositions: () => Promise<unknown>;
-  deleteFinishedTour: (groupKey?: string | "all") => void;
+  refresh: () => void;
+  refreshDialog: () => void;
+  updatePositions: () => void;
+  deleteFinishedTour: (groupKey?: string) => void;
 
   // Step management
   updateCurrentStepTarget: (target: string | HTMLElement) => Promise<void>;
@@ -59,232 +72,233 @@ const TourGuideContext = createContext<TourGuideContextType | undefined>(
 
 interface TourGuideProviderProps {
   children: ReactNode;
-  initialOptions?: TourGuideOptions;
-  initialSteps?: TourGuideStep[];
+  initialOptions?: object;
+  initialSteps?: TourStep[];
 }
 
 export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
   children,
-  initialOptions = {},
-  initialSteps = [],
 }) => {
-  const [tour, setTour] = useState<TourGuideClient | null>(null);
+  const shepherdRef = useRef<Tour | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [tourReady, setTourReady] = useState(false);
 
-  // Initialize tour instance
+  // Refs for step tracking and callbacks (avoid stale closures)
+  const stepIndexRef = useRef(-1);
+  const beforeStepChangeCallbacks = useRef<Array<(step: number) => void>>([]);
+  const afterStepChangeCallbacks = useRef<Array<(step: number) => void>>([]);
+  const finishCallbacks = useRef<Array<() => void>>([]);
+  const beforeExitCallbacks = useRef<Array<() => void>>([]);
+  const afterExitCallbacks = useRef<Array<() => void>>([]);
+
   useEffect(() => {
-    const tourInstance = new TourGuideClient({
-      ...initialOptions,
-      steps: initialSteps,
+    const tour = new Shepherd.Tour({
+      useModalOverlay: true,
+      defaultStepOptions: {
+        cancelIcon: { enabled: false },
+        scrollTo: false,
+      },
     });
 
-    // Set up event listeners
-    tourInstance.onBeforeStepChange(() => {
-      setCurrentStep(tourInstance.activeStep);
+    tour.on("show", () => {
+      const step = tour.getCurrentStep();
+      if (!step) return;
+      const idx = tour.steps.indexOf(step as Step);
+      const prevIdx = stepIndexRef.current;
+
+      // Fire "before step change" with the index of the step being left
+      beforeStepChangeCallbacks.current.forEach((cb) => cb(prevIdx));
+
+      stepIndexRef.current = idx;
+      setCurrentStep(idx);
+      setIsVisible(true);
+
+      afterStepChangeCallbacks.current.forEach((cb) => cb(idx));
     });
 
-    tourInstance.onAfterStepChange(() => {
-      setCurrentStep(tourInstance.activeStep);
-    });
-
-    tourInstance.onFinish(() => {
+    tour.on("complete", () => {
       setIsVisible(false);
       setIsOnboarding(false);
+      finishCallbacks.current.forEach((cb) => cb());
     });
 
-    tourInstance.onBeforeExit(() => {
-      setIsVisible(false);
-    });
-
-    tourInstance.onAfterExit(() => {
+    tour.on("cancel", () => {
       setIsVisible(false);
       setIsOnboarding(false);
+      beforeExitCallbacks.current.forEach((cb) => cb());
+      afterExitCallbacks.current.forEach((cb) => cb());
     });
 
-    setTour(tourInstance);
+    shepherdRef.current = tour;
+    setTourReady(true);
 
-    // Cleanup on unmount
     return () => {
-      if (tourInstance) {
-        tourInstance.exit();
-      }
+      tour.cancel();
+      shepherdRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Tour actions
-  const startTour = useCallback(
-    async (group?: string) => {
-      if (!tour) return;
-      setIsVisible(true);
-      setIsOnboarding(true);
-      return await tour.start(group);
-    },
-    [tour]
-  );
+  const startTour = useCallback(async () => {
+    if (!shepherdRef.current) return;
+    setIsVisible(true);
+    setIsOnboarding(true);
+    await shepherdRef.current.start();
+  }, []);
 
-  const stopTour = useCallback(async () => {
-    if (!tour) return;
+  const stopTour = useCallback(() => {
+    if (!shepherdRef.current) return;
     setIsVisible(false);
     setIsOnboarding(false);
-    return await tour.exit();
-  }, [tour]);
+    shepherdRef.current.cancel();
+  }, []);
 
-  const nextStep = useCallback(async () => {
-    if (!tour) return;
-    return await tour.nextStep();
-  }, [tour]);
+  const nextStep = useCallback(() => {
+    shepherdRef.current?.next();
+  }, []);
 
-  const prevStep = useCallback(async () => {
-    if (!tour) return;
-    return await tour.prevStep();
-  }, [tour]);
+  const prevStep = useCallback(() => {
+    shepherdRef.current?.back();
+  }, []);
 
-  const visitStep = useCallback(
-    async (stepIndex: number | "next" | "prev") => {
-      if (!tour) return;
-      return await tour.visitStep(stepIndex);
-    },
-    [tour]
-  );
+  const visitStep = useCallback((stepIndex: number | "next" | "prev") => {
+    if (!shepherdRef.current) return;
+    if (stepIndex === "next") {
+      shepherdRef.current.next();
+    } else if (stepIndex === "prev") {
+      shepherdRef.current.back();
+    } else {
+      shepherdRef.current.show(stepIndex);
+    }
+  }, []);
 
-  const finishTour = useCallback(
-    async (exit: boolean = true, tourGroup?: string) => {
-      if (!tour) return false;
-      setIsVisible(false);
-      setIsOnboarding(false);
-      return await tour.finishTour(exit, tourGroup);
-    },
-    [tour]
-  );
+  const finishTour = useCallback(() => {
+    if (!shepherdRef.current) return;
+    setIsVisible(false);
+    setIsOnboarding(false);
+    shepherdRef.current.complete();
+  }, []);
 
-  // Configuration
-  const setSteps = useCallback(
-    async (steps: TourGuideStep[]) => {
-      if (!tour) return;
-      return await tour.addSteps(steps);
-    },
-    [tour]
-  );
+  // Configuration (no-ops kept for interface compatibility)
+  const setSteps = useCallback((_steps: TourStep[]) => {}, []);
+  const setOptions = useCallback((_options: object) => {}, []);
 
-  const setOptions = useCallback(
-    async (options: TourGuideOptions) => {
-      if (!tour) throw new Error("Tour not initialized");
-      return await tour.setOptions(options);
-    },
-    [tour]
-  );
-
-  // Initialize tour with steps and options (only once)
   const initializeTour = useCallback(
-    async (steps: TourGuideStep[], options?: TourGuideOptions) => {
-      if (!tour || isInitialized) return;
+    async (steps: TourStep[]) => {
+      if (!shepherdRef.current || isInitialized) return;
+      const tour = shepherdRef.current;
 
-      if (steps.length > 0) {
-        await setSteps(steps);
-      }
-      if (options) {
-        await setOptions(options);
-      }
+      steps.forEach((step, index) => {
+        const isFirst = index === 0;
+        const isLast = index === steps.length - 1;
+
+        const buttons: StepOptionsButton[] = [];
+        if (!isFirst) {
+          buttons.push({
+            text: "← Back",
+            secondary: true,
+            action: () => tour.back(),
+          });
+        }
+        buttons.push({
+          text: isLast ? "Finish" : "Next →",
+          action: () => tour.next(),
+        });
+
+        tour.addStep({
+          id: `step-${index}`,
+          title: step.title,
+          text: step.content || "",
+          attachTo: step.target
+            ? { element: step.target, on: "bottom" }
+            : undefined,
+          buttons,
+          cancelIcon: { enabled: false },
+        });
+      });
+
       setIsInitialized(true);
     },
-    [tour, isInitialized, setSteps, setOptions]
+    [isInitialized]
   );
 
-  // Event handlers
+  // Event handler registration
   const onBeforeStepChange = useCallback(
     (callback: (currentStep: number) => void) => {
-      if (!tour) return;
-      tour.onBeforeStepChange(() => {
-        callback(tour.activeStep);
-      });
+      beforeStepChangeCallbacks.current.push(callback);
     },
-    [tour]
+    []
   );
 
   const onAfterStepChange = useCallback(
     (callback: (currentStep: number) => void) => {
-      if (!tour) return;
-      tour.onAfterStepChange(() => {
-        callback(tour.activeStep);
-      });
+      afterStepChangeCallbacks.current.push(callback);
     },
-    [tour]
+    []
   );
 
-  const onFinish = useCallback(
-    (callback: () => void) => {
-      if (!tour) return;
-      tour.onFinish(callback);
-    },
-    [tour]
-  );
+  const onFinish = useCallback((callback: () => void) => {
+    finishCallbacks.current.push(callback);
+  }, []);
 
-  const onBeforeExit = useCallback(
-    (callback: () => void) => {
-      if (!tour) return;
-      tour.onBeforeExit(callback);
-    },
-    [tour]
-  );
+  const onBeforeExit = useCallback((callback: () => void) => {
+    beforeExitCallbacks.current.push(callback);
+  }, []);
 
-  const onAfterExit = useCallback(
-    (callback: () => void) => {
-      if (!tour) return;
-      tour.onAfterExit(callback);
-    },
-    [tour]
-  );
+  const onAfterExit = useCallback((callback: () => void) => {
+    afterExitCallbacks.current.push(callback);
+  }, []);
 
   // Utility methods
-  const refresh = useCallback(async () => {
-    if (!tour) return;
-    return await tour.refresh();
-  }, [tour]);
+  const refresh = useCallback(() => {}, []);
 
-  const refreshDialog = useCallback(async () => {
-    if (!tour) return;
-    // console.log("happening");
-    return await tour.refreshDialog();
-  }, [tour]);
+  const refreshDialog = useCallback(() => {
+    const step = shepherdRef.current?.getCurrentStep();
+    if (step) {
+      step.updateStepOptions({ ...(step as any).options });
+    }
+  }, []);
 
-  const updatePositions = useCallback(async () => {
-    if (!tour) return;
-    return await tour.updatePositions();
-  }, [tour]);
+  const updatePositions = useCallback(() => {
+    const step = shepherdRef.current?.getCurrentStep();
+    if (step) {
+      step.updateStepOptions({ ...(step as any).options });
+    }
+  }, []);
 
-  const deleteFinishedTour = useCallback(
-    (groupKey?: string | "all") => {
-      if (!tour) return;
-      tour.deleteFinishedTour(groupKey);
-    },
-    [tour]
-  );
+  const deleteFinishedTour = useCallback((_groupKey?: string) => {}, []);
 
-  // Step management
   const updateCurrentStepTarget = useCallback(
     async (target: string | HTMLElement) => {
-      // console.log("target", target);
-      // console.log("tour", tour);
-      if (!tour) return;
-
-      // Get the current step
-      const currentStep = tour.tourSteps[tour.activeStep];
-
-      // console.log("currentStep", currentStep);
-      if (currentStep) {
-        // Update the target
-        currentStep.target =
-          typeof target === "string" ? document.querySelector(target) : target;
-
-        // Refresh the dialog to apply changes
-        await refreshDialog();
+      const step = shepherdRef.current?.getCurrentStep();
+      if (step) {
+        step.updateStepOptions({
+          ...(step as any).options,
+          attachTo: { element: target, on: "bottom" },
+        });
       }
     },
-    [tour, refreshDialog]
+    []
+  );
+
+  // Stable tour adapter — getters always read from refs/live state
+  const tour: TourInstance = useMemo(
+    () =>
+      tourReady
+        ? {
+            get isFinished() {
+              return !shepherdRef.current?.isActive();
+            },
+            get activeStep() {
+              return stepIndexRef.current;
+            },
+            nextStep: () => shepherdRef.current?.next(),
+          }
+        : null,
+    [tourReady]
   );
 
   const contextValue: TourGuideContextType = {

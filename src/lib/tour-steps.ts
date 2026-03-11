@@ -1,10 +1,9 @@
-import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
-import { useMemo } from "react";
+import type { TourStep } from "@/providers/contexts/TourGuideContext";
 
-export const tourSteps: TourGuideStep[] = [
+export const tourSteps: TourStep[] = [
   {
     title: "Hi and welcome to the Bulletin!",
-    content: `The Bulletin is social media in the real world! Once a month, your close friends or family members will receive a physical copy of your monthly life update in the mail alongside anyone else who's added them! Let's get started!`
+    content: `The Bulletin is social media in the real world! Once a month, your close friends or family members will receive a physical copy of your monthly life update in the mail alongside anyone else who's added them! Let's get started!`,
   },
   {
     title: "let's start by adding an image!",
@@ -15,8 +14,7 @@ export const tourSteps: TourGuideStep[] = [
     title: "next let's add a description about your month",
     content:
       "just tap or click on the text between the images, then write about your month! everything gets saved as you type!",
-    target: "[data-tg-title='Bulletin Preview']"
-
+    target: "[data-tg-title='Bulletin Preview']",
   },
   {
     title: "now, let's check out some different templates",
@@ -42,6 +40,7 @@ export const tourSteps: TourGuideStep[] = [
   },
   {
     title: "amazing! last order of business is your subscribtion!",
-    content: "once you've subscribed, your bulletin will be sent out to your recipients at the end of the month!",
+    content:
+      "once you've subscribed, your bulletin will be sent out to your recipients at the end of the month!",
   },
 ];

@@ -17,7 +17,7 @@ import PhoneInput, { isValidPhoneNumber } from "react-phone-number-input";
 import { useDialog } from "@/providers/dialog-provider";
 import { useReducer } from "react";
 import { addRecipient, User } from "@/redux/user";
-import { TourGuideClient } from "@sjmc11/tourguidejs/src/Tour";
+import type { TourInstance } from "@/providers/contexts/TourGuideContext";
 import { PencilLine, Plus, X } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
 
@@ -155,7 +155,7 @@ const AddFriendRow: React.FC<{
 };
 
 
-const FriendModalContent: React.FC<{ updatePositions?: () => void, tour?: TourGuideClient }> = ({ updatePositions, tour }) => {
+const FriendModalContent: React.FC<{ updatePositions?: () => void, tour?: TourInstance }> = ({ updatePositions, tour }) => {
   const { toast } = useToast();
 
   const user = useSelector(staticGetUser);
