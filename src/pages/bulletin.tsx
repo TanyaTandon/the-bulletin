@@ -6,7 +6,7 @@ import { UploadedImage } from "@/components/ImageUploadGrid";
 import BlurbInput, { CalendarNote } from "@/components/BlurbInput";
 import { useIsMobile } from "@/hooks/use-mobile";
 import { Button } from "@/components/ui/button";
-import { useAppSelector } from "@/redux";
+import { useAppSelector, useAppDispatch } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
 import { setUser } from "@/redux/user";
 import {
@@ -23,7 +23,8 @@ import {
 import PageDesignPreview from "@/components/pageDesignPreview";
 import { Tabs, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import BigCalendar from "@/components/BigCalendar";
-import { Bulletin } from "@/lib/api";
+import { Bulletin, supabase, mapUserRecordFromDb } from "@/lib/api";
+import { useDialog } from "@/providers/dialog-provider";
 import { useStytch } from "@stytch/react";
 import { tourSteps } from "@/lib/tour-steps";
 
@@ -78,12 +79,16 @@ const BulletinPage: React.FC<{
   const navigate = useNavigate();
   const isMobile = useIsMobile();
   const user = useAppSelector(staticGetUser);
+  const dispatch = useAppDispatch();
+  const { close } = useDialog();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [images, setImages] = useState<UploadedImage[]>([]);
   const [blurb, setBlurb] = useState<string | null>(null);
   const [previewHover, setPreviewHover] = useState<boolean>(false);
   const [buttonHover, setButtonHover] = useState<boolean>(false);
   const [loaded, setLoaded] = useState(false);
+  const [tabValue, setTabValue] = useState<string>("page");
+
 
   const [editState, setEditState] = useState<EditState | null>(null);
 
@@ -126,6 +131,7 @@ const BulletinPage: React.FC<{
     isOnboarding,
     startTour,
     onBeforeStepChange,
+    onAfterStepChange,
     onFinish,
     isVisible,
     initializeTour,
@@ -149,8 +155,32 @@ const BulletinPage: React.FC<{
       initializeTour(tourSteps);
       startTour();
       onFinish(() => {
+        if (user) {
+          supabase
+            .from("user_record")
+            .update({ onboarding_completed: true })
+            .eq("phone_number", user.phone_number)
+            .select()
+            .single()
+            .then(({ data: updatedRow }) => {
+              if (updatedRow) {
+                dispatch(setUser(mapUserRecordFromDb(updatedRow) as typeof user));
+              }
+            });
+        }
+        close(true);
         navigate("/checkout");
       });
+      // Track direction: when going back from the calendar step (4), reset the tab to 'page'
+      let prevStepForDirection = -1;
+      onAfterStepChange((newStep) => {
+        const wasOnStep = prevStepForDirection;
+        prevStepForDirection = newStep;
+        if (wasOnStep === 4 && newStep === 3) {
+          setTabValue("page");
+        }
+      });
+
       onBeforeStepChange((currentStep) => {
         // console.log("currentStep", currentStep);
         if (currentStep == 1) {
@@ -196,6 +226,7 @@ const BulletinPage: React.FC<{
     startTour,
     isVisible,
     onBeforeStepChange,
+    onAfterStepChange,
     onFinish,
     initializeTour,
     isInitialized,
@@ -245,11 +276,10 @@ const BulletinPage: React.FC<{
     },
   });
 
-  const [tabValue, setTabValue] = useState<string>("page");
 
   useEffect(() => {
     async function syncPostions() {
-      await tour.updatePositions();
+      updatePositions();
     }
     if (isOnboarding && tabValue === "notes") {
       // console.log("updating positions");
@@ -317,7 +347,7 @@ const BulletinPage: React.FC<{
         // console.log(bulletin);
         setImages(
           bulletin.images.map((item: string) => ({
-            id: item.id,
+            id: item,
             url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
           }))
         );
@@ -354,16 +384,18 @@ const BulletinPage: React.FC<{
             className={`tabHousing ${"flex justify-between"} items-center gap-4`}
           >
             <Tabs
-              defaultValue="page"
+              value={tabValue}
               onValueChange={(e) => {
-                if (isOnboarding && e === "notes") {
-                  // tour?.nextStep();
-                  // setTimeout(async () => {
-                  // console.log("updating positions");
-                  //   await tour?.updatePositions();
-                  // }, 500);
-                }
                 setTabValue(e);
+                // On the calendar onboarding step, keep the tour target in sync with the active tab
+                if (isOnboarding && currentStep === 4) {
+                  if (e === "page") {
+                    setTimeout(() => {
+                      updateCurrentStepTarget("[data-tg-title='tab housing']");
+                    }, 100);
+                  }
+                  // switching to 'notes': BigCalendar's own useEffect updates the target
+                }
               }}
               data-tg-title="tab housing"
             >

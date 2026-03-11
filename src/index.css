@@ -225,3 +225,10 @@ span {
 .driver-popover-title {
   font-family: "Delight" !important;
 }
+
+/* Allow dialogs/modals to remain interactive while driver.js tour is active.
+   Without this, .driver-active * { pointer-events: none } blocks portal-rendered dialogs. */
+.driver-active [role="dialog"],
+.driver-active [role="dialog"] * {
+  pointer-events: auto !important;
+}

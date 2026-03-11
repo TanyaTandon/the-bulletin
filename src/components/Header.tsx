@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Link, useNavigate, useLocation } from "react-router-dom";
 import { LogOut } from "lucide-react";
 import { Button } from "./ui/button";
@@ -14,10 +14,12 @@ import { useSheet } from "@/providers/sheet-provider";
 import UserAvatar from "./UserAvatar";
 import { useSelector } from "react-redux";
 import { staticGetUser } from "@/redux/user/selectors";
+import { useToast } from "@/hooks/use-toast";
 
 const Header: React.FC = () => {
   const navigate = useNavigate();
   const isMobile = useIsMobile();
+  const { toast } = useToast();
   const { session } = useStytchSession();
   const [feedback, setFeedback] = useState<boolean>(false);
   const [feedbackContent, setFeedbackContent] = useState<string>("");
@@ -35,6 +37,17 @@ const Header: React.FC = () => {
   const { sheet, close } = useSheet();
   const user = useSelector(staticGetUser);
 
+  const uniqueLink = `${window.location.origin}/register/${user.id}?name=${user.firstName}`;
+
+  const handleCopyLink = useCallback(() => {
+    navigator.clipboard.writeText(uniqueLink);
+    toast({
+      title: "Link copied!",
+      description:
+        "Share this with your friends to invite them to the bulletin",
+    });
+  }, [uniqueLink, toast]);
+
   return (
     <header className="border-b border-gray-200 bg-[#9DBD99] p-3 shadow-sm">
       <div className="container mx-auto flex justify-between items-center px-1">
@@ -47,7 +60,13 @@ const Header: React.FC = () => {
           the bulletin.
         </Link>
 
+        {isMobile && <Button className="px-[.5rem] py-[.25rem] ml-[.75rem] h-[2rem] text-[.75rem]" onClick={handleCopyLink}>
+          Add Friend
+        </Button>}
         <div className={`flex items-center space-x-2 ${isMobile && "max-w-[60%]"}`}>
+          {!isMobile && <Button className="px-[1rem] py-[.25rem] ml-[.75rem] h-[2.5rem] " onClick={handleCopyLink}>
+            Add Friend
+          </Button>}
           <Button variant="ghost" className=" hover:text-black hover:bg-red-50 rounded-[6px]"
             onClick={() => navigate("/catalogue")}>
             {isMobile ? <BookOpenIcon size={22} /> : "your Bulletins"}
