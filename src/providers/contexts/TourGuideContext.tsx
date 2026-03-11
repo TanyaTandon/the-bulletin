@@ -5,14 +5,30 @@ import React, {
   useState,
   ReactNode,
   useCallback,
+  useRef,
+  useMemo,
 } from "react";
-import { TourGuideClient } from "@sjmc11/tourguidejs/src/Tour";
-import { TourGuideOptions } from "@sjmc11/tourguidejs/src/core/options";
-import { TourGuideStep } from "@sjmc11/tourguidejs/src/types/TourGuideStep";
+import { driver } from "driver.js";
+import type { Driver, DriveStep } from "driver.js";
+import "driver.js/dist/driver.css";
+
+// The tour instance interface exposed to consumers
+export type TourInstance = {
+  isFinished: boolean;
+  activeStep: number;
+  nextStep: () => void;
+} | null;
+
+// Simplified step type for our usage
+export type TourStep = {
+  title?: string;
+  content?: string;
+  target?: string;
+};
 
 interface TourGuideContextType {
-  // Tour instance
-  tour: TourGuideClient | null;
+  // Tour instance adapter
+  tour: TourInstance;
 
   // State
   isVisible: boolean;
@@ -21,20 +37,17 @@ interface TourGuideContextType {
   isInitialized: boolean;
 
   // Actions
-  startTour: (group?: string) => Promise<unknown>;
-  stopTour: () => Promise<unknown>;
-  nextStep: () => Promise<unknown>;
-  prevStep: () => Promise<unknown>;
-  visitStep: (stepIndex: number | "next" | "prev") => Promise<unknown>;
-  finishTour: (exit?: boolean, tourGroup?: string) => Promise<boolean>;
+  startTour: () => Promise<void>;
+  stopTour: () => void;
+  nextStep: () => void;
+  prevStep: () => void;
+  visitStep: (stepIndex: number | "next" | "prev") => void;
+  finishTour: () => void;
 
   // Configuration
-  setSteps: (steps: TourGuideStep[]) => Promise<void>;
-  setOptions: (options: TourGuideOptions) => Promise<TourGuideClient>;
-  initializeTour: (
-    steps: TourGuideStep[],
-    options?: TourGuideOptions
-  ) => Promise<void>;
+  setSteps: (steps: TourStep[]) => void;
+  setOptions: (options: object) => void;
+  initializeTour: (steps: TourStep[], options?: object) => Promise<void>;
 
   // Event handlers
   onBeforeStepChange: (callback: (currentStep: number) => void) => void;
@@ -44,10 +57,10 @@ interface TourGuideContextType {
   onAfterExit: (callback: () => void) => void;
 
   // Utility
-  refresh: () => Promise<unknown>;
-  refreshDialog: () => Promise<unknown>;
-  updatePositions: () => Promise<unknown>;
-  deleteFinishedTour: (groupKey?: string | "all") => void;
+  refresh: () => void;
+  refreshDialog: () => void;
+  updatePositions: () => void;
+  deleteFinishedTour: (groupKey?: string) => void;
 
   // Step management
   updateCurrentStepTarget: (target: string | HTMLElement) => Promise<void>;
@@ -59,232 +72,214 @@ const TourGuideContext = createContext<TourGuideContextType | undefined>(
 
 interface TourGuideProviderProps {
   children: ReactNode;
-  initialOptions?: TourGuideOptions;
-  initialSteps?: TourGuideStep[];
+  initialOptions?: object;
+  initialSteps?: TourStep[];
 }
 
 export const TourGuideProvider: React.FC<TourGuideProviderProps> = ({
   children,
-  initialOptions = {},
-  initialSteps = [],
 }) => {
-  const [tour, setTour] = useState<TourGuideClient | null>(null);
+  const driverRef = useRef<Driver | null>(null);
   const [isVisible, setIsVisible] = useState(false);
   const [currentStep, setCurrentStep] = useState(0);
   const [isOnboarding, setIsOnboarding] = useState(false);
   const [isInitialized, setIsInitialized] = useState(false);
+  const [tourReady, setTourReady] = useState(false);
 
-  // Initialize tour instance
+  // Refs for tracking state and callbacks (avoid stale closures)
+  const stepIndexRef = useRef(-1);
+  const completedRef = useRef(false);
+  const beforeStepChangeCallbacks = useRef<Array<(step: number) => void>>([]);
+  const afterStepChangeCallbacks = useRef<Array<(step: number) => void>>([]);
+  const finishCallbacks = useRef<Array<() => void>>([]);
+  const beforeExitCallbacks = useRef<Array<() => void>>([]);
+  const afterExitCallbacks = useRef<Array<() => void>>([]);
+
+  // Cleanup on unmount
   useEffect(() => {
-    const tourInstance = new TourGuideClient({
-      ...initialOptions,
-      steps: initialSteps,
-    });
-
-    // Set up event listeners
-    tourInstance.onBeforeStepChange(() => {
-      setCurrentStep(tourInstance.activeStep);
-    });
-
-    tourInstance.onAfterStepChange(() => {
-      setCurrentStep(tourInstance.activeStep);
-    });
-
-    tourInstance.onFinish(() => {
-      setIsVisible(false);
-      setIsOnboarding(false);
-    });
-
-    tourInstance.onBeforeExit(() => {
-      setIsVisible(false);
-    });
-
-    tourInstance.onAfterExit(() => {
-      setIsVisible(false);
-      setIsOnboarding(false);
-    });
-
-    setTour(tourInstance);
-
-    // Cleanup on unmount
     return () => {
-      if (tourInstance) {
-        tourInstance.exit();
-      }
+      driverRef.current?.destroy();
+      driverRef.current = null;
     };
-    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // Tour actions
-  const startTour = useCallback(
-    async (group?: string) => {
-      if (!tour) return;
-      setIsVisible(true);
-      setIsOnboarding(true);
-      return await tour.start(group);
-    },
-    [tour]
-  );
+  const startTour = useCallback(async () => {
+    if (!driverRef.current) return;
+    setIsVisible(true);
+    setIsOnboarding(true);
+    driverRef.current.drive();
+  }, []);
 
-  const stopTour = useCallback(async () => {
-    if (!tour) return;
+  const stopTour = useCallback(() => {
+    if (!driverRef.current) return;
     setIsVisible(false);
     setIsOnboarding(false);
-    return await tour.exit();
-  }, [tour]);
+    driverRef.current.destroy();
+  }, []);
 
-  const nextStep = useCallback(async () => {
-    if (!tour) return;
-    return await tour.nextStep();
-  }, [tour]);
+  const nextStep = useCallback(() => {
+    driverRef.current?.moveNext();
+  }, []);
 
-  const prevStep = useCallback(async () => {
-    if (!tour) return;
-    return await tour.prevStep();
-  }, [tour]);
+  const prevStep = useCallback(() => {
+    driverRef.current?.movePrevious();
+  }, []);
 
-  const visitStep = useCallback(
-    async (stepIndex: number | "next" | "prev") => {
-      if (!tour) return;
-      return await tour.visitStep(stepIndex);
-    },
-    [tour]
-  );
+  const visitStep = useCallback((stepIndex: number | "next" | "prev") => {
+    if (!driverRef.current) return;
+    if (stepIndex === "next") driverRef.current.moveNext();
+    else if (stepIndex === "prev") driverRef.current.movePrevious();
+    else driverRef.current.moveTo(stepIndex);
+  }, []);
 
-  const finishTour = useCallback(
-    async (exit: boolean = true, tourGroup?: string) => {
-      if (!tour) return false;
-      setIsVisible(false);
-      setIsOnboarding(false);
-      return await tour.finishTour(exit, tourGroup);
-    },
-    [tour]
-  );
+  const finishTour = useCallback(() => {
+    if (!driverRef.current) return;
+    completedRef.current = true;
+    setIsVisible(false);
+    setIsOnboarding(false);
+    driverRef.current.destroy();
+  }, []);
 
-  // Configuration
-  const setSteps = useCallback(
-    async (steps: TourGuideStep[]) => {
-      if (!tour) return;
-      return await tour.addSteps(steps);
-    },
-    [tour]
-  );
+  // No-ops kept for interface compatibility
+  const setSteps = useCallback((_steps: TourStep[]) => {}, []);
+  const setOptions = useCallback((_options: object) => {}, []);
 
-  const setOptions = useCallback(
-    async (options: TourGuideOptions) => {
-      if (!tour) throw new Error("Tour not initialized");
-      return await tour.setOptions(options);
-    },
-    [tour]
-  );
-
-  // Initialize tour with steps and options (only once)
   const initializeTour = useCallback(
-    async (steps: TourGuideStep[], options?: TourGuideOptions) => {
-      if (!tour || isInitialized) return;
+    async (steps: TourStep[]) => {
+      if (driverRef.current || isInitialized) return;
 
-      if (steps.length > 0) {
-        await setSteps(steps);
-      }
-      if (options) {
-        await setOptions(options);
-      }
+      const driveSteps: DriveStep[] = steps.map((step) => ({
+        ...(step.target ? { element: step.target } : {}),
+        popover: {
+          title: step.title,
+          description: step.content || "",
+        },
+      }));
+
+      const d = driver({
+        allowClose: false,
+        showButtons: ["next", "previous"],
+        steps: driveSteps,
+
+        onNextClick: (_el, _step, opts) => {
+          // Fire "before step change" with index of the step being LEFT
+          const idx = opts.state.activeIndex ?? stepIndexRef.current;
+          beforeStepChangeCallbacks.current.forEach((cb) => cb(idx));
+
+          if (d.isLastStep()) {
+            completedRef.current = true;
+            d.destroy();
+          } else {
+            d.moveNext();
+          }
+        },
+
+        onPrevClick: () => {
+          d.movePrevious();
+        },
+
+        onHighlighted: (_el, _step, opts) => {
+          const idx = opts.state.activeIndex ?? 0;
+          stepIndexRef.current = idx;
+          setCurrentStep(idx);
+          setIsVisible(true);
+          afterStepChangeCallbacks.current.forEach((cb) => cb(idx));
+        },
+
+        onDestroyStarted: () => {
+          setIsVisible(false);
+          setIsOnboarding(false);
+        },
+
+        onDestroyed: () => {
+          if (completedRef.current) {
+            finishCallbacks.current.forEach((cb) => cb());
+          } else {
+            beforeExitCallbacks.current.forEach((cb) => cb());
+            afterExitCallbacks.current.forEach((cb) => cb());
+          }
+          completedRef.current = false;
+          stepIndexRef.current = -1;
+        },
+      });
+
+      driverRef.current = d;
+      setTourReady(true);
       setIsInitialized(true);
     },
-    [tour, isInitialized, setSteps, setOptions]
+    [isInitialized]
   );
 
-  // Event handlers
+  // Event handler registration
   const onBeforeStepChange = useCallback(
     (callback: (currentStep: number) => void) => {
-      if (!tour) return;
-      tour.onBeforeStepChange(() => {
-        callback(tour.activeStep);
-      });
+      beforeStepChangeCallbacks.current.push(callback);
     },
-    [tour]
+    []
   );
 
   const onAfterStepChange = useCallback(
     (callback: (currentStep: number) => void) => {
-      if (!tour) return;
-      tour.onAfterStepChange(() => {
-        callback(tour.activeStep);
-      });
+      afterStepChangeCallbacks.current.push(callback);
     },
-    [tour]
+    []
   );
 
-  const onFinish = useCallback(
-    (callback: () => void) => {
-      if (!tour) return;
-      tour.onFinish(callback);
-    },
-    [tour]
-  );
+  const onFinish = useCallback((callback: () => void) => {
+    finishCallbacks.current.push(callback);
+  }, []);
 
-  const onBeforeExit = useCallback(
-    (callback: () => void) => {
-      if (!tour) return;
-      tour.onBeforeExit(callback);
-    },
-    [tour]
-  );
+  const onBeforeExit = useCallback((callback: () => void) => {
+    beforeExitCallbacks.current.push(callback);
+  }, []);
 
-  const onAfterExit = useCallback(
-    (callback: () => void) => {
-      if (!tour) return;
-      tour.onAfterExit(callback);
-    },
-    [tour]
-  );
+  const onAfterExit = useCallback((callback: () => void) => {
+    afterExitCallbacks.current.push(callback);
+  }, []);
 
-  // Utility methods
-  const refresh = useCallback(async () => {
-    if (!tour) return;
-    return await tour.refresh();
-  }, [tour]);
+  // Utility
+  const refresh = useCallback(() => {}, []);
 
-  const refreshDialog = useCallback(async () => {
-    if (!tour) return;
-    // console.log("happening");
-    return await tour.refreshDialog();
-  }, [tour]);
+  const refreshDialog = useCallback(() => {
+    driverRef.current?.refresh();
+  }, []);
 
-  const updatePositions = useCallback(async () => {
-    if (!tour) return;
-    return await tour.updatePositions();
-  }, [tour]);
+  const updatePositions = useCallback(() => {
+    driverRef.current?.refresh();
+  }, []);
 
-  const deleteFinishedTour = useCallback(
-    (groupKey?: string | "all") => {
-      if (!tour) return;
-      tour.deleteFinishedTour(groupKey);
-    },
-    [tour]
-  );
+  const deleteFinishedTour = useCallback((_groupKey?: string) => {}, []);
 
-  // Step management
   const updateCurrentStepTarget = useCallback(
     async (target: string | HTMLElement) => {
-      // console.log("target", target);
-      // console.log("tour", tour);
-      if (!tour) return;
+      if (!driverRef.current) return;
+      const activeStep = driverRef.current.getActiveStep();
+      if (!activeStep) return;
 
-      // Get the current step
-      const currentStep = tour.tourSteps[tour.activeStep];
-
-      // console.log("currentStep", currentStep);
-      if (currentStep) {
-        // Update the target
-        currentStep.target =
-          typeof target === "string" ? document.querySelector(target) : target;
-
-        // Refresh the dialog to apply changes
-        await refreshDialog();
-      }
+      driverRef.current.highlight({
+        element: target,
+        popover: activeStep.popover,
+      });
     },
-    [tour, refreshDialog]
+    []
+  );
+
+  // Stable adapter — getters read live values from refs
+  const tour: TourInstance = useMemo(
+    () =>
+      tourReady
+        ? {
+            get isFinished() {
+              return !driverRef.current?.isActive();
+            },
+            get activeStep() {
+              return stepIndexRef.current;
+            },
+            nextStep: () => driverRef.current?.moveNext(),
+          }
+        : null,
+    [tourReady]
   );
 
   const contextValue: TourGuideContextType = {

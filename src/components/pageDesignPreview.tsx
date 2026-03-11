@@ -16,10 +16,8 @@ import {
   XIcon,
 } from "@phosphor-icons/react";
 import { Lila, Nick, Tanya, Jackson, calculateFontSize } from "@/lib/bulletin-templates";
-import { TourGuideClient } from "@sjmc11/tourguidejs";
 import {
   useTourGuide,
-  useTourGuideWithInit,
 } from "@/providers/contexts/TourGuideContext";
 import { useAppSelector } from "@/redux";
 import { staticGetUser } from "@/redux/user/selectors";
@@ -67,7 +65,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   imageIndex,
 }) => {
   const isMobile = useIsMobile();
-  const { tour, nextStep, updateCurrentStepTarget } = useTourGuide();
+  const { tour, updateCurrentStepTarget } = useTourGuide();
   const user = useAppSelector(staticGetUser);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);

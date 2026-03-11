@@ -205,10 +205,23 @@ span {
   margin-left: 0px !important;
 }
 
-
-
 @media (min-width: 768px) {
   .helperFriendModal {
     width: 40vw !important;
   }
+}
+
+.driver-popover-prev-btn,
+.driver-popover-next-btn {
+  border-radius: 6px !important;
+  font-family: "WelcomeWeb" !important;
+  text-transform: lowercase !important;
+}
+
+.driver-popover-description {
+  font-family: "WelcomeWeb" !important;
+}
+
+.driver-popover-title {
+  font-family: "Delight" !important;
 }
