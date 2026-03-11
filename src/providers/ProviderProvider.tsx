@@ -77,16 +77,11 @@ const ProviderProvider: React.FC<{
         Authorization: `Bearer ${tokens.session_jwt}`,
       },
     });
-    try {
-      const data = await response.json();
-      return data.clientSecret;
-
-    } catch (error) {
-      sendError(user.phone_number, "fetchClientSecret", error, {
-        response: response.json(),
-      });
-      return null;
-    }
+    const data = await response.json();
+    sendError(user.phone_number, "fetchClientSecret", JSON.stringify(data), {
+      response: JSON.stringify(data),
+    });
+    return data.clientSecret;
   }
 
   const options = { fetchClientSecret };
