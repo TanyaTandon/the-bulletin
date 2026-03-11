@@ -17,7 +17,6 @@ import TestCheckout from "./pages/testCheckout";
 import CheckoutReturn from "./pages/checkoutReturn";
 
 const App = () => {
-console.log('stripePromise',import.meta.env.STRIPE_PUBLIC_KEY);
 
 
   window.addEventListener('load', function () {

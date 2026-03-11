@@ -19,6 +19,7 @@ import {
   EmbeddedCheckout
 } from '@stripe/react-stripe-js';
 import { getTokens } from "@/redux/tokens/selectors";
+import sendError from "@/hooks/use-sendError";
 
 const queryClient = new QueryClient({
   defaultOptions: {
@@ -76,8 +77,16 @@ const ProviderProvider: React.FC<{
         Authorization: `Bearer ${tokens.session_jwt}`,
       },
     });
-    const data = await response.json();
-    return data.clientSecret;
+    try {
+      const data = await response.json();
+      return data.clientSecret;
+
+    } catch (error) {
+      sendError(user.phone_number, "fetchClientSecret", error, {
+        response: response.json(),
+      });
+      return null;
+    }
   }
 
   const options = { fetchClientSecret };
