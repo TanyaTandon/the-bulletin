@@ -239,7 +239,7 @@ export const updateImage = createAsyncThunk(
             formData.append("image", item.file);
             formData.append("image_index", imageIndex.toString());
             return await fetch(
-              "https://be.thebulletin.app/api/image_processing_ffmpeg",
+              `${import.meta.env.VITE_BE_URL}/api/image_processing_ffmpeg`,
               {
                 method: "POST",
                 body: formData,

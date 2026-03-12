@@ -33,10 +33,12 @@ const NoteModalContent: React.FC<{
       <div className="space-y-4">
         <Textarea
           value={note}
-          onChange={(e) => setNote(e.target.value)}
+          onChange={(e) => setNote(e.target.value.slice(0, 15))}
           placeholder="What's happening on this day?"
           className="min-h-[100px] resize-none border-violet-200 focus:border-violet-400 focus:ring-violet-400"
+          maxLength={15}
         />
+        <p className="text-xs text-muted-foreground text-right">{note.length}/15</p>
         <div className="flex justify-end space-x-2">
           <Button onClick={() => onSave(note)} disabled={!note.trim()}>
             Save Note
@@ -109,7 +111,11 @@ const BigCalendar: React.FC<{
           ]);
           close();
         }}
-      />
+      />, {
+      parentOptions: {
+        className: !isMobile && "h-[250px]",
+      }
+    }
     );
   };
 

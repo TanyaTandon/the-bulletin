@@ -1,4 +1,4 @@
-import React, { useEffect, useRef, useState, useMemo } from "react";
+import React, { useEffect, useRef, useState, useMemo, useCallback } from "react";
 import { useNavigate, useSearchParams } from "react-router-dom";
 import { useSpring, animated, useTransition, update } from "@react-spring/web";
 import Layout from "@/components/Layout";
@@ -82,7 +82,7 @@ const BulletinPage: React.FC<{
   const dispatch = useAppDispatch();
   const { close } = useDialog();
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [images, setImages] = useState<UploadedImage[]>([]);
+  const [images, setImages] = useState<(UploadedImage | null)[]>([]);
   const [blurb, setBlurb] = useState<string | null>(null);
   const [previewHover, setPreviewHover] = useState<boolean>(false);
   const [buttonHover, setButtonHover] = useState<boolean>(false);
@@ -111,6 +111,8 @@ const BulletinPage: React.FC<{
   }>({ id: 0, name: "Nick", images: 6 });
 
   const refereenceBulletinData = structuredClone(existingBulletin);
+  const existingBulletinRef = useRef(existingBulletin);
+  useEffect(() => { existingBulletinRef.current = existingBulletin; }, [existingBulletin]);
 
   const [savedNotes, setSavedNotes] = useState<CalendarNote[]>([
     {
@@ -291,6 +293,7 @@ const BulletinPage: React.FC<{
 
   useEffect(() => {
     if (existingBulletin) {
+      console.log("existingBulletin", existingBulletin);
       setImages(existingBulletin.images);
       setBlurb(existingBulletin.blurb);
       setSavedNotes(existingBulletin.saved_notes);
@@ -326,13 +329,16 @@ const BulletinPage: React.FC<{
       }
     );
 
-    // console.log(existingBulletin, diff.unequal, loaded);
     if (existingBulletin && diff.unequal && loaded) {
-      // console.log("❤️",diff.differences);
+      const category = Object.keys(diff.differences)[0] as ChangeCategory;
+      // Skip if it's an image change with no new file to upload (e.g. after delete or remote-URL sync)
+      if (category === ChangeCategory.IMAGES && !images.some((img) => img?.file)) {
+        return;
+      }
       handleCategoryChange(
-        Object.keys(diff.differences)[0] as ChangeCategory,
+        category,
         {
-          images: images,
+          images: images.filter(Boolean) as UploadedImage[],
           blurb: blurb,
           saved_notes: savedNotes,
           template: selectedTemplate.id,
@@ -341,16 +347,20 @@ const BulletinPage: React.FC<{
         tokens,
         imageIndex + 1
       ).then((arg) => {
-        // console.log("arg", arg);
-
-        const bulletin = JSON.parse(arg.payload.data[0].bulletin);
-        // console.log(bulletin);
-        setImages(
-          bulletin.images.map((item: string) => ({
-            id: item,
-            url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
-          }))
-        );
+        const bulletin = JSON.parse(arg?.payload?.data?.[0]?.bulletin);
+        if (!bulletin) return;
+        // Only replace the uploaded slot — the backend may incorrectly fill gaps
+        const uploadedId: string = bulletin.images[imageIndex];
+        if (uploadedId) {
+          setImages((prev) => {
+            const next = [...prev];
+            next[imageIndex] = {
+              id: uploadedId,
+              url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${uploadedId}.jpeg`,
+            };
+            return next;
+          });
+        }
         setImageIndex(null);
       });
     }
@@ -360,10 +370,35 @@ const BulletinPage: React.FC<{
     imageToInsert: UploadedImage,
     imageIndex: number
   ) => {
-    const newImages = structuredClone(images);
+    // Ensure the array is padded to template length so no sparse holes are created
+    const targetLength = Math.max(selectedTemplate.images, imageIndex + 1);
+    const newImages: (UploadedImage | null)[] = Array.from(
+      { length: targetLength },
+      (_, i) => images[i] ?? null
+    );
     newImages[imageIndex] = imageToInsert;
     setImages(newImages);
   };
+
+  const deleteImageFunction = useCallback((idx: number) => {
+    setImages((prev) => {
+      const newImages = prev.map((img, i): UploadedImage | null =>
+        i === idx ? null : img
+      );
+      console.log('newImages', newImages, images);
+      const bulletinId = existingBulletinRef.current?.id;
+      console.log('bulletinId', bulletinId);
+      if (bulletinId) {
+        supabase
+          .from("bulletins")
+          .update({ images: newImages.map((img) => img?.id ?? "") })
+          .eq("id", bulletinId).then(() => {
+            console.log('done',);
+          });
+      }
+      return newImages;
+    });
+  }, []);
 
   return (
     <Layout>
@@ -422,12 +457,13 @@ const BulletinPage: React.FC<{
                   setHover={setHover}
                   setEditState={setEditState}
                   editState={editState}
-                  images={images.map((image) => image.url)}
+                  images={images.map((image) => image?.url ?? "")}
                   bodyText={blurb ?? customPlaceholder}
                   selectedTemplate={selectedTemplate}
                   setImages={imageSetFunction}
                   setImageIndex={setImageIndex}
                   imageIndex={imageIndex}
+                  onDeleteImage={deleteImageFunction}
                 />
               </animated.div>
               {blurbTransitions((style, item) =>

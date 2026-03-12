@@ -13,10 +13,12 @@ import { useSelector } from "react-redux";
 import { useNavigate, useParams } from "react-router";
 import { useSearchParams } from "react-router-dom";
 import { toast } from "sonner";
+import { useIsMobile } from "@/hooks/use-mobile";
 
 const Register: React.FC = () => {
   const user = useSelector(staticGetUser);
   const navigate = useNavigate();
+  const isMobile = useIsMobile();
 
   const dispatch = useAppDispatch();
   const { id } = useParams();
@@ -122,8 +124,7 @@ const Register: React.FC = () => {
             <br />
             <p>
               connecting with {name} will allow you to recieve their bulletin
-              after you sign up. then you can create your own bulletin and allow
-              them to receive yours!
+              after you sign up. then you can create your own bulletin and send them yours!
             </p>
             <br />
 
@@ -157,9 +158,10 @@ const Register: React.FC = () => {
     }
   }
 
+  console.log('isMobile', isMobile);
   return (
     <section>
-      <div className="w-[45%] mr-auto ml-auto">{renderScenario(user)}</div>
+      <div className={`${isMobile ? "w-[90%]" : "w-[45%]"} mr-auto ml-auto text-center`}>{renderScenario(user)}</div>
     </section>
   );
 };

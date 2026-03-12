@@ -8,11 +8,7 @@ import React, {
 } from "react";
 import { useSpring, animated, useTransition } from "@react-spring/web";
 import {
-  CalendarIcon,
-  ImagesSquareIcon,
   NotebookIcon,
-  PencilLineIcon,
-  TrashIcon,
   XIcon,
 } from "@phosphor-icons/react";
 import { Lila, Nick, Tanya, Jackson, calculateFontSize } from "@/lib/bulletin-templates";
@@ -46,6 +42,7 @@ interface PageDesignPreviewProps {
   setImages: (imageToInsert: UploadedImage, imageIndex: number) => void;
   setImageIndex: (imageIndex: number) => void;
   imageIndex: number | null;
+  onDeleteImage: (imageIndex: number) => void;
 }
 
 const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
@@ -59,14 +56,19 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
   onboarding,
   currentStep,
   existingBulletin,
-  scale = 1, // Default scale of 1 (no scaling)
+  scale = 1,
   setImages,
   setImageIndex,
   imageIndex,
+  onDeleteImage,
 }) => {
   const isMobile = useIsMobile();
   const { tour, updateCurrentStepTarget } = useTourGuide();
   const user = useAppSelector(staticGetUser);
+
+  // Keep a stable ref so the message listener never captures a stale callback
+  const onDeleteImageRef = useRef(onDeleteImage);
+  useEffect(() => { onDeleteImageRef.current = onDeleteImage; }, [onDeleteImage]);
 
   const iframeRef = useRef<HTMLIFrameElement>(null);
   const iframeInitializedRef = useRef<boolean>(false);
@@ -213,24 +215,22 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
       const idx = parseInt(
         (el as HTMLElement).getAttribute("data-image-index") || "-1"
       );
-      if (
-        !Number.isNaN(idx) &&
-        idx >= 0 &&
-        idx < images.length &&
-        images[idx]
-      ) {
+      if (!Number.isNaN(idx) && idx >= 0 && idx < images.length) {
         const existingStyle = (el as HTMLElement).style.cssText;
-        // Extract non-background-image properties
         const otherStyles = existingStyle
           .split(";")
           .filter((s) => !s.trim().startsWith("background-image"))
           .join(";");
-        // Set only the background-image, preserving other styles
-        (el as HTMLElement).style.cssText =
-          `${otherStyles}; background-image: url('${images[idx]}');`.replace(
-            /^; /,
-            ""
-          );
+        if (images[idx]) {
+          (el as HTMLElement).style.cssText =
+            `${otherStyles}; background-image: url('${images[idx]}');`.replace(
+              /^; /,
+              ""
+            );
+        } else {
+          // Slot was deleted — clear the background image
+          (el as HTMLElement).style.cssText = otherStyles;
+        }
       }
     });
   }, [bodyText, images, user?.firstName]);
@@ -283,10 +283,10 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     }
   }, [baseTemplateHTML, selectedTemplate.id, scale, isMobile]);
 
-  // Update content in-place when images or bodyText change
+
   useEffect(() => {
     if (!iframeInitializedRef.current) return;
-    // Small delay to ensure iframe is ready after potential full write
+
     const timeoutId = setTimeout(() => {
       updateIframeContent();
     }, 0);
@@ -313,6 +313,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     return style;
   }, [scaledWidth, tiltProps]);
 
+  console.log('editState', editState);
   useEffect(() => {
     const handleMessage = async (event: MessageEvent) => {
       if (event.data?.type === "BUTTON_CLICKED") {
@@ -321,11 +322,15 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
           setImageIndex(event.data.imageIndex);
         }
         if (event.data.buttonId === "delete") {
-          setEditState(EditState.IMAGES);
+          onDeleteImageRef.current(event.data.imageIndex);
+          const iframe = document.querySelector("iframe");
+          if (iframe?.contentWindow) {
+            iframe.contentWindow.postMessage({ type: "HIDE_BUTTONS" }, "*");
+          }
         }
       }
       if (event.data?.type === "TEXT_CLICKED") {
-        setEditState(EditState.BLURB);
+        if (!isMobile) setEditState(EditState.BLURB);
       }
     };
 
@@ -336,28 +341,47 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     };
   }, [isMobile]);
 
-  const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+  const handleFileSelect = async (event: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(event.target.files || []);
 
-    if (imageIndex === null) {
-      alert("no image inded yo");
+    if (imageIndex === null || files.length !== 1) {
+      if (event.target.value) event.target.value = "";
       return;
     }
 
-    // console.log("imageIndex", imageIndex);
-    if (files.length === 1 && imageIndex !== null) {
-      const newImage = {
-        id: crypto.randomUUID(),
-        url: URL.createObjectURL(files[0]),
-        file: files[0],
-      };
-      // console.log("setting image", newImage, imageIndex);
-      setImages(newImage, imageIndex);
-      // INSERT_YOUR_CODE
-      const iframe = document.querySelector('iframe');
-      if (iframe && iframe.contentWindow) {
-        iframe.contentWindow.postMessage({ type: "HIDE_BUTTONS" }, "*");
-      }
+    const file = files[0];
+
+    // Correct EXIF orientation: mobile photos often have rotation metadata
+    // that CSS background-image doesn't respect — bake it into the pixels via canvas.
+    let objectUrl: string;
+    let processedFile: File = file;
+    try {
+      const bitmap = await createImageBitmap(file, { imageOrientation: "from-image" });
+      const canvas = document.createElement("canvas");
+      canvas.width = bitmap.width;
+      canvas.height = bitmap.height;
+      canvas.getContext("2d")!.drawImage(bitmap, 0, 0);
+      bitmap.close();
+      const correctedBlob = await new Promise<Blob>((resolve, reject) =>
+        canvas.toBlob((b) => (b ? resolve(b) : reject(new Error("toBlob failed"))), "image/jpeg", 0.92)
+      );
+      objectUrl = URL.createObjectURL(correctedBlob);
+      processedFile = new File([correctedBlob], file.name, { type: "image/jpeg" });
+    } catch {
+      objectUrl = URL.createObjectURL(file);
+    }
+
+    const newImage: UploadedImage = {
+      id: crypto.randomUUID(),
+      url: objectUrl,
+      file: processedFile,
+    };
+
+    setImages(newImage, imageIndex);
+
+    const iframe = document.querySelector("iframe");
+    if (iframe?.contentWindow) {
+      iframe.contentWindow.postMessage({ type: "HIDE_BUTTONS" }, "*");
     }
 
     if (event.target.value) {
@@ -481,14 +505,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
                 if (tour) {
                   updateCurrentStepTarget("[data-tg-title='template-button']");
                 }
-                setEditState(EditState.TEMPLATE);
-                if (isMobile && editState === EditState.TEMPLATE) {
-                  setTimeout(() => {
-                    document
-                      .querySelector(".editStateWrapper")
-                      ?.scrollIntoView({ behavior: "smooth" });
-                  }, 500);
-                }
+                if (!isMobile) setEditState(EditState.TEMPLATE);
               }}
             >
               <NotebookIcon />

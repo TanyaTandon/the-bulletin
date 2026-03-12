@@ -20,8 +20,8 @@ const FilledBulletin: React.FC = () => {
       getBulletin(bulletin).then((data) => {
         const setData = {
           ...data,
-          images: data.images.map((item) => ({
-            id: item.id,
+          images: data.images.map((item: string) => ({
+            id: item,
             url: `https://voiuicuaujbhkkljtjfw.supabase.co/storage/v1/object/public/user-images-standardized/${item}.jpeg`,
           })),
         };

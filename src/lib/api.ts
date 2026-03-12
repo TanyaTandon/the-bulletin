@@ -87,12 +87,14 @@ export async function createNewUser({
   }
 }
 
-export async function getBulletin(bulletinId: string): Promise<Bulletin> {
+export type BEBulletin = Omit<Bulletin, 'images'> & { images: string[] };
+
+export async function getBulletin(bulletinId: string): Promise<BEBulletin> {
   const { data, error } = await supabase
     .from("bulletins")
     .select("*")
     .eq("id", bulletinId);
-  return data[0] as Bulletin;
+  return data[0] as BEBulletin;
 }
 
 export async function getAllBulletins(user: User) {
