@@ -158,7 +158,6 @@ const Register: React.FC = () => {
     }
   }
 
-  console.log('isMobile', isMobile);
   return (
     <section>
       <div className={`${isMobile ? "w-[90%]" : "w-[45%]"} mr-auto ml-auto text-center`}>{renderScenario(user)}</div>

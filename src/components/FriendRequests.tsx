@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { Popover } from "@/components/ui/popover";
+import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import { Button } from "@/components/ui/button";
 import { HelpCircle, UserPlus } from "lucide-react";
 import { useDialog } from "@/providers/dialog-provider";
@@ -7,6 +7,47 @@ import FriendModalContent from "./modalContent/FriendModalContent";
 import { ClosureDirection } from "./ui/dialog";
 import { useTourGuideWithInit } from "@/providers/contexts/TourGuideContext";
 import { Tooltip, TooltipContent, TooltipTrigger } from "./ui/tooltip";
+import { useIsMobile } from "@/hooks/use-mobile";
+
+const helpText = (
+  <>
+    <p><strong>Friends</strong> are people on the platform — you can add each other to your bulletins and they'll get notified.</p>
+    <p className="mt-1"><strong>Recipients</strong> receive your bulletin by mail each month without needing an account, but you can only have 2.</p>
+  </>
+);
+
+const HelpIcon: React.FC = () => {
+  const isMobile = useIsMobile();
+  const [popoverOpen, setPopoverOpen] = useState(false);
+
+  if (isMobile) {
+    return (
+      <Popover open={popoverOpen} onOpenChange={setPopoverOpen}>
+        <PopoverTrigger asChild>
+          <button className="text-muted-foreground hover:text-foreground" onClick={() => setPopoverOpen((v) => !v)}>
+            <HelpCircle size={18} />
+          </button>
+        </PopoverTrigger>
+        <PopoverContent side="right" className="max-w-[220px] text-xs">
+          {helpText}
+        </PopoverContent>
+      </Popover>
+    );
+  }
+
+  return (
+    <Tooltip>
+      <TooltipTrigger asChild>
+        <button className="text-muted-foreground hover:text-foreground" tabIndex={-1}>
+          <HelpCircle size={18} />
+        </button>
+      </TooltipTrigger>
+      <TooltipContent side="right" className="max-w-[220px] text-xs">
+        {helpText}
+      </TooltipContent>
+    </Tooltip>
+  );
+};
 
 const FriendRequests: React.FC = () => {
   const [open, setOpen] = useState(false);
@@ -27,19 +68,7 @@ const FriendRequests: React.FC = () => {
             parentOptions: {
               className: "helperFriendModal",
             },
-            topLeftIcon: (
-              <Tooltip>
-                <TooltipTrigger asChild>
-                  <button className="text-muted-foreground hover:text-foreground" tabIndex={-1}>
-                    <HelpCircle size={18} />
-                  </button>
-                </TooltipTrigger>
-                <TooltipContent side="right" className="max-w-[220px] text-xs">
-                  <p><strong>Friends</strong> are people on the platform — you can add each other to your bulletins and they'll get notified.</p>
-                  <p className="mt-1"><strong>Recipients</strong> receive your bulletin by mail each month without needing an account, but you can only have 2.</p>
-                </TooltipContent>
-              </Tooltip>
-            ),
+            topLeftIcon: <HelpIcon />,
           })
         }
       >

@@ -232,3 +232,9 @@ span {
 .driver-active [role="dialog"] * {
   pointer-events: auto !important;
 }
+
+@media (max-width: 375px) {
+  .addFriendHelper {
+    font-size: 0.55rem;
+  }
+}

@@ -140,7 +140,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
     });
   };
 
-  // Bulletin Preview animated.div mouse handlers for buttons
+
   const handlePreviewMouseEnter = () => {
     if (!onboarding) {
       // Clear any existing timeout when re-entering
@@ -330,7 +330,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
         }
       }
       if (event.data?.type === "TEXT_CLICKED") {
-        if (!isMobile) setEditState(EditState.BLURB);
+        setEditState(EditState.BLURB);
       }
     };
 
@@ -505,7 +505,7 @@ const PageDesignPreview: React.FC<PageDesignPreviewProps> = ({
                 if (tour) {
                   updateCurrentStepTarget("[data-tg-title='template-button']");
                 }
-                if (!isMobile) setEditState(EditState.TEMPLATE);
+                setEditState(EditState.TEMPLATE)
               }}
             >
               <NotebookIcon />

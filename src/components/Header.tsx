@@ -60,7 +60,7 @@ const Header: React.FC = () => {
           the bulletin.
         </Link>
 
-        {isMobile && <Button className="px-[.5rem] py-[.25rem] ml-[.75rem] h-[2rem] text-[.75rem]" onClick={handleCopyLink}>
+        {isMobile && <Button className="px-[.5rem] py-[.25rem] ml-[.75rem] h-[2rem] text-[.75rem] addFriendHelper" onClick={handleCopyLink}>
           Add Friend
         </Button>}
         <div className={`flex items-center space-x-2 ${isMobile && "max-w-[60%]"}`}>
