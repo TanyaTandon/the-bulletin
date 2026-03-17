@@ -34,11 +34,11 @@ const Index = () => {
           the bulletin
         </Link>
 
-        <p className={`text-left w-[${isMobile ? "100%" : "50%"}] ${isMobile ? "text-sm" : "text-base"}`}>
+        <p className={`text-left w-[${isMobile ? "100%" : "50%"}] ${isMobile ? "text-[12.5px]" : "text-base"}`}>
           hi!
           <br />
-          we're tanya, jacob, and jackson, from turby in the mission, right here in sf.
-          <br />
+          we're tanya, jacob, and jackson{!isMobile && ", from turby in the mission, right here in sf."},
+          {!isMobile && <br />}
           we love our friends! we want to keep up with them, see what they're up to, and have something to show for it!
           <br />
           <br />
@@ -53,15 +53,21 @@ const Index = () => {
           <br />
           <br />
           a monthly magazine, by your friends, created for you, in the mail. 🐌
-          <br />
-          made with love.
+          {!isMobile && <>
+            <br />
+            made with love.
+          </>
+          }
           <br />
           we've designed the bulletin to look great, feel great, and to be collage-able, scrap-bookable, and collectible.
           <br />
-          <br />
-          love,
-          <br />
-          tanya, jacob, jackson
+          {!isMobile && <>
+            <br />
+            love,
+            <br />
+            tanya, jacob, jackson
+          </>
+          }
         </p>
         <div className="gap-4">
           {user == null && (
