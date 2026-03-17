@@ -49,7 +49,7 @@ const AuthModalContent: React.FC<{
     }, 100);
   }, []);
 
-  console.log('errorcde',codeError);
+  console.log('errorcde', codeError);
 
   return (
     <>
@@ -88,7 +88,7 @@ const AuthModalContent: React.FC<{
               <h1 className="text-xl font-semibold mb-2">Enter your code</h1>
               <span style={isMobile ? { transform: "scale(0.6)" } : {}}>
                 <OPTVerification
-                  onComplete={(code) => handleVerifySignIn(code, navigate, close).then(()=>{})}
+                  onComplete={(code) => handleVerifySignIn(code, navigate, close).then(() => { })}
                 />
               </span>
               {codeError && (
@@ -121,7 +121,7 @@ const AuthModalContent: React.FC<{
                     }
                 }
                 size="lg"
-                className={`bg-gradient-to-r from-accent to-primary hover:opacity-90 ${isMobile ? "w-auto" : "w-full"
+                className={`bg-gradient-to-r from-accent to-primary hover:opacity-90 ${isMobile ? "w-auto mb-[5rem]" : "w-full"
                   }`}
                 disabled={isProcessing}
               >
@@ -275,7 +275,7 @@ const AuthModalContent: React.FC<{
 
               <Button
                 onClick={handleSignUp}
-                className="w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity"
+                className={`w-full mt-8 h-12 text-base font-medium bg-gradient-to-r from-accent to-primary hover:opacity-90 transition-opacity ${isMobile ? "mb-[5rem]" : ""}`}
                 disabled={isProcessing}
               >
                 {isProcessing ? "Processing..." : "Create Account"}
